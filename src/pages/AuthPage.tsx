@@ -1065,8 +1065,7 @@ const AuthPage: React.FC = () => {
             {!isLogin && currentStep === 3 && (
               <div className="space-y-6">
                 {/* Header del paso opcional */}
-                <div className="text-center">
-                 
+                <div className="text-center">                 
                 </div>
 
                 <form onSubmit={handleStep3Submit} className="space-y-6">
