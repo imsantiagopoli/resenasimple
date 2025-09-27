@@ -161,32 +161,48 @@ const AuthPage: React.FC = () => {
         formData.email,
         formData.password,
         formData.firstName,
-        formData.lastName
+        formData.lastName,
+        formData.restaurantName,
+        formData.businessType
       );
 
       if (error) {
         throw error;
       }
 
-      if (data.user && !data.user.email_confirmed_at) {
-        setSuccessMessage('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
-        setCurrentStep(1);
-        setIsLogin(true);
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          restaurantName: '',
-          businessType: ''
-        });
+      if (data.user) {
+        if (!data.user.email_confirmed_at) {
+          // Email confirmation required
+          setSuccessMessage(
+            `¡Cuenta creada para ${formData.restaurantName}! Revisa tu email para confirmar tu cuenta y acceder al dashboard.`
+          );
+          setCurrentStep(1);
+          setIsLogin(true);
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            restaurantName: '',
+            businessType: ''
+          });
+        } else {
+          // Auto login if email confirmation is disabled
+          setSuccessMessage(`¡Bienvenido a ${formData.restaurantName}! Tu cuenta ha sido creada exitosamente.`);
+          // Navigation will happen automatically via useEffect when user state changes
+        }
       } else {
-        // Auto login if email confirmation is disabled
-        navigate('/dashboard');
+        setError('Error inesperado durante el registro. Por favor intenta de nuevo.');
       }
     } catch (err: any) {
-      setError(err.message || 'Error al crear la cuenta');
+      if (err.message?.includes('email')) {
+        setError('Este email ya está registrado. ¿Quieres iniciar sesión en su lugar?');
+      } else if (err.message?.includes('password')) {
+        setError('La contraseña debe tener al menos 6 caracteres.');
+      } else {
+        setError(err.message || 'Error al crear la cuenta y configurar el restaurante. Por favor intenta de nuevo.');
+      }
     } finally {
       setIsSubmitting(false);
     }
