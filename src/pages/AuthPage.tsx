@@ -1061,8 +1061,7 @@ const AuthPage: React.FC = () => {
               </form>
             )}
 
-            {/* REGISTRO PASO 3 - REDES SOCIALES (OPCIONAL) */}
-            {!isLogin && currentStep === 3 && (
+           
              
                 <form onSubmit={handleStep3Submit} className="space-y-6">
                   {/* Facebook */}
