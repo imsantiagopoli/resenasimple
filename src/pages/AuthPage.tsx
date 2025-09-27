@@ -1066,12 +1066,7 @@ const AuthPage: React.FC = () => {
               <div className="space-y-6">
                 {/* Header del paso opcional */}
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-2" style={{ color: '#161616' }}>
-                    Conecta tus redes sociales
-                  </h3>
-                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Opcional: Agrega tus redes para mostrarlas en la página de votación
-                  </p>
+                
                 </div>
 
                 <form onSubmit={handleStep3Submit} className="space-y-6">
