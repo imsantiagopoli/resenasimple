@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { 
   Home, 
   Building2,
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
 
   const mainMenuItems = [
@@ -28,9 +30,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
     { icon: Star, label: 'Reseñas', id: 'resenas', color: 'rgb(75, 85, 99)' },
   ];
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    navigate('/auth');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -114,13 +120,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
                   className="font-medium text-sm truncate"
                   style={{ color: 'rgb(17, 24, 39)' }}
                 >
-                  Restaurant Owner
+                  {user?.user_metadata?.full_name || 'Usuario'}
                 </p>
                 <p 
                   className="text-xs truncate"
                   style={{ color: 'rgb(107, 114, 128)' }}
                 >
-                  owner@restaurant.com
+                  {user?.email || ''}
                 </p>
               </div>
             </div>

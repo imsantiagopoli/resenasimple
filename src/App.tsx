@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UploadProvider } from './components/UploadContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import UploadDocumentModal from './components/UploadDocumentModal';
 import { useUpload } from './components/UploadContext';
 import DashboardLayout from './components/DashboardLayout';
@@ -26,7 +27,16 @@ const AppContent: React.FC = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:id" element={<BlogArticlePage />} />
-        <Route path="/dashboard" element={<DashboardLayout activePage="inicio"><InicioPage /></DashboardLayout>} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout activePage="inicio">
+                <InicioPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
       
       {/* Global Upload Modal */}
