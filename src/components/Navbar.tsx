@@ -37,15 +37,6 @@ const Navbar: React.FC = () => {
             >
               Características
             </a>
-            <Link
-              to="/blog"
-              className="text-sm font-medium transition-colors duration-200 py-2"
-              style={{ color: 'rgb(107, 114, 128)' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
-            >
-              Blog
-            </Link>
             <a
               href={isHomePage ? "#features" : "/#features"}
               className="text-sm font-medium transition-colors duration-200 py-2"
@@ -118,14 +109,6 @@ const Navbar: React.FC = () => {
               >
                 Características
               </a>
-              <Link
-                to="/blog"
-                className="text-sm font-medium transition-colors duration-200"
-                style={{ color: 'rgb(107, 114, 128)' }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Blog
-              </Link>
               <a 
                 href={isHomePage ? "#features" : "/#features"}
                 className="text-sm font-medium transition-colors duration-200"

@@ -12,8 +12,6 @@ import MiNegocioPage from './pages/MiNegocioPage';
 import PaginaVotacionPage from './pages/PaginaVotacionPage';
 import PaginaQRPage from './pages/PaginaQRPage';
 import ResenasPage from './pages/ResenasPage';
-import BlogPage from './pages/BlogPage';
-import BlogArticlePage from './pages/BlogArticlePage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -28,8 +26,6 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/blog/:id" element={<BlogArticlePage />} />
         <Route 
           path="/app/inicio" 
           element={
