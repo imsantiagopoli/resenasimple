@@ -1,160 +1,71 @@
 import React, { useState } from 'react';
+import { useBusiness } from '../hooks/useBusiness';
+import { useVotingConfig } from '../hooks/useVotingConfig';
 import VotingConfigPanel from '../components/voting/VotingConfigPanel';
 import VotingPreviewPanel from '../components/voting/VotingPreviewPanel';
 
-export interface VotingConfig {
-  // Diseño
-  design: {
-    message: {
-      headline: string;
-      body: string;
-    };
-    showLogo: boolean;
-    logoDisplayPages: 'all' | 'voting-only';
-    starLabels: {
-      enabled: boolean;
-      labels: {
-        1: string;
-        2: string;
-        3: string;
-        4: string;
-        5: string;
-      };
-    };
-    logoShape: 'circular' | 'square';
-    specialOffer: {
-      enabled: boolean;
-      headline: string;
-      body: string;
-    };
-    socials: {
-      instagram: boolean;
-      tiktok: boolean;
-      linkedin: boolean;
-      twitter: boolean;
-      youtube: boolean;
-      website: boolean;
-    };
-  };
-  typography: {
-    primaryFont: string;
-    secondaryFont: string;
-  };
-  // Lógica
-  logic: {
-    threshold: number;
-    smartAutoRedirect: boolean;
-    publicWorkflow: {
-      thankYouMessage: string;
-      buttonText: string;
-    };
-    privateWorkflow: {
-      feedbackMessage: string;
-      thankYouMessage: 'Gracias por tu sinceridad. Tu aporte nos ayuda a crecer.',
-      collectName: false,
-      nameRequired: false,
-      collectPhone: false,
-      phoneRequired: false
-      collectEmail: boolean;
-      emailRequired: boolean;
-     collectName: boolean;
-     nameRequired: boolean;
-     collectPhone: boolean;
-     phoneRequired: boolean;
-    };
-    prompt: {
-      enabled: boolean;
-      text: string;
-    };
-  };
-}
-
 const PaginaVotacionPage: React.FC = () => {
-  const [config, setConfig] = useState<VotingConfig>({
-    design: {
-      message: {
-        headline: 'Queremos tu opinión. Tu experiencia nos ayuda a mejorar.',
-        body: 'Tomate un momento para compartir tu experiencia con nosotros. Tu opinión guía nuestro servicio y ayuda a otros clientes.'
-      },
-      showLogo: true,
-      logoDisplayPages: 'all',
-      logoShape: 'circular',
-      starLabels: {
-        enabled: true,
-        labels: {
-          1: 'Muy malo',
-          2: 'Regular', 
-          3: 'Aceptable',
-          4: 'Bueno',
-          5: 'Excelente'
-        }
-      },
-      specialOffer: {
-        enabled: false,
-        headline: '¡Oferta exclusiva para reseñadores!',
-        body: 'Deja una reseña y obtené un 10% de descuento en tu próxima compra. Enviá un screenshot de la página de agradecimiento para reclamar tu beneficio.'
-      },
-      socials: {
-        instagram: true,
-        tiktok: true,
-        linkedin: false,
-        twitter: false,
-        youtube: false,
-        website: true
-      }
-    },
-    typography: {
-      primaryFont: 'Cabinet Grotesk',
-      secondaryFont: 'Cabinet Grotesk'
-    },
-    colors: {
-      buttonColor: '#075E54'
-    },
-    logic: {
-      threshold: 4,
-      smartAutoRedirect: true,
-      publicWorkflow: {
-        thankYouMessage: 'Gracias por tu tiempo. Tu opinión nos ayuda a mejorar.',
-        buttonText: 'Califícanos en Google'
-      },
-      privateWorkflow: {
-        feedbackMessage: 'Tu opinión es muy valiosa. Por favor, contanos cómo podemos mejorar.',
-        thankYouMessage: 'Gracias por tu sinceridad. Tu aporte nos ayuda a crecer.',
-        collectName: false,
-        nameRequired: false,
-        collectPhone: false,
-        phoneRequired: false,
-        collectEmail: false,
-        emailRequired: false
-      },
-      prompt: {
-        enabled: true,
-        text: 'Tu opinión es importante. Antes de enviar una reseña neutral o negativa, ¿podrías compartir tus comentarios en privado para ayudarnos a mejorar?'
-      }
-    }
-  });
+  const { branches, loading: branchesLoading } = useBusiness();
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  
+  // Get the main branch by default
+  const mainBranch = branches.find(branch => branch.is_main) || branches[0];
+  const currentBranchId = selectedBranchId || mainBranch?.id || '';
+  
+  const { config, loading: configLoading, updateVotingConfig, getOrCreateConfig } = useVotingConfig(currentBranchId);
 
-  const updateConfig = (updates: Partial<VotingConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      ...updates,
-      design: {
-        ...prev.design,
-        ...(updates.design || {})
-      },
-      logic: {
-        ...prev.logic,
-        ...(updates.logic || {})
-      }
-    }));
+  // Initialize config if it doesn't exist
+  React.useEffect(() => {
+    if (currentBranchId && !config && !configLoading) {
+      getOrCreateConfig(currentBranchId);
+    }
+  }, [currentBranchId, config, configLoading]);
+
+  const handleConfigUpdate = async (updates: Partial<typeof config>) => {
+    if (!config) return;
+    
+    try {
+      await updateVotingConfig(updates);
+    } catch (error) {
+      console.error('Error updating config:', error);
+    }
   };
+
+  if (branchesLoading || configLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+            No se pudo cargar la configuración
+          </p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+            Intenta recargar la página
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-white">
       <div className="flex h-screen">
         {/* Columna izquierda - Configuración (más estrecha) */}
         <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <VotingConfigPanel config={config} onConfigUpdate={updateConfig} />
+          <VotingConfigPanel 
+            config={config} 
+            onConfigUpdate={handleConfigUpdate}
+            branches={branches}
+            selectedBranchId={currentBranchId}
+            onBranchChange={setSelectedBranchId}
+          />
         </div>
         
         {/* Columna derecha - Vista previa (más ancha) */}
