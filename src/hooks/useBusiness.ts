@@ -113,7 +113,7 @@ export const useBusiness = () => {
           branches: [],
           socialMedia: [],
           loading: false,
-          error: null
+          error: null, // <-- CORRECCIÓN: Faltaba una coma aquí
           loaded: true
         })
       }
@@ -122,7 +122,7 @@ export const useBusiness = () => {
       setBusinessData(prev => ({
         ...prev,
         loading: false,
-        error: err.message || 'Error al cargar los datos del negocio'
+        error: err.message || 'Error al cargar los datos del negocio', // <-- CORRECCIÓN: Faltaba una coma aquí
         loaded: true
       }))
     }
@@ -278,7 +278,7 @@ export const useBusiness = () => {
   useEffect(() => {
     // Solo fetch si no se han cargado los datos aún o si el usuario cambió
     if (!businessData.loaded || (user && !businessData.profile && !businessData.loading)) {
-    fetchBusinessData()
+      fetchBusinessData()
     }
   }, [user])
 
