@@ -2,74 +2,234 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
-export interface VotingConfiguration {
+// Database row structure
+export interface VotingConfigurationRecord {
   id: string
   branch_id: string
-  
-  // Mensaje principal
   encabezado: string
   cuerpo: string
-  
-  // Logo
   mostrar_logo: boolean
   forma_logo: 'circular' | 'square'
   mostrar_logo_en: 'all' | 'voting-only'
-  
-  // Tipografía
   tipografia_principal: string
   tipografia_secundaria: string
-  
-  // Colores
   color_botones: string
-  
-  // Etiquetas de estrellas
   mostrar_etiquetas_estrellas: boolean
   etiqueta_1_estrella: string
   etiqueta_2_estrellas: string
   etiqueta_3_estrellas: string
   etiqueta_4_estrellas: string
   etiqueta_5_estrellas: string
-  
-  // Oferta especial
   oferta_especial_activa: boolean
   oferta_especial_titulo: string
   oferta_especial_descripcion: string
-  
-  // Redes sociales
   mostrar_instagram: boolean
   mostrar_tiktok: boolean
   mostrar_linkedin: boolean
   mostrar_twitter: boolean
   mostrar_youtube: boolean
   mostrar_website: boolean
-  
-  // Lógica de votación
   umbral_estrellas: number
   redireccion_automatica: boolean
-  
-  // Flujo público
   mensaje_agradecimiento_publico: string
   texto_boton_publico: string
-  
-  // Flujo privado
   mensaje_feedback_privado: string
   mensaje_agradecimiento_privado: string
-  
-  // Campos de feedback privado
   solicitar_nombre: boolean
   nombre_requerido: boolean
   solicitar_telefono: boolean
   telefono_requerido: boolean
   solicitar_email: boolean
   email_requerido: boolean
-  
-  // Prompt preventivo
   prompt_preventivo_activo: boolean
   texto_prompt_preventivo: string
-  
-  // Timestamps
   created_at: string
   updated_at: string
+}
+
+// UI-friendly structure that components expect
+export interface VotingConfiguration {
+  id: string
+  branch_id: string
+  design: {
+    message: {
+      headline: string
+      body: string
+    }
+    showLogo: boolean
+    logoShape: 'circular' | 'square'
+    logoDisplayPages: 'all' | 'voting-only'
+    starLabels: {
+      enabled: boolean
+      labels: {
+        1: string
+        2: string
+        3: string
+        4: string
+        5: string
+      }
+    }
+    specialOffer: {
+      enabled: boolean
+      headline: string
+      body: string
+    }
+    socials: {
+      instagram: boolean
+      tiktok: boolean
+      linkedin: boolean
+      twitter: boolean
+      youtube: boolean
+      website: boolean
+    }
+  }
+  typography: {
+    primaryFont: string
+    secondaryFont: string
+  }
+  colors: {
+    buttonColor: string
+  }
+  logic: {
+    threshold: number
+    smartAutoRedirect: boolean
+    publicWorkflow: {
+      thankYouMessage: string
+      buttonText: string
+    }
+    privateWorkflow: {
+      feedbackMessage: string
+      thankYouMessage: string
+      collectName: boolean
+      nameRequired: boolean
+      collectPhone: boolean
+      phoneRequired: boolean
+      collectEmail: boolean
+      emailRequired: boolean
+    }
+    prompt: {
+      enabled: boolean
+      text: string
+    }
+  }
+  created_at: string
+  updated_at: string
+}
+
+// Convert database record to UI structure
+const mapRecordToConfig = (record: VotingConfigurationRecord): VotingConfiguration => {
+  return {
+    id: record.id,
+    branch_id: record.branch_id,
+    design: {
+      message: {
+        headline: record.encabezado,
+        body: record.cuerpo
+      },
+      showLogo: record.mostrar_logo,
+      logoShape: record.forma_logo,
+      logoDisplayPages: record.mostrar_logo_en,
+      starLabels: {
+        enabled: record.mostrar_etiquetas_estrellas,
+        labels: {
+          1: record.etiqueta_1_estrella,
+          2: record.etiqueta_2_estrellas,
+          3: record.etiqueta_3_estrellas,
+          4: record.etiqueta_4_estrellas,
+          5: record.etiqueta_5_estrellas
+        }
+      },
+      specialOffer: {
+        enabled: record.oferta_especial_activa,
+        headline: record.oferta_especial_titulo,
+        body: record.oferta_especial_descripcion
+      },
+      socials: {
+        instagram: record.mostrar_instagram,
+        tiktok: record.mostrar_tiktok,
+        linkedin: record.mostrar_linkedin,
+        twitter: record.mostrar_twitter,
+        youtube: record.mostrar_youtube,
+        website: record.mostrar_website
+      }
+    },
+    typography: {
+      primaryFont: record.tipografia_principal,
+      secondaryFont: record.tipografia_secundaria
+    },
+    colors: {
+      buttonColor: record.color_botones
+    },
+    logic: {
+      threshold: record.umbral_estrellas,
+      smartAutoRedirect: record.redireccion_automatica,
+      publicWorkflow: {
+        thankYouMessage: record.mensaje_agradecimiento_publico,
+        buttonText: record.texto_boton_publico
+      },
+      privateWorkflow: {
+        feedbackMessage: record.mensaje_feedback_privado,
+        thankYouMessage: record.mensaje_agradecimiento_privado,
+        collectName: record.solicitar_nombre,
+        nameRequired: record.nombre_requerido,
+        collectPhone: record.solicitar_telefono,
+        phoneRequired: record.telefono_requerido,
+        collectEmail: record.solicitar_email,
+        emailRequired: record.email_requerido
+      },
+      prompt: {
+        enabled: record.prompt_preventivo_activo,
+        text: record.texto_prompt_preventivo
+      }
+    },
+    created_at: record.created_at,
+    updated_at: record.updated_at
+  }
+}
+
+// Convert UI structure back to database format
+const mapConfigToRecord = (config: Partial<VotingConfiguration>): Partial<Omit<VotingConfigurationRecord, 'id' | 'branch_id' | 'created_at' | 'updated_at'>> => {
+  const updates: Partial<Omit<VotingConfigurationRecord, 'id' | 'branch_id' | 'created_at' | 'updated_at'>> = {}
+  
+  if (config.design?.message?.headline !== undefined) updates.encabezado = config.design.message.headline
+  if (config.design?.message?.body !== undefined) updates.cuerpo = config.design.message.body
+  if (config.design?.showLogo !== undefined) updates.mostrar_logo = config.design.showLogo
+  if (config.design?.logoShape !== undefined) updates.forma_logo = config.design.logoShape
+  if (config.design?.logoDisplayPages !== undefined) updates.mostrar_logo_en = config.design.logoDisplayPages
+  if (config.typography?.primaryFont !== undefined) updates.tipografia_principal = config.typography.primaryFont
+  if (config.typography?.secondaryFont !== undefined) updates.tipografia_secundaria = config.typography.secondaryFont
+  if (config.colors?.buttonColor !== undefined) updates.color_botones = config.colors.buttonColor
+  if (config.design?.starLabels?.enabled !== undefined) updates.mostrar_etiquetas_estrellas = config.design.starLabels.enabled
+  if (config.design?.starLabels?.labels?.[1] !== undefined) updates.etiqueta_1_estrella = config.design.starLabels.labels[1]
+  if (config.design?.starLabels?.labels?.[2] !== undefined) updates.etiqueta_2_estrellas = config.design.starLabels.labels[2]
+  if (config.design?.starLabels?.labels?.[3] !== undefined) updates.etiqueta_3_estrellas = config.design.starLabels.labels[3]
+  if (config.design?.starLabels?.labels?.[4] !== undefined) updates.etiqueta_4_estrellas = config.design.starLabels.labels[4]
+  if (config.design?.starLabels?.labels?.[5] !== undefined) updates.etiqueta_5_estrellas = config.design.starLabels.labels[5]
+  if (config.design?.specialOffer?.enabled !== undefined) updates.oferta_especial_activa = config.design.specialOffer.enabled
+  if (config.design?.specialOffer?.headline !== undefined) updates.oferta_especial_titulo = config.design.specialOffer.headline
+  if (config.design?.specialOffer?.body !== undefined) updates.oferta_especial_descripcion = config.design.specialOffer.body
+  if (config.design?.socials?.instagram !== undefined) updates.mostrar_instagram = config.design.socials.instagram
+  if (config.design?.socials?.tiktok !== undefined) updates.mostrar_tiktok = config.design.socials.tiktok
+  if (config.design?.socials?.linkedin !== undefined) updates.mostrar_linkedin = config.design.socials.linkedin
+  if (config.design?.socials?.twitter !== undefined) updates.mostrar_twitter = config.design.socials.twitter
+  if (config.design?.socials?.youtube !== undefined) updates.mostrar_youtube = config.design.socials.youtube
+  if (config.design?.socials?.website !== undefined) updates.mostrar_website = config.design.socials.website
+  if (config.logic?.threshold !== undefined) updates.umbral_estrellas = config.logic.threshold
+  if (config.logic?.smartAutoRedirect !== undefined) updates.redireccion_automatica = config.logic.smartAutoRedirect
+  if (config.logic?.publicWorkflow?.thankYouMessage !== undefined) updates.mensaje_agradecimiento_publico = config.logic.publicWorkflow.thankYouMessage
+  if (config.logic?.publicWorkflow?.buttonText !== undefined) updates.texto_boton_publico = config.logic.publicWorkflow.buttonText
+  if (config.logic?.privateWorkflow?.feedbackMessage !== undefined) updates.mensaje_feedback_privado = config.logic.privateWorkflow.feedbackMessage
+  if (config.logic?.privateWorkflow?.thankYouMessage !== undefined) updates.mensaje_agradecimiento_privado = config.logic.privateWorkflow.thankYouMessage
+  if (config.logic?.privateWorkflow?.collectName !== undefined) updates.solicitar_nombre = config.logic.privateWorkflow.collectName
+  if (config.logic?.privateWorkflow?.nameRequired !== undefined) updates.nombre_requerido = config.logic.privateWorkflow.nameRequired
+  if (config.logic?.privateWorkflow?.collectPhone !== undefined) updates.solicitar_telefono = config.logic.privateWorkflow.collectPhone
+  if (config.logic?.privateWorkflow?.phoneRequired !== undefined) updates.telefono_requerido = config.logic.privateWorkflow.phoneRequired
+  if (config.logic?.privateWorkflow?.collectEmail !== undefined) updates.solicitar_email = config.logic.privateWorkflow.collectEmail
+  if (config.logic?.privateWorkflow?.emailRequired !== undefined) updates.email_requerido = config.logic.privateWorkflow.emailRequired
+  if (config.logic?.prompt?.enabled !== undefined) updates.prompt_preventivo_activo = config.logic.prompt.enabled
+  if (config.logic?.prompt?.text !== undefined) updates.texto_prompt_preventivo = config.logic.prompt.text
+  
+  return updates
 }
 
 interface VotingConfigState {
@@ -89,27 +249,29 @@ export const useVotingConfig = (branchId?: string) => {
   })
 
   // Fetch voting configuration
-  const fetchVotingConfig = async (targetBranchId?: string) => {
+  const fetchVotingConfig = async (targetBranchId?: string): Promise<VotingConfiguration | null> => {
     if (!targetBranchId) {
       setConfigState(prev => ({ ...prev, loading: false, loaded: true }))
-      return
+      return null
     }
 
     try {
       setConfigState(prev => ({ ...prev, loading: true, error: null }))
 
-      const { data: config, error } = await supabase
+      const { data: record, error } = await supabase
         .from('voting_configuration')
         .select('*')
         .eq('branch_id', targetBranchId)
-        .single()
+        .maybeSingle() // Use maybeSingle() instead of single() to handle no rows gracefully
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error
       }
 
+      const config = record ? mapRecordToConfig(record) : null
+
       setConfigState({
-        config: config || null,
+        config,
         loading: false,
         error: null,
         loaded: true
@@ -129,9 +291,9 @@ export const useVotingConfig = (branchId?: string) => {
   }
 
   // Create default configuration for a branch
-  const createDefaultConfig = async (targetBranchId: string) => {
+  const createDefaultConfig = async (targetBranchId: string): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
     try {
-      const { data, error } = await supabase
+      const { data: record, error } = await supabase
         .from('voting_configuration')
         .insert([{ branch_id: targetBranchId }])
         .select()
@@ -141,12 +303,13 @@ export const useVotingConfig = (branchId?: string) => {
         throw error
       }
 
+      const config = mapRecordToConfig(record)
       setConfigState(prev => ({
         ...prev,
-        config: data
+        config
       }))
 
-      return { data, error: null }
+      return { data: config, error: null }
     } catch (err: any) {
       console.error('Error creating default config:', err)
       return { data: null, error: err.message || 'Error al crear la configuración por defecto' }
@@ -154,15 +317,17 @@ export const useVotingConfig = (branchId?: string) => {
   }
 
   // Update voting configuration (real-time)
-  const updateVotingConfig = async (updates: Partial<Omit<VotingConfiguration, 'id' | 'branch_id' | 'created_at' | 'updated_at'>>) => {
+  const updateVotingConfig = async (updates: Partial<VotingConfiguration>): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
     if (!configState.config) {
       throw new Error('No hay configuración para actualizar')
     }
 
     try {
-      const { data, error } = await supabase
+      const recordUpdates = mapConfigToRecord(updates)
+      
+      const { data: record, error } = await supabase
         .from('voting_configuration')
-        .update(updates)
+        .update(recordUpdates)
         .eq('id', configState.config.id)
         .select()
         .single()
@@ -171,12 +336,13 @@ export const useVotingConfig = (branchId?: string) => {
         throw error
       }
 
+      const updatedConfig = mapRecordToConfig(record)
       setConfigState(prev => ({
         ...prev,
-        config: data
+        config: updatedConfig
       }))
 
-      return { data, error: null }
+      return { data: updatedConfig, error: null }
     } catch (err: any) {
       console.error('Error updating voting config:', err)
       return { data: null, error: err.message || 'Error al actualizar la configuración' }
@@ -184,7 +350,7 @@ export const useVotingConfig = (branchId?: string) => {
   }
 
   // Get or create configuration for a branch
-  const getOrCreateConfig = async (targetBranchId: string) => {
+  const getOrCreateConfig = async (targetBranchId: string): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
     try {
       // First try to fetch existing config
       let config = await fetchVotingConfig(targetBranchId)

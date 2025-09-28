@@ -1,13 +1,13 @@
 import React from 'react';
-import { VotingConfig } from '../../pages/PaginaVotacionPage';
+import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
 interface LogicConfigTabProps {
-  config: VotingConfig;
-  onConfigUpdate: (updates: Partial<VotingConfig>) => void;
+  config: VotingConfiguration;
+  onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
 }
 
 const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate }) => {
-  const updateLogic = (updates: Partial<VotingConfig['logic']>) => {
+  const updateLogic = (updates: Partial<VotingConfiguration['logic']>) => {
     onConfigUpdate({
       logic: {
         ...config.logic,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, EyeOff, Instagram, Music, Linkedin, Twitter, Youtube, Globe, Building2 } from 'lucide-react';
+import { Instagram, Music, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
 interface DesignConfigTabProps {
@@ -8,6 +8,35 @@ interface DesignConfigTabProps {
 }
 
 const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate }) => {
+  // Helper function to update design properties
+  const updateDesign = (updates: Partial<VotingConfiguration['design']>) => {
+    onConfigUpdate({
+      design: {
+        ...config.design,
+        ...updates
+      }
+    });
+  };
+
+  // Helper function to update typography properties
+  const updateTypography = (updates: Partial<VotingConfiguration['typography']>) => {
+    onConfigUpdate({
+      typography: {
+        ...config.typography,
+        ...updates
+      }
+    });
+  };
+
+  // Helper function to update colors properties
+  const updateColors = (updates: Partial<VotingConfiguration['colors']>) => {
+    onConfigUpdate({
+      colors: {
+        ...config.colors,
+        ...updates
+      }
+    });
+  };
 
   const socialIcons = {
     instagram: Instagram,
@@ -88,8 +117,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
           <label className="flex items-center space-x-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={config.mostrar_logo}
-              onChange={(e) => onConfigUpdate({ mostrar_logo: e.target.checked })}
+              checked={config.design.showLogo}
+              onChange={(e) => updateDesign({ showLogo: e.target.checked })}
               className="rounded border-gray-300 focus:ring-2"
               style={{ accentColor: '#075E54' }}
             />
@@ -98,7 +127,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
             </span>
           </label>
           
-          {config.mostrar_logo && (
+          {config.design.showLogo && (
             <div className="ml-6 space-y-2">
               <div className="space-y-2">
                 <label className="block text-sm font-medium" style={{ color: '#161616' }}>
@@ -110,8 +139,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                       type="radio"
                       name="logoDisplayPages"
                       value="all"
-                      checked={config.mostrar_logo_en === 'all'}
-                      onChange={(e) => onConfigUpdate({ mostrar_logo_en: e.target.value as 'all' | 'voting-only' })}
+                      checked={config.design.logoDisplayPages === 'all'}
+                      onChange={(e) => updateDesign({ logoDisplayPages: e.target.value as 'all' | 'voting-only' })}
                       className="focus:ring-2"
                       style={{ accentColor: '#075E54' }}
                     />
@@ -122,8 +151,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                       type="radio"
                       name="logoDisplayPages"
                       value="voting-only"
-                      checked={config.mostrar_logo_en === 'voting-only'}
-                      onChange={(e) => onConfigUpdate({ mostrar_logo_en: e.target.value as 'all' | 'voting-only' })}
+                      checked={config.design.logoDisplayPages === 'voting-only'}
+                      onChange={(e) => updateDesign({ logoDisplayPages: e.target.value as 'all' | 'voting-only' })}
                       className="focus:ring-2"
                       style={{ accentColor: '#075E54' }}
                     />
@@ -141,8 +170,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                     type="radio"
                     name="logoShape"
                     value="circular"
-                    checked={config.forma_logo === 'circular'}
-                    onChange={(e) => onConfigUpdate({ forma_logo: e.target.value as 'circular' | 'square' })}
+                    checked={config.design.logoShape === 'circular'}
+                    onChange={(e) => updateDesign({ logoShape: e.target.value as 'circular' | 'square' })}
                     className="focus:ring-2"
                     style={{ accentColor: '#075E54' }}
                   />
@@ -153,8 +182,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                     type="radio"
                     name="logoShape"
                     value="square"
-                    checked={config.forma_logo === 'square'}
-                    onChange={(e) => onConfigUpdate({ forma_logo: e.target.value as 'circular' | 'square' })}
+                    checked={config.design.logoShape === 'square'}
+                    onChange={(e) => updateDesign({ logoShape: e.target.value as 'circular' | 'square' })}
                     className="focus:ring-2"
                     style={{ accentColor: '#075E54' }}
                   />
@@ -180,8 +209,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
               Fuente Principal (Headline)
             </label>
             <select
-              value={config.tipografia_principal}
-              onChange={(e) => onConfigUpdate({ tipografia_principal: e.target.value })}
+              value={config.typography.primaryFont}
+              onChange={(e) => updateTypography({ primaryFont: e.target.value })}
               className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
               style={{
                 borderColor: 'rgb(209, 213, 219)',
@@ -205,8 +234,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
               Fuente Secundaria (Cuerpo)
             </label>
             <select
-              value={config.tipografia_secundaria}
-              onChange={(e) => onConfigUpdate({ tipografia_secundaria: e.target.value })}
+              value={config.typography.secondaryFont}
+              onChange={(e) => updateTypography({ secondaryFont: e.target.value })}
               className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
               style={{
                 borderColor: 'rgb(209, 213, 219)',
@@ -254,15 +283,15 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
             <div className="flex items-center space-x-3">
               <input
                 type="color"
-                value={config.color_botones}
-                onChange={(e) => onConfigUpdate({ color_botones: e.target.value })}
+                value={config.colors.buttonColor}
+                onChange={(e) => updateColors({ buttonColor: e.target.value })}
                 className="w-12 h-10 rounded-lg border cursor-pointer"
                 style={{ borderColor: 'rgb(209, 213, 219)' }}
               />
               <input
                 type="text"
-                value={config.color_botones}
-                onChange={(e) => onConfigUpdate({ color_botones: e.target.value })}
+                value={config.colors.buttonColor}
+                onChange={(e) => updateColors({ buttonColor: e.target.value })}
                 className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
@@ -298,8 +327,10 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
         <label className="flex items-center space-x-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={config.mostrar_etiquetas_estrellas}
-            onChange={(e) => onConfigUpdate({ mostrar_etiquetas_estrellas: e.target.checked })}
+            checked={config.design.starLabels.enabled}
+            onChange={(e) => updateDesign({
+              starLabels: { ...config.design.starLabels, enabled: e.target.checked }
+            })}
             className="rounded border-gray-300 focus:ring-2"
             style={{ accentColor: '#075E54' }}
           />
@@ -308,7 +339,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
           </span>
         </label>
 
-        {config.mostrar_etiquetas_estrellas && (
+        {config.design.starLabels.enabled && (
           <div className="space-y-3 ml-6">
             {[1, 2, 3, 4, 5].map((star) => (
               <div key={star} className="flex items-center space-x-3">
@@ -318,20 +349,18 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                 <input
                   type="text"
                   value={
-                    star === 1 ? config.etiqueta_1_estrella :
-                    star === 2 ? config.etiqueta_2_estrellas :
-                    star === 3 ? config.etiqueta_3_estrellas :
-                    star === 4 ? config.etiqueta_4_estrellas :
-                    config.etiqueta_5_estrellas
+                    config.design.starLabels.labels[star as keyof typeof config.design.starLabels.labels]
                   }
                   onChange={(e) => {
-                    const fieldName = 
-                      star === 1 ? 'etiqueta_1_estrella' :
-                      star === 2 ? 'etiqueta_2_estrellas' :
-                      star === 3 ? 'etiqueta_3_estrellas' :
-                      star === 4 ? 'etiqueta_4_estrellas' :
-                      'etiqueta_5_estrellas';
-                    onConfigUpdate({ [fieldName]: e.target.value });
+                    updateDesign({
+                      starLabels: {
+                        ...config.design.starLabels,
+                        labels: {
+                          ...config.design.starLabels.labels,
+                          [star]: e.target.value
+                        }
+                      }
+                    });
                   }}
                   className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
                   style={{
@@ -357,8 +386,10 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
         <label className="flex items-center space-x-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={config.oferta_especial_activa}
-            onChange={(e) => onConfigUpdate({ oferta_especial_activa: e.target.checked })}
+            checked={config.design.specialOffer.enabled}
+            onChange={(e) => updateDesign({
+              specialOffer: { ...config.design.specialOffer, enabled: e.target.checked }
+            })}
             className="rounded border-gray-300 focus:ring-2"
             style={{ accentColor: '#075E54' }}
           />
@@ -367,7 +398,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
           </span>
         </label>
 
-        {config.oferta_especial_activa && (
+        {config.design.specialOffer.enabled && (
           <div className="space-y-4 ml-6">
             <div className="space-y-2">
               <label className="block text-sm font-medium" style={{ color: '#161616' }}>
@@ -375,8 +406,10 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
               </label>
               <input
                 type="text"
-                value={config.oferta_especial_titulo}
-                onChange={(e) => onConfigUpdate({ oferta_especial_titulo: e.target.value })}
+                value={config.design.specialOffer.headline}
+                onChange={(e) => updateDesign({
+                  specialOffer: { ...config.design.specialOffer, headline: e.target.value }
+                })}
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
@@ -391,8 +424,12 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                 Body
               </label>
               <textarea
-                value={config.cuerpo}
-                onChange={(e) => onConfigUpdate({ cuerpo: e.target.value })}
+                value={config.design.specialOffer.body}
+                onChange={(e) => updateDesign({
+                  specialOffer: { ...config.design.specialOffer, body: e.target.value }
+                })}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
@@ -422,23 +459,18 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
               <input
                 type="checkbox"
                 checked={
-                  key === 'instagram' ? config.mostrar_instagram :
-                  key === 'tiktok' ? config.mostrar_tiktok :
-                  key === 'linkedin' ? config.mostrar_linkedin :
-                  key === 'twitter' ? config.mostrar_twitter :
-                  key === 'youtube' ? config.mostrar_youtube :
-                  config.mostrar_website
+                  config.design.socials[key as keyof typeof config.design.socials]
                 }
                 onChange={(e) => {
-                  const fieldName = 
-                    key === 'instagram' ? 'mostrar_instagram' :
-                    key === 'tiktok' ? 'mostrar_tiktok' :
-                    key === 'linkedin' ? 'mostrar_linkedin' :
-                    key === 'twitter' ? 'mostrar_twitter' :
-                    key === 'youtube' ? 'mostrar_youtube' :
-                    'mostrar_website';
-                  onConfigUpdate({ [fieldName]: e.target.checked });
+                  updateDesign({
+                    socials: {
+                      ...config.design.socials,
+                      [key]: e.target.checked
+                    }
+                  });
                 }}
+                className="rounded border-gray-300 focus:ring-2"
+                style={{ accentColor: '#075E54' }}
               />
               <div 
                 className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
