@@ -104,7 +104,7 @@ export const useBusiness = () => {
           branches: branches || [],
           socialMedia: socialMedia || [],
           loading: false,
-          error: null
+          error: null,
           loaded: true
         })
       } else {
