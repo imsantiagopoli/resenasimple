@@ -108,7 +108,12 @@ const MiNegocioPage: React.FC = () => {
       // Update branches
       for (const branch of branchesData) {
         const branchToSave = {
-          ...branch,
+          id: branch.id,
+          name: branch.name,
+          address: branch.address,
+          phone: branch.phone,
+          is_main: branch.isMain,
+          google_maps_link: branch.googleMapsLink,
           slug: branch.slug || generateSlug(branch.name)
         };
         
