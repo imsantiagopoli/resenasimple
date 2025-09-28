@@ -222,12 +222,12 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
         )}
       </div>
       
-      <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
         {socialIcons.map((social) => (
           <div key={social.key} className="flex items-center space-x-4">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: social.key === 'tiktok_url' ? '#6b7280' + '20' : social.color + '20' }}
+              style={{ backgroundColor: 'rgb(243, 244, 246)' }}
             >
               {social.key === 'tiktok_url' ? (
                 <img 
@@ -235,9 +235,10 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                   alt="TikTok"
                   width={20}
                   height={20}
+                  style={{ filter: 'grayscale(100%)' }}
                 />
               ) : (
-                <social.icon size={20} style={{ color: social.color }} />
+                <social.icon size={20} style={{ color: 'rgb(107, 114, 128)' }} />
               )}
             </div>
             <div className="flex-1">
