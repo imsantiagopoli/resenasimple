@@ -221,32 +221,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
         {/* Separador */}
         <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
-        {/* Logo en el centro */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Logo en el Centro
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="showLogo"
-                checked={config.design.showLogo}
-                onChange={(e) => updateDesign({ showLogo: e.target.checked })}
-                className="w-4 h-4"
-                style={{ accentColor: '#075E54' }}
-              />
-              <label htmlFor="showLogo" className="text-sm font-medium" style={{ color: '#161616' }}>
-                Mostrar logo en el centro del QR
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Separador */}
-        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
         {/* Marco/Borde */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
@@ -269,7 +243,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
             </div>
             
             {config.design.showFrame && (
-              <div className="ml-7 space-y-4">
+              <div className="ml-6 space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
                     Grosor: {config.design.frameWidth}px
@@ -279,7 +253,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                     min="1"
                     max="10"
                     value={config.design.frameWidth}
-                    onChange={(e) => updateDesign({ frameWidth: parseInt(e.target.value) })}
+                    onChange={(e) => updateDesign({ frameThickness: parseInt(e.target.value) })}
                     className="w-full"
                     style={{ accentColor: '#075E54' }}
                   />

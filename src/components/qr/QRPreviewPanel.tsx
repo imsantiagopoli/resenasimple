@@ -179,15 +179,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ config }) => {
                       height: config.qr.size
                     }}
                   />
-                  
-                  {/* Logo overlay */}
-                  {config.design.showLogo && (
-                    <div 
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                      <span>{selectedBranch.name}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

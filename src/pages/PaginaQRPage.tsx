@@ -13,8 +13,6 @@ export interface QRConfig {
   };
   // Diseño
   design: {
-    showLogo: boolean;
-    logoSize: number;
     showFrame: boolean;
     frameColor: string;
     frameThickness: number;
@@ -53,8 +51,6 @@ const PaginaQRPage: React.FC = () => {
       margin: 4
     },
     design: {
-      showLogo: true,
-      logoSize: 50,
       showFrame: false,
       frameColor: '#075E54',
       frameThickness: 4
