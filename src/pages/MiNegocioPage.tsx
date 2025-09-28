@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, Save, X, Plus, Trash2, ExternalLink, Music, AlertCircle, CheckCircle } from 'lucide-react';
+import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, Save, X, Plus, Trash2, ExternalLink, Music, AlertCircle, CheckCircle, ImageIcon } from 'lucide-react';
 import { useBusiness } from '../hooks/useBusiness';
 
 const MiNegocioPage: React.FC = () => {
@@ -15,6 +15,7 @@ const MiNegocioPage: React.FC = () => {
     updateSocialMedia,
     generateSlug
   } = useBusiness();
+  import { supabase } from '../lib/supabase';
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,6 +37,10 @@ const MiNegocioPage: React.FC = () => {
   });
 
   const [branchesData, setBranchesData] = useState<any[]>([]);
+
+  // Estados para el logo
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Initialize data when profile loads
   useEffect(() => {
@@ -82,6 +87,55 @@ const MiNegocioPage: React.FC = () => {
     }
   }, [branches]);
 
+  // Función para manejar la selección del archivo de logo
+  const handleLogoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        showMessage('error', 'Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+      
+      // Validar tamaño (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        showMessage('error', 'El archivo debe ser menor a 2MB');
+        return;
+      }
+      
+      setLogoFile(file);
+      
+      // Crear preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Función para subir logo a Supabase Storage
+  const uploadLogo = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `logo-${profile?.id}-${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('business-logos')
+      .upload(fileName, file);
+
+    if (error) {
+      console.error('Error uploading logo:', error);
+      return null;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('business-logos')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const showMessage = (type: 'success' | 'error', text: string) => {
     setSaveMessage({ type, text });
     setTimeout(() => setSaveMessage(null), 5000);
@@ -93,8 +147,23 @@ const MiNegocioPage: React.FC = () => {
     setIsSaving(true);
     
     try {
-      // Update business profile
-      const { error: profileError } = await updateBusinessProfile(businessData);
+      let logoUrl = profile.logo_url;
+      
+      // Upload new logo if selected
+      if (logoFile) {
+        const uploadedLogoUrl = await uploadLogo(logoFile);
+        if (uploadedLogoUrl) {
+          logoUrl = uploadedLogoUrl;
+        } else {
+          throw new Error('Error al subir el logo');
+        }
+      }
+      
+      // Update business profile with logo URL
+      const { error: profileError } = await updateBusinessProfile({
+        ...businessData,
+        logo_url: logoUrl
+      });
       if (profileError) {
         throw new Error(profileError);
       }
@@ -124,6 +193,10 @@ const MiNegocioPage: React.FC = () => {
       }
 
       setIsEditing(false);
+      // Reset logo states after successful save
+      setLogoFile(null);
+      setLogoPreview(null);
+      
       showMessage('success', 'Datos guardados correctamente');
     } catch (err: any) {
       console.error('Error saving data:', err);
@@ -278,20 +351,54 @@ const MiNegocioPage: React.FC = () => {
         
         <div className="flex items-center space-x-6">
           <div className="relative">
-            <div 
-              className="w-24 h-24 rounded-lg border-2 border-dashed flex items-center justify-center"
-              style={{ borderColor: 'rgb(209, 213, 219)', backgroundColor: 'rgb(249, 250, 251)' }}
-            >
-              <Building2 size={32} style={{ color: 'rgb(107, 114, 128)' }} />
-            </div>
+            {/* Logo Preview */}
+            {logoPreview || profile?.logo_url ? (
+              <div 
+                className="w-24 h-24 rounded-lg border-2 overflow-hidden"
+                style={{ borderColor: 'rgb(209, 213, 219)' }}
+              >
+                <img
+                  src={logoPreview || profile.logo_url || ''}
+                  alt="Logo del negocio"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div 
+                className="w-24 h-24 rounded-lg border-2 border-dashed flex items-center justify-center"
+                style={{ borderColor: 'rgb(209, 213, 219)', backgroundColor: 'rgb(249, 250, 251)' }}
+              >
+                <ImageIcon size={32} style={{ color: 'rgb(107, 114, 128)' }} />
+              </div>
+            )}
+            
+            {/* Camera Button - Solo en modo edición */}
             {isEditing && (
-              <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200"
+              <label 
+                htmlFor="logo-upload"
+                className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200 cursor-pointer"
                 style={{ backgroundColor: '#075E54', color: 'white' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#064e45'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#075E54'}
               >
                 <Camera size={16} />
-              </button>
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoSelect}
+                  className="hidden"
+                />
+              </label>
+            )}
+            
+            {/* Indicador de archivo nuevo */}
+            {logoFile && (
+              <div 
+                className="absolute -top-2 -left-2 w-4 h-4 rounded-full border-2 border-white"
+                style={{ backgroundColor: '#10b981' }}
+                title="Nuevo logo seleccionado"
+              />
             )}
           </div>
           
@@ -300,15 +407,23 @@ const MiNegocioPage: React.FC = () => {
               Logo actual
             </p>
             <p className="text-xs mb-3" style={{ color: 'rgb(107, 114, 128)' }}>
-              Recomendado: 400x400px, formato PNG o JPG
+              Recomendado: 400x400px, formato PNG o JPG, máximo 2MB
             </p>
             {isEditing && (
-              <button className="flex items-center space-x-2 text-sm font-medium transition-colors duration-200"
+              <label
+                htmlFor="logo-upload"
+                className="flex items-center space-x-2 text-sm font-medium transition-colors duration-200 cursor-pointer"
                 style={{ color: '#075E54' }}
               >
                 <Upload size={16} />
-                <span>Subir nuevo logo</span>
-              </button>
+                <span>{logoFile ? 'Cambiar logo' : 'Subir nuevo logo'}</span>
+              </label>
+            )}
+            
+            {logoFile && (
+              <p className="text-xs mt-2 text-green-600 font-medium">
+                ✓ Nuevo logo seleccionado: {logoFile.name}
+              </p>
             )}
           </div>
         </div>
