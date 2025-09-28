@@ -313,7 +313,9 @@ export const useVotingConfig = () => {
     try {
       const { data: record, error } = await supabase
         .from('voting_configuration')
-        .insert([{ business_id: profile.id }])
+        .upsert([{ business_id: profile.id }], {
+          onConflict: 'business_id'
+        })
         .select()
         .single()
 
