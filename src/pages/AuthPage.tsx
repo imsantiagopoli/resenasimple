@@ -1,1350 +1,298 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { 
-  ArrowRight, 
-  Mail, 
-  Lock, 
-  User, 
-  Building2,
-  Shield,
-  Zap,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import AuthStep1 from '../components/auth/AuthStep1';
 import AuthStep2 from '../components/auth/AuthStep2';
 import AuthStep3 from '../components/auth/AuthStep3';
 
 const AuthPage: React.FC = () => {
+  const [mode, setMode] = useState<'login' | 'register'>('register');
+  const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<any>({});
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { signIn, signUp, signInWithGoogle } = useAuth();
+
+  // Form data states
   const [formData, setFormData] = useState({
-    // Paso 1
     firstName: '',
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    // Paso 2
+    confirmPassword: ''
+  });
+
+  const [businessData, setBusinessData] = useState({
     restaurantName: '',
-    businessType: '',
-    // Paso 3 - Redes Sociales (opcional)
+    businessType: ''
+  });
+
+  const [socialMedia, setSocialMedia] = useState({
     facebook: '',
     instagram: '',
     website: '',
     tiktok: ''
   });
 
-  // Testimonials carousel data
-  const testimonials = [
-    {
-      image: 'https://images.pexels.com/photos/28945103/pexels-photo-28945103.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1600&dpr=2',
-      rating: 5,
-      review: 'La pizza estaba deliciosa, ambiente perfecto para cenar en familia. ¡Definitivamente volveremos pronto!',
-      customer: 'María González',
-      restaurant: 'Pizzería Napolitana',
-      type: 'positive',
-      status: 'Reseña enviada a Google ⭐'
-    },
-    {
-      image: 'https://images.pexels.com/photos/29039084/pexels-photo-29039084.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1600&dpr=2',
-      rating: 5,
-      review: 'Pasta increíble, el sabor casero que buscaba. El servicio fue excelente y rápido.',
-      customer: 'Carlos Martínez',
-      restaurant: 'Trattoria Roma',
-      type: 'positive',
-      status: 'Reseña enviada a Google ⭐'
-    },
-    {
-      image: 'https://images.pexels.com/photos/29007122/pexels-photo-29007122.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1600&dpr=2',
-      rating: 2,
-      review: 'Los tacos estaban fríos y el servicio fue muy lento. Esperaba mucho más.',
-      customer: 'Ana López',
-      restaurant: 'Tacos El Primo',
-      type: 'negative',
-      status: 'Reseña negativa evitada en Google ✅'
-    },
-    {
-      image: 'https://wallpapers.com/images/hd/churrasco-on-chopping-board-g3ikpaz5sy5cl9g6.jpg',
-      rating: 5,
-      review: 'El mejor asado que he probado en años. La carne estaba perfecta y el ambiente espectacular.',
-      customer: 'Roberto Silva',
-      restaurant: 'Parrilla Don Juan',
-      type: 'positive',
-      status: 'Reseña enviada a Google ⭐'
+  // Validation functions
+  const validateStep1 = () => {
+    const newErrors: any = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'El nombre es requerido';
     }
-  ];
 
-  const businessTypes = [
-    'Restaurante',
-    'Pizzería',
-    'Bar',
-    'Café',
-    'Parrilla',
-    'Food Truck',
-    'Panadería',
-    'Heladería',
-    'Otro'
-  ];
-
-  // Check URL params for mode (reset password, etc.)
-  useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'reset') {
-      setSuccessMessage('Revisa tu email para continuar con el restablecimiento de contraseña');
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'El apellido es requerido';
     }
-  }, [searchParams]);
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard');
+    if (!formData.email.trim()) {
+      newErrors.email = 'El email es requerido';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El email no es válido';
     }
-  }, [user, loading, navigate]);
 
-  // Auto-advance carousel
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % testimonials.length);
-    }, 4000); // Change every 4 seconds
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    }
 
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
+    if (mode === 'register') {
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Confirma tu contraseña';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      }
+    }
 
-  const clearMessages = () => {
-    setError(null);
-    setSuccessMessage(null);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    clearMessages();
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const validateStep2 = () => {
+    const newErrors: any = {};
+
+    if (!businessData.restaurantName.trim()) {
+      newErrors.restaurantName = 'El nombre del restaurante es requerido';
+    }
+
+    if (!businessData.businessType) {
+      newErrors.businessType = 'El tipo de negocio es requerido';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
+  // Handle functions
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearMessages();
     
-    if (isLogin) {
-      return handleLoginSubmit(e);
+    if (!validateStep1()) return;
+
+    if (mode === 'login') {
+      setIsLoading(true);
+      try {
+        const { error } = await signIn(formData.email, formData.password);
+        
+        if (error) {
+          setErrors({ 
+            email: error.message.includes('Invalid') ? 'Credenciales inválidas' : error.message 
+          });
+          return;
+        }
+
+        navigate('/dashboard');
+      } catch (err: any) {
+        setErrors({ email: 'Error al iniciar sesión' });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Register mode - go to step 2
+      setStep(2);
+      setErrors({});
     }
-    
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-    
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    
-    setCurrentStep(2);
   };
 
-  const handleStep2Submit = (e: React.FormEvent) => {
+  const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearMessages();
     
-    // Ir al paso 3 (redes sociales)
-    setCurrentStep(3);
+    if (!validateStep2()) return;
+
+    // Go to step 3 (social media)
+    setStep(3);
+    setErrors({});
   };
 
-  const handleStep3Submit = async (e: React.FormEvent) => {
+  const handleStep3SubmitWithSocials = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleFinalRegistration();
+    await completeRegistration(true);
   };
 
-  const handleSkipSocialMedia = async () => {
-    // Saltear redes sociales y proceder con el registro
-    await handleFinalRegistration();
+  const handleStep3SubmitSkipSocials = async () => {
+    await completeRegistration(false);
   };
 
-  const handleFinalRegistration = async () => {
-    clearMessages();
-    setIsSubmitting(true);
-
+  const completeRegistration = async (includeSocials: boolean) => {
+    setIsLoading(true);
     try {
-      const { data, error } = await signUp(
+      const socialMediaData = includeSocials ? {
+        facebook: socialMedia.facebook.trim() || undefined,
+        instagram: socialMedia.instagram.trim() || undefined,
+        website: socialMedia.website.trim() || undefined,
+        tiktok: socialMedia.tiktok.trim() || undefined
+      } : undefined;
+
+      const { error } = await signUp(
         formData.email,
         formData.password,
         formData.firstName,
         formData.lastName,
-        formData.restaurantName,
-        formData.businessType,
-        {
-          facebook: formData.facebook,
-          instagram: formData.instagram,
-          website: formData.website,
-          tiktok: formData.tiktok
-        }
+        businessData.restaurantName,
+        businessData.businessType,
+        socialMediaData
       );
 
       if (error) {
-        throw error;
-      }
-
-      if (data.user) {
-        if (!data.user.email_confirmed_at) {
-          // Email confirmation required
-          setSuccessMessage(
-            `¡Cuenta creada para ${formData.restaurantName}! Revisa tu email para confirmar tu cuenta y acceder al dashboard.`
-          );
-          setCurrentStep(1);
-          setIsLogin(true);
-          setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            restaurantName: '',
-            businessType: '',
-            facebook: '',
-            instagram: '',
-            website: '',
-            tiktok: ''
-          });
+        if (error.message.includes('already registered')) {
+          setErrors({ email: 'Este email ya está registrado' });
+          setStep(1);
         } else {
-          // Auto login if email confirmation is disabled
-          setSuccessMessage(`¡Bienvenido a ${formData.restaurantName}! Tu cuenta ha sido creada exitosamente.`);
-          // Navigation will happen automatically via useEffect when user state changes
+          setErrors({ general: error.message });
         }
-      } else {
-        setError('Error inesperado durante el registro. Por favor intenta de nuevo.');
+        return;
       }
+
+      // Success - redirect to dashboard
+      navigate('/dashboard');
     } catch (err: any) {
-      if (err.message?.includes('email')) {
-        setError('Este email ya está registrado. ¿Quieres iniciar sesión en su lugar?');
-      } else if (err.message?.includes('password')) {
-        setError('La contraseña debe tener al menos 6 caracteres.');
-      } else {
-        setError(err.message || 'Error al crear la cuenta y configurar el restaurante. Por favor intenta de nuevo.');
-      }
+      setErrors({ general: 'Error al crear la cuenta' });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearMessages();
-    setIsSubmitting(true);
-
-    try {
-      const { data, error } = await signIn(formData.email, formData.password);
-
-      if (error) {
-        throw error;
-      }
-
-      // Navigation will happen automatically via useEffect when user state changes
-    } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    clearMessages();
-    setIsSubmitting(true);
-
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
     try {
       const { error } = await signInWithGoogle();
       if (error) {
-        throw error;
+        setErrors({ google: error.message });
       }
-      // Google auth will redirect automatically
     } catch (err: any) {
-      setError(err.message || 'Error al autenticar con Google');
-      setIsSubmitting(false);
+      setErrors({ google: 'Error al iniciar sesión con Google' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!formData.email) {
-      setError('Ingresa tu email para restablecer la contraseña');
-      return;
+  const handleBack = () => {
+    if (step === 3) {
+      setStep(2);
+    } else if (step === 2) {
+      setStep(1);
     }
+    setErrors({});
+  };
 
-    clearMessages();
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await resetPassword(formData.email);
-      if (error) {
-        throw error;
-      }
-      setSuccessMessage('Te hemos enviado un email para restablecer tu contraseña');
-    } catch (err: any) {
-      setError(err.message || 'Error al enviar email de restablecimiento');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const toggleMode = () => {
+    setMode(mode === 'login' ? 'register' : 'login');
+    setStep(1);
+    setErrors({});
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
   };
 
   return (
-    <div className="h-screen bg-white flex">
-      {/* Left Side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex flex-col overflow-y-auto">
-        {/* Header */}
-        <header className="border-b bg-white" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="px-6 py-4">
-            <Link 
-              to="/"
-              className="flex items-center justify-between cursor-pointer group transition-opacity duration-200 hover:opacity-80 bg-white"
-            >
-              <h1 className="text-xl font-bold" style={{ color: '#075E54' }}>
-                Reseña Simple
-              </h1>
-              <div className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Gestión de Reseñas
-              </div>
-            </Link>
-          </div>
-        </header>
+    <div className="min-h-screen flex">
+      {/* Left Side - Form */}
+      <div className="flex-1 flex items-center justify-center bg-white px-4 sm:px-6 lg:px-20 xl:px-24">
+        <div className="w-full max-w-sm space-y-8">
+          {step === 1 && (
+            <AuthStep1
+              mode={mode}
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              isLoading={isLoading}
+              onSubmit={handleStep1Submit}
+              onGoogleLogin={handleGoogleLogin}
+              onToggleMode={toggleMode}
+            />
+          )}
 
-        {/* Form Content - Posicionado más abajo */}
-        <div className="flex-1 px-6 pt-16 pb-12 min-h-0 overflow-y-auto">
-          <div className="w-full max-w-md mx-auto space-y-8">
-            {/* Welcome Section */}
-            <div className="text-center">
-              {/* Error Message */}
-              {error && (
-                <div 
-                  className="mb-4 p-3 rounded-lg border text-sm"
-                  style={{
-                    backgroundColor: '#fee2e2',
-                    borderColor: '#fecaca',
-                    color: '#dc2626'
-                  }}
-                >
-                  {error}
-                </div>
-              )}
+          {step === 2 && (
+            <AuthStep2
+              businessData={businessData}
+              setBusinessData={setBusinessData}
+              errors={errors}
+              isLoading={isLoading}
+              onSubmit={handleStep2Submit}
+              onBack={handleBack}
+            />
+          )}
 
-              {/* Success Message */}
-              {successMessage && (
-                <div 
-                  className="mb-4 p-3 rounded-lg border text-sm"
-                  style={{
-                    backgroundColor: '#dcfce7',
-                    borderColor: '#bbf7d0',
-                    color: '#16a34a'
-                  }}
-                >
-                  {successMessage}
-                </div>
-              )}
-
-              <h2 className="text-3xl font-bold mb-2" style={{ color: '#161616' }}>
-                {isLogin 
-                  ? 'Bienvenido de vuelta' 
-                  : currentStep === 1 ? 'Crea tu cuenta'
-                  : currentStep === 2 ? 'Detalles del restaurante'  
-                  : 'Conecta tus redes'
-                }
-              </h2>
-              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                {isLogin 
-                  ? 'Accede a tu panel de gestión de reseñas' 
-                  : currentStep === 1
-                    ? 'Comienza a filtrar reseñas hoy mismo'
-                    : currentStep === 2
-                      ? 'Ya casi terminamos, cuéntanos sobre tu negocio'
-                      : 'Opcional: Muestra tus redes en la página de votación'
-                }
-              </p>
-            </div>
-
-            {/* Form Toggle - Solo mostrar en paso 1 o login */}
-            {(isLogin || currentStep === 1) && (
-              <div className="flex p-1 rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)', backgroundColor: 'rgb(249, 250, 251)' }}>
-                <button
-                  onClick={() => {
-                    setIsLogin(true);
-                    setCurrentStep(1);
-                  }}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                    isLogin ? 'shadow-sm' : ''
-                  }`}
-                  style={{
-                    backgroundColor: isLogin ? 'white' : 'transparent',
-                    color: isLogin ? '#161616' : 'rgb(107, 114, 128)',
-                    borderColor: isLogin ? 'rgb(229, 231, 235)' : 'transparent'
-                  }}
-                >
-                  Iniciar Sesión
-                </button>
-                <button
-                  onClick={() => {
-                    setIsLogin(false);
-                    setCurrentStep(1);
-                  }}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                    !isLogin ? 'shadow-sm' : ''
-                  }`}
-                  style={{
-                    backgroundColor: !isLogin ? 'white' : 'transparent',
-                    color: !isLogin ? '#161616' : 'rgb(107, 114, 128)',
-                    borderColor: !isLogin ? 'rgb(229, 231, 235)' : 'transparent'
-                  }}
-                >
-                  Crear Cuenta
-                </button>
-              </div>
-            )}
-
-            {/* LOGIN FORM */}
-            {isLogin && (
-              <form onSubmit={handleLoginSubmit} className="space-y-6">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="email"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="tu@email.com"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="password"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Lock 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="Tu contraseña"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Forgot Password */}
-                <div className="text-right">
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-sm transition-colors duration-200"
-                    style={{ color: '#075E54' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#064e45'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = '#075E54'}
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </button>
-                </div>
-
-                {/* Login Button */}
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: '#075E54',
-                    color: 'white',
-                    border: '1px solid #075E54'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#064e45';
-                    e.currentTarget.style.borderColor = '#064e45';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#075E54';
-                    e.currentTarget.style.borderColor = '#075E54';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                        Iniciar Sesión
-                      </span>
-                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span 
-                      className="px-2 bg-white"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    >
-                      o
-                    </span>
-                  </div>
-                </div>
-
-                {/* Google Button */}
-                <button 
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={handleGoogleAuth}
-                  className="w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    borderColor: 'rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                    e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                    e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                      </svg>
-                      Continuar con Google
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-
-            {/* REGISTRO PASO 1 */}
-            {!isLogin && currentStep === 1 && (
-              <form onSubmit={handleStep1Submit} className="space-y-6">
-                {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="firstName"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      Nombre
-                    </label>
-                    <div className="relative">
-                      <User 
-                        size={18} 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                        style={{ color: 'rgb(107, 114, 128)' }}
-                      />
-                      <input
-                        type="text"
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                        style={{
-                          backgroundColor: 'white',
-                          borderColor: 'rgb(209, 213, 219)',
-                          color: '#161616',
-                        }}
-                        onFocus={(e) => {
-                          e.currentTarget.style.borderColor = '#075E54';
-                          e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                          e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                        placeholder="Juan"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="lastName"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      Apellido
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="Pérez"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="email"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="tu@email.com"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="password"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Contraseña
-                  </label>
-                  <div className="relative">
-                    <Lock 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="Mínimo 8 caracteres"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded transition-colors duration-200"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm Password Field */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="confirmPassword"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Confirmar Contraseña
-                  </label>
-                  <div className="relative">
-                    <Lock 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="Repite tu contraseña"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded transition-colors duration-200"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
-                    >
-                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Terms Checkbox */}
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 focus:ring-2"
-                    style={{ 
-                      accentColor: '#075E54'
-                    }}
-                    required
-                  />
-                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Acepto los términos y condiciones
-                  </span>
-                </div>
-
-                {/* Continue Button */}
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: '#075E54',
-                    color: 'white',
-                    border: '1px solid #075E54'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#064e45';
-                    e.currentTarget.style.borderColor = '#064e45';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#075E54';
-                    e.currentTarget.style.borderColor = '#075E54';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                        Continuar
-                      </span>
-                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span 
-                      className="px-2 bg-white"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    >
-                      o
-                    </span>
-                  </div>
-                </div>
-
-                {/* Google Button */}
-                <button 
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={handleGoogleAuth}
-                  className="w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    borderColor: 'rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                    e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                    e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                      </svg>
-                      Continuar con Google
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-
-            {/* REGISTRO PASO 2 */}
-            {!isLogin && currentStep === 2 && (
-              <form onSubmit={handleStep2Submit} className="space-y-6">
-                {/* Restaurant Name */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="restaurantName"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    Nombre del restaurante
-                  </label>
-                  <div className="relative">
-                    <Building2 
-                      size={18} 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'rgb(107, 114, 128)' }}
-                    />
-                    <input
-                      type="text"
-                      id="restaurantName"
-                      name="restaurantName"
-                      value={formData.restaurantName}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="Nombre de tu negocio"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Business Type */}
-                <div className="space-y-2">
-                  <label 
-                    htmlFor="businessType"
-                    className="block text-sm font-medium"
-                    style={{ color: '#161616' }}
-                  >
-                    ¿Qué tipo de negocio es?
-                  </label>
-                  <select
-                    id="businessType"
-                    name="businessType"
-                    value={formData.businessType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                    style={{
-                      backgroundColor: 'white',
-                      borderColor: 'rgb(209, 213, 219)',
-                      color: '#161616',
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#075E54';
-                      e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                    required
-                  >
-                    <option value="">Selecciona un tipo...</option>
-                    {businessTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Continue Button */}
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: '#075E54',
-                    color: 'white',
-                    border: '1px solid #075E54'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#064e45';
-                    e.currentTarget.style.borderColor = '#064e45';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#075E54';
-                    e.currentTarget.style.borderColor = '#075E54';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                        Continuar
-                      </span>
-                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {/* Back Button */}
-                <button 
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="w-full py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    borderColor: 'rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                    e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                    e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                  }}
-                >
-                  Volver
-                </button>
-              </form>
-            )}
-
-            {/* REGISTRO PASO 3 */}
-            {!isLogin && currentStep === 3 && (
-              <form onSubmit={handleStep3Submit} className="space-y-6">
-                {/* Social Media Fields */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="facebook"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      Facebook (opcional)
-                    </label>
-                    <input
-                      type="url"
-                      id="facebook"
-                      name="facebook"
-                      value={formData.facebook}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://facebook.com/tu-restaurante"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="instagram"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      Instagram (opcional)
-                    </label>
-                    <input
-                      type="url"
-                      id="instagram"
-                      name="instagram"
-                      value={formData.instagram}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://instagram.com/tu-restaurante"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="website"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      Sitio Web (opcional)
-                    </label>
-                    <input
-                      type="url"
-                      id="website"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://tu-restaurante.com"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="tiktok"
-                      className="block text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      TikTok (opcional)
-                    </label>
-                    <input
-                      type="url"
-                      id="tiktok"
-                      name="tiktok"
-                      value={formData.tiktok}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://tiktok.com/@tu-restaurante"
-                    />
-                  </div>
-                </div>
-
-                {/* Finish Button */}
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: '#075E54',
-                    color: 'white',
-                    border: '1px solid #075E54'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#064e45';
-                    e.currentTarget.style.borderColor = '#064e45';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#075E54';
-                    e.currentTarget.style.borderColor = '#075E54';
-                  }}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                        Crear Cuenta
-                      </span>
-                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {/* Skip Button */}
-                <button 
-                  type="button"
-                  onClick={handleSkipSocialMedia}
-                  disabled={isSubmitting}
-                  className="w-full py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    borderColor: 'rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                    e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                    e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                  }}
-                >
-                  Saltar este paso
-                </button>
-
-                {/* Back Button */}
-                <button 
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="w-full py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    borderColor: 'rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                    e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                    e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                  }}
-                >
-                  Volver
-                </button>
-              </form>
-            )}
-          </div>
+          {step === 3 && (
+            <AuthStep3
+              socialMedia={socialMedia}
+              setSocialMedia={setSocialMedia}
+              errors={errors}
+              isLoading={isLoading}
+              onSubmitWithSocials={handleStep3SubmitWithSocials}
+              onSubmitSkipSocials={handleStep3SubmitSkipSocials}
+              onBack={handleBack}
+            />
+          )}
         </div>
       </div>
 
-      {/* Right Side - Testimonials Carousel */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#075E54' }}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-full relative">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                {/* Background Image */}
-                <div 
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${testimonial.image})`,
-                  }}
-                />
-                
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-50" />
-                
-                {/* Content */}
-                <div className="relative h-full flex flex-col justify-center items-center p-12 text-center">
-                  <div className="max-w-lg">
-                    {/* Status Badge */}
-                    <div 
-                      className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-6 ${
-                        testimonial.type === 'positive' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {testimonial.status}
-                    </div>
-
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Review Text */}
-                    <blockquote className="text-xl text-white mb-6 leading-relaxed">
-                      "{testimonial.review}"
-                    </blockquote>
-
-                    {/* Customer Info */}
-                    <div className="text-white">
-                      <div className="font-semibold">{testimonial.customer}</div>
-                      <div className="text-sm opacity-80">{testimonial.restaurant}</div>
-                    </div>
-                  </div>
+      {/* Right Side - Image */}
+      <div className="hidden lg:block relative w-0 flex-1">
+        <div 
+          className="absolute inset-0 h-full w-full object-cover bg-gradient-to-br"
+          style={{
+            backgroundImage: `linear-gradient(135deg, #075E54 0%, #128C7E 50%, #25D366 100%)`
+          }}
+        >
+          <div className="absolute inset-0 bg-black opacity-20" />
+          
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col justify-center h-full p-12 text-white">
+            <div className="max-w-md">
+              <h2 className="text-3xl font-bold mb-4">
+                {mode === 'login' ? 'Bienvenido de vuelta' : 'Mejora tus reseñas'}
+              </h2>
+              <p className="text-lg opacity-90 mb-8">
+                {mode === 'login' 
+                  ? 'Accede a tu panel de control y gestiona las reseñas de tu restaurante'
+                  : 'Filtra las reseñas antes de Google. Solo los clientes satisfechos dejan reseñas públicas.'
+                }
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 rounded-full bg-white opacity-60" />
+                  <span className="text-sm">Filtro inteligente de reseñas</span>
                 </div>
-              </div>
-            ))}
-
-            {/* Slide Indicators */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-              <div className="flex space-x-2">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide 
-                        ? 'bg-white w-8' 
-                        : 'bg-white/50'
-                    }`}
-                    onClick={() => setCurrentSlide(index)}
-                  />
-                ))}
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 rounded-full bg-white opacity-60" />
+                  <span className="text-sm">Códigos QR personalizables</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 rounded-full bg-white opacity-60" />
+                  <span className="text-sm">Dashboard de análisis</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 rounded-full bg-white opacity-60" />
+                  <span className="text-sm">Protege tu reputación online</span>
+                </div>
               </div>
             </div>
           </div>
