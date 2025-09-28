@@ -165,14 +165,13 @@ export const useBusiness = () => {
     }
 
     try {
-      const branchData = {
-        ...branch,
-        business_id: businessData.profile.id
-      }
-
       let result
       if (branch.id) {
         // Update existing branch
+        const branchData = {
+          ...branch,
+          business_id: businessData.profile.id
+        }
         result = await supabase
           .from('business_branches')
           .update(branchData)
@@ -181,6 +180,11 @@ export const useBusiness = () => {
           .single()
       } else {
         // Create new branch
+        const { id, ...branchDataWithoutId } = branch
+        const branchData = {
+          ...branchDataWithoutId,
+          business_id: businessData.profile.id
+        }
         result = await supabase
           .from('business_branches')
           .insert([branchData])
