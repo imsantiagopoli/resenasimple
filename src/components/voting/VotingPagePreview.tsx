@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Star, Building2, Instagram, Music, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
-import { VotingConfig } from '../../pages/PaginaVotacionPage';
+import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
 // Function to calculate if text should be white or black based on background color
 const getContrastColor = (hexColor: string): string => {
@@ -20,7 +20,7 @@ const getContrastColor = (hexColor: string): string => {
 };
 
 interface VotingPagePreviewProps {
-  config: VotingConfig;
+  config: VotingConfiguration;
   viewType: 'voting' | 'private-feedback' | 'public-review' | 'private-thanks';
 }
 
@@ -145,7 +145,6 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
                   />
                 </button>
                 
-                {/* Tooltip */}
                 {config.design.starLabels.enabled && hoveredStars === star && (
                   <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10">
                     <div 
