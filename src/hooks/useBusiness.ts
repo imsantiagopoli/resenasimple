@@ -52,7 +52,7 @@ export const useBusiness = () => {
     branches: [],
     socialMedia: [],
     loading: true,
-    error: null
+    error: null,
     loaded: false
   })
 
