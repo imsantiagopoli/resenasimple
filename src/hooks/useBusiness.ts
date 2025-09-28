@@ -276,14 +276,11 @@ export const useBusiness = () => {
   }
 
   useEffect(() => {
-    // Solo fetch si:
-    // 1. Hay un usuario
-    // 2. Los datos no se han cargado previamente
-    // 3. No está actualmente cargando
-    if (user && !businessData.loaded && !businessData.loading) {
+    // Solo fetch si no se han cargado los datos aún o si el usuario cambió
+    if (!businessData.loaded || (user && !businessData.profile && !businessData.loading)) {
       fetchBusinessData()
     }
-  }, [user?.id, businessData.loaded, businessData.loading])
+  }, [user])
 
   return {
     ...businessData,
