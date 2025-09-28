@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, Save, X, Plus, Trash2, ExternalLink, Music, AlertCircle, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { useBusiness } from '../hooks/useBusiness';
+import { supabase } from '../lib/supabase';
 
 const MiNegocioPage: React.FC = () => {
   const { 
@@ -15,7 +16,6 @@ const MiNegocioPage: React.FC = () => {
     updateSocialMedia,
     generateSlug
   } = useBusiness();
-  import { supabase } from '../lib/supabase';
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
