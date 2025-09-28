@@ -12,6 +12,8 @@ export interface VotingSession {
   rating: number
   comment: string | null
   is_public: boolean
+  google_redirect_clicked: boolean | null
+  google_redirect_attempted_at: string | null
   created_at: string
   // Joined data
   branch_name?: string

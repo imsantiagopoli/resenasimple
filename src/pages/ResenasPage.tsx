@@ -44,7 +44,9 @@ const ResenasPage: React.FC = () => {
       }),
       branch: session.branch_name || 'Sucursal desconocida',
       type: session.is_public ? 'public' : 'private',
-      status: session.is_public ? 'sent_to_google' : 'retained_internally'
+      status: session.is_public 
+        ? (session.google_redirect_clicked ? 'sent_to_google' : 'reached_google_page')
+        : 'retained_internally'
     }));
   }, [sessions]);
 
@@ -648,12 +650,19 @@ const ResenasPage: React.FC = () => {
                   <td className="py-4 px-4">
                     <span 
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        resena.type === 'public'
+                        resena.status === 'sent_to_google'
                           ? 'bg-green-100 text-green-800'
+                          : resena.status === 'reached_google_page'
+                          ? 'bg-blue-100 text-blue-800'
                           : 'bg-orange-100 text-orange-800'
                       }`}
                     >
-                      {resena.type === 'public' ? 'Enviado a Google' : 'Retenido'}
+                      {resena.status === 'sent_to_google' 
+                        ? 'Enviado a Google' 
+                        : resena.status === 'reached_google_page'
+                        ? 'Vio página de Google'
+                        : 'Retenido'
+                      }
                     </span>
                   </td>
 

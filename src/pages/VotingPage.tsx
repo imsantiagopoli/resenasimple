@@ -36,6 +36,8 @@ interface VotingSession {
   rating: number;
   comment?: string;
   is_public: boolean;
+  google_redirect_clicked?: boolean;
+  google_redirect_attempted_at?: string;
 }
 
 type ViewState = 'loading' | 'voting' | 'private-feedback' | 'public-review' | 'private-thanks' | 'error';
@@ -198,6 +200,8 @@ const VotingPage: React.FC = () => {
     // Determine next view based on rating and threshold
     if (stars >= config.logic.threshold) {
       // High rating - show public review flow
+      // Register voting session immediately when reaching public review page
+      submitPublicVotingSession(stars);
       setViewState('public-review');
     } else {
       // Low rating - show private feedback flow
@@ -228,6 +232,8 @@ const VotingPage: React.FC = () => {
           rating: sessionData.rating,
           comment: sessionData.comment || null,
           is_public: sessionData.is_public,
+          google_redirect_clicked: sessionData.google_redirect_clicked || false,
+          google_redirect_attempted_at: sessionData.google_redirect_attempted_at || null,
           ip_address: null, // Could be populated with actual IP
           user_agent: navigator.userAgent
         }]);
@@ -241,19 +247,43 @@ const VotingPage: React.FC = () => {
     }
   };
 
+  // Submit public voting session when reaching thank you page
+  const submitPublicVotingSession = async (stars: number) => {
+    try {
+      await submitVotingSession({
+        rating: stars,
+        is_public: true,
+        google_redirect_clicked: false,
+        google_redirect_attempted_at: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error('Error submitting public voting session:', err);
+      setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
+    }
+  };
   // Handle public review submission
   const handlePublicReview = async () => {
     if (!config) return;
 
     setIsSubmitting(true);
-    setError(null);
 
     try {
-      await submitVotingSession({
-        rating: selectedStars,
-        is_public: true
-      });
+      // Update the existing session to mark that Google button was clicked
+      // We need to find the most recent session for this user/rating
+      const { error: updateError } = await supabase
+        .from('voting_sessions')
+        .update({ 
+          google_redirect_clicked: true 
+        })
+        .eq('branch_id', branch!.id)
+        .eq('rating', selectedStars)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
+      if (updateError) {
+        throw updateError;
+      }
       // Redirect to Google or show success based on config
       if (config.logic.smartAutoRedirect && business) {
         // Try to redirect to Google My Business
@@ -262,6 +292,7 @@ const VotingPage: React.FC = () => {
       }
 
     } catch (err) {
+      console.error('Error updating Google redirect click:', err);
       setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
