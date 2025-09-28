@@ -162,7 +162,8 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
               e.currentTarget.style.backgroundColor = 'white';
             }}
           >
-            <Globe size={14} />
+            {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
+            <Globe size={14} fill="currentColor" />
             <span>Editar</span>
           </button>
         ) : (
@@ -190,7 +191,8 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Save size={14} />
+                // CAMBIO AQUÍ: Añadido fill="currentColor" 
+                <Save size={14} fill="currentColor" />
               )}
               <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
             </button>
@@ -215,7 +217,8 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                 }
               }}
             >
-              <X size={14} />
+              {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
+              <X size={14} fill="currentColor" />
               <span>Cancelar</span>
             </button>
           </div>
@@ -237,7 +240,8 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                   height={20}
                 />
               ) : (
-                <social.icon size={20} style={{ color: social.color }} />
+                // CAMBIO AQUÍ: Añadido fill={social.color} y cambiado style por prop 'color'
+                <social.icon size={20} color={social.color} fill={social.color} />
               )}
             </div>
             <div className="flex-1">
@@ -265,7 +269,8 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                 onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
               >
-                <ExternalLink size={16} />
+                {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
+                <ExternalLink size={16} fill="currentColor" />
               </a>
             )}
           </div>
