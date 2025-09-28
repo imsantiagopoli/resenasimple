@@ -104,7 +104,7 @@ const AuthPage: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      navigate('/dashboard');
+      navigate('/app/inicio');
     }
   }, [user, loading, navigate]);
 

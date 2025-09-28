@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { 
   Home, 
@@ -14,20 +14,20 @@ import {
 
 interface SidebarProps {
   activePage: string;
-  onPageChange: (page: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
 
   const mainMenuItems = [
-    { icon: Home, label: 'Inicio', id: 'inicio', color: 'rgb(75, 85, 99)' },
-    { icon: Building2, label: 'Mi negocio', id: 'mi-negocio', color: 'rgb(75, 85, 99)' },
-    { icon: Vote, label: 'Página de votación', id: 'pagina-votacion', color: 'rgb(75, 85, 99)' },
-    { icon: QrCode, label: 'Página QR', id: 'pagina-qr', color: 'rgb(75, 85, 99)' },
-    { icon: Star, label: 'Reseñas', id: 'resenas', color: 'rgb(75, 85, 99)' },
+    { icon: Home, label: 'Inicio', id: 'inicio', route: '/app/inicio', color: 'rgb(75, 85, 99)' },
+    { icon: Building2, label: 'Mi negocio', id: 'mi-negocio', route: '/app/mi-negocio', color: 'rgb(75, 85, 99)' },
+    { icon: Vote, label: 'Página de votación', id: 'pagina-votacion', route: '/app/pagina-votacion', color: 'rgb(75, 85, 99)' },
+    { icon: QrCode, label: 'Página QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
+    { icon: Star, label: 'Reseñas', id: 'resenas', route: '/app/resenas', color: 'rgb(75, 85, 99)' },
   ];
 
   const handleLogout = async () => {
@@ -61,20 +61,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
           {mainMenuItems.map((item, index) => (
             <button
               key={index}
-              onClick={() => onPageChange(item.id)}
+              onClick={() => navigate(item.route)}
               className={`w-full flex items-center p-2 rounded-lg transition-all duration-200 group ${
-                item.id === activePage ? 'shadow-sm' : ''
+                location.pathname === item.route ? 'shadow-sm' : ''
               }`}
               style={{
-                backgroundColor: item.id === activePage ? '#075E54' : 'transparent',
+                backgroundColor: location.pathname === item.route ? '#075E54' : 'transparent',
               }}
               onMouseEnter={(e) => {
-                if (item.id !== activePage) {
+                if (location.pathname !== item.route) {
                   e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
                 }
               }}
               onMouseLeave={(e) => {
-                if (item.id !== activePage) {
+                if (location.pathname !== item.route) {
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }
               }}
@@ -83,14 +83,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
                 size={18} 
                 className="flex-shrink-0" 
                 style={{
-                  color: item.id === activePage ? 'rgb(255, 255, 255)' : item.color
+                  color: location.pathname === item.route ? 'rgb(255, 255, 255)' : item.color
                 }}
               />
               {isOpen && (
                 <span 
                   className="ml-3 font-medium text-sm"
                   style={{
-                    color: item.id === activePage ? 'rgb(255, 255, 255)' : '#161616'
+                    color: location.pathname === item.route ? 'rgb(255, 255, 255)' : '#161616'
                   }}
                 >
                   {item.label}
@@ -134,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onPageChange }) => {
             {/* Profile and Settings */}
             <div className="space-y-1">
               <button
-                onClick={() => onPageChange('settings')}
+                onClick={() => navigate('/app/settings')}
                 className="flex items-center px-2 py-1.5 rounded-md transition-colors duration-200 focus:outline-none"
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
