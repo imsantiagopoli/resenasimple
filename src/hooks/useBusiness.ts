@@ -11,6 +11,13 @@ export interface BusinessProfile {
   email: string | null
   website: string | null
   logo_url: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
+  linkedin_url: string | null
+  twitter_url: string | null
+  youtube_url: string | null
+  website_url: string | null
   created_at: string
   updated_at: string
 }
@@ -28,18 +35,10 @@ export interface BusinessBranch {
   updated_at: string
 }
 
-export interface BusinessSocialMedia {
-  id: string
-  business_id: string
-  platform: string
-  url: string
-  created_at: string
-}
 
 interface BusinessData {
   profile: BusinessProfile | null
   branches: BusinessBranch[]
-  socialMedia: BusinessSocialMedia[]
   loading: boolean
   error: string | null
   loaded: boolean
@@ -50,7 +49,6 @@ export const useBusiness = () => {
   const [businessData, setBusinessData] = useState<BusinessData>({
     profile: null,
     branches: [],
-    socialMedia: [],
     loading: true,
     error: null,
     loaded: false
@@ -89,20 +87,9 @@ export const useBusiness = () => {
           throw branchesError
         }
 
-        // Fetch social media
-        const { data: socialMedia, error: socialError } = await supabase
-          .from('business_social_media')
-          .select('*')
-          .eq('business_id', profile.id)
-
-        if (socialError) {
-          throw socialError
-        }
-
         setBusinessData({
           profile,
           branches: branches || [],
-          socialMedia: socialMedia || [],
           loading: false,
           error: null,
           loaded: true
@@ -111,7 +98,6 @@ export const useBusiness = () => {
         setBusinessData({
           profile: null,
           branches: [],
-          socialMedia: [],
           loading: false,
           error: null, // <-- CORRECCIÓN: Faltaba una coma aquí
           loaded: true
@@ -228,48 +214,6 @@ export const useBusiness = () => {
     }
   }
 
-  // Update social media
-  const updateSocialMedia = async (socialData: Record<string, string>) => {
-    if (!user || !businessData.profile) {
-      throw new Error('No hay perfil de negocio')
-    }
-
-    try {
-      // Delete existing social media entries
-      await supabase
-        .from('business_social_media')
-        .delete()
-        .eq('business_id', businessData.profile.id)
-
-      // Insert new entries for non-empty URLs
-      const socialEntries = Object.entries(socialData)
-        .filter(([_, url]) => url.trim() !== '')
-        .map(([platform, url]) => ({
-          business_id: businessData.profile!.id,
-          platform,
-          url: url.trim()
-        }))
-
-      if (socialEntries.length > 0) {
-        const { error } = await supabase
-          .from('business_social_media')
-          .insert(socialEntries)
-
-        if (error) {
-          throw error
-        }
-      }
-
-      // Refresh data
-      await fetchBusinessData()
-
-      return { error: null }
-    } catch (err: any) {
-      console.error('Error updating social media:', err)
-      return { error: err.message || 'Error al actualizar redes sociales' }
-    }
-  }
-
   // Generate slug from name
   const generateSlug = (name: string): string => {
     return name
@@ -291,7 +235,6 @@ export const useBusiness = () => {
     updateBusinessProfile,
     upsertBranch,
     deleteBranch,
-    updateSocialMedia,
     generateSlug,
     refetch: fetchBusinessData
   }
