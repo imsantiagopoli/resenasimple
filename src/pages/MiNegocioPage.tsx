@@ -4,6 +4,7 @@ import { useBusiness } from '../hooks/useBusiness';
 import { supabase } from '../lib/supabase';
 import BranchesSection from '../components/BranchesSection';
 import LogoSection from '../components/LogoSection';
+import BusinessInfoSection from '../components/BusinessInfoSection';
 
 const MiNegocioPage: React.FC = () => {
   const { 
@@ -17,17 +18,7 @@ const MiNegocioPage: React.FC = () => {
     generateSlug
   } = useBusiness();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-
-  const [businessData, setBusinessData] = useState({
-    name: '',
-    description: '',
-    phone: '',
-    email: '',
-    website: ''
-  });
 
   const [socialMediaData, setSocialMediaData] = useState({
     facebook_url: '',
@@ -38,19 +29,6 @@ const MiNegocioPage: React.FC = () => {
     youtube_url: '',
     website_url: ''
   });
-
-  // Initialize data when profile loads
-  useEffect(() => {
-    if (profile) {
-      setBusinessData({
-        name: profile.name || '',
-        description: profile.description || '',
-        phone: profile.phone || '',
-        email: profile.email || '',
-        website: profile.website || ''
-      });
-    }
-  }, [profile]);
 
   // Initialize social media data from profile
   useEffect(() => {
@@ -72,6 +50,16 @@ const MiNegocioPage: React.FC = () => {
     setTimeout(() => setSaveMessage(null), 5000);
   };
 
+  // Función para actualizar solo la información del negocio
+  const handleBusinessUpdate = async (updates: Partial<BusinessProfile>) => {
+    try {
+      const { error } = await updateBusinessProfile(updates);
+      return { error };
+    } catch (err: any) {
+      return { error: err.message || 'Error al actualizar la información del negocio' };
+    }
+  };
+
   // Función para actualizar solo el logo
   const handleLogoUpdate = async (logoUrl: string) => {
     try {
@@ -81,32 +69,6 @@ const MiNegocioPage: React.FC = () => {
       return { error };
     } catch (err: any) {
       return { error: err.message || 'Error al actualizar el logo' };
-    }
-  };
-
-  const handleSave = async () => {
-    if (!profile) return;
-
-    setIsSaving(true);
-    
-    try {
-      // Update business profile (excluding logo)
-      const { error: profileError } = await updateBusinessProfile({
-        ...businessData,
-        ...socialMediaData
-      });
-      if (profileError) {
-        throw new Error(profileError);
-      }
-
-      setIsEditing(false);
-      
-      showMessage('success', 'Datos guardados correctamente');
-    } catch (err: any) {
-      console.error('Error saving data:', err);
-      showMessage('error', err.message || 'Error al guardar los datos');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -153,37 +115,9 @@ const MiNegocioPage: React.FC = () => {
             Mi Negocio
           </h1>
           <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-            Gestiona la información, logo y sucursales de tu restaurante
+            Gestiona el logo, información, redes sociales y sucursales de tu restaurante
           </p>
         </div>
-        
-        <button
-          onClick={isEditing ? handleSave : () => setIsEditing(true)}
-          disabled={isSaving}
-          className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: isEditing ? '#075E54' : 'white',
-            color: isEditing ? 'white' : '#161616',
-            border: isEditing ? '1px solid #075E54' : '1px solid rgb(209, 213, 219)'
-          }}
-          onMouseEnter={(e) => {
-            if (!isEditing && !isSaving) {
-              e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isEditing && !isSaving) {
-              e.currentTarget.style.backgroundColor = 'white';
-            }
-          }}
-        >
-          {isSaving ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>{isEditing ? <Save size={16} /> : <MapPin size={16} />}</>
-          )}
-          <span>{isSaving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Editar'}</span>
-        </button>
       </div>
 
       {/* Save Message */}
@@ -213,104 +147,12 @@ const MiNegocioPage: React.FC = () => {
         showMessage={showMessage}
       />
 
-      {/* Business Information */}
-      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <h2 className="text-lg font-semibold mb-4" style={{ color: '#161616' }}>
-          Información del Negocio
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Nombre del negocio
-            </label>
-            <input
-              type="text"
-              value={businessData.name}
-              onChange={(e) => setBusinessData({...businessData, name: e.target.value})}
-              disabled={!isEditing}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Teléfono
-            </label>
-            <input
-              type="tel"
-              value={businessData.phone}
-              onChange={(e) => setBusinessData({...businessData, phone: e.target.value})}
-              disabled={!isEditing}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={businessData.email}
-              onChange={(e) => setBusinessData({...businessData, email: e.target.value})}
-              disabled={!isEditing}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Sitio web
-            </label>
-            <input
-              type="url"
-              value={businessData.website}
-              onChange={(e) => setBusinessData({...businessData, website: e.target.value})}
-              disabled={!isEditing}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
-              }}
-            />
-          </div>
-
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Descripción
-            </label>
-            <textarea
-              value={businessData.description}
-              onChange={(e) => setBusinessData({...businessData, description: e.target.value})}
-              disabled={!isEditing}
-              rows={3}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Business Information Section */}
+      <BusinessInfoSection 
+        profile={profile}
+        onBusinessUpdate={handleBusinessUpdate}
+        showMessage={showMessage}
+      />
 
       {/* Social Media */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
