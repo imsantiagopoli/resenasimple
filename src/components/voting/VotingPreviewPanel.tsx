@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import VotingPagePreview from './VotingPagePreview';
-import { VotingConfig } from '../../pages/PaginaVotacionPage';
+import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
 interface VotingPreviewPanelProps {
-  config: VotingConfig;
+  config: VotingConfiguration;
 }
 
 type PreviewType = 'voting' | 'private-feedback' | 'public-review' | 'private-thanks';

@@ -12,6 +12,7 @@ import MiNegocioPage from './pages/MiNegocioPage';
 import PaginaVotacionPage from './pages/PaginaVotacionPage';
 import PaginaQRPage from './pages/PaginaQRPage';
 import ResenasPage from './pages/ResenasPage';
+import VotingPage from './pages/VotingPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -26,6 +27,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/v/:slug" element={<VotingPage />} />
         <Route 
           path="/app/inicio" 
           element={

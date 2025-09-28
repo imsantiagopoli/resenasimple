@@ -1,0 +1,779 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Star, Building2, Instagram, Music, Linkedin, Twitter, Youtube, Globe, ExternalLink } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { VotingConfiguration } from '../hooks/useVotingConfig';
+
+interface BusinessBranch {
+  id: string;
+  business_id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  google_maps_link: string | null;
+  slug: string;
+  is_main: boolean;
+}
+
+interface BusinessProfile {
+  id: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  website_url: string | null;
+}
+
+interface VotingSession {
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  rating: number;
+  comment?: string;
+  is_public: boolean;
+}
+
+type ViewState = 'loading' | 'voting' | 'private-feedback' | 'public-review' | 'private-thanks' | 'error';
+
+const VotingPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  
+  const [viewState, setViewState] = useState<ViewState>('loading');
+  const [branch, setBranch] = useState<BusinessBranch | null>(null);
+  const [business, setBusiness] = useState<BusinessProfile | null>(null);
+  const [config, setConfig] = useState<VotingConfiguration | null>(null);
+  const [selectedStars, setSelectedStars] = useState(0);
+  const [hoveredStars, setHoveredStars] = useState(0);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    comment: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load branch, business and config data
+  useEffect(() => {
+    const loadData = async () => {
+      if (!slug) {
+        setViewState('error');
+        return;
+      }
+
+      try {
+        // Get branch by slug
+        const { data: branchData, error: branchError } = await supabase
+          .from('business_branches')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+
+        if (branchError || !branchData) {
+          setViewState('error');
+          return;
+        }
+
+        setBranch(branchData);
+
+        // Get business profile
+        const { data: businessData, error: businessError } = await supabase
+          .from('business_profiles')
+          .select('*')
+          .eq('id', branchData.business_id)
+          .single();
+
+        if (businessError || !businessData) {
+          setViewState('error');
+          return;
+        }
+
+        setBusiness(businessData);
+
+        // Get voting configuration
+        const { data: configData, error: configError } = await supabase
+          .from('voting_configuration')
+          .select('*')
+          .eq('business_id', branchData.business_id)
+          .single();
+
+        if (configError || !configData) {
+          setViewState('error');
+          return;
+        }
+
+        // Map database config to UI format
+        const mappedConfig: VotingConfiguration = {
+          id: configData.id,
+          business_id: configData.business_id,
+          design: {
+            message: {
+              headline: configData.encabezado,
+              body: configData.cuerpo
+            },
+            showLogo: configData.mostrar_logo,
+            logoShape: configData.forma_logo,
+            logoDisplayPages: configData.mostrar_logo_en,
+            starLabels: {
+              enabled: configData.mostrar_etiquetas_estrellas,
+              labels: {
+                1: configData.etiqueta_1_estrella,
+                2: configData.etiqueta_2_estrellas,
+                3: configData.etiqueta_3_estrellas,
+                4: configData.etiqueta_4_estrellas,
+                5: configData.etiqueta_5_estrellas
+              }
+            },
+            specialOffer: {
+              enabled: configData.oferta_especial_activa,
+              headline: configData.oferta_especial_titulo,
+              body: configData.oferta_especial_descripcion
+            },
+            socials: {
+              instagram: configData.mostrar_instagram,
+              tiktok: configData.mostrar_tiktok,
+              linkedin: configData.mostrar_linkedin,
+              twitter: configData.mostrar_twitter,
+              youtube: configData.mostrar_youtube,
+              website: configData.mostrar_website
+            }
+          },
+          typography: {
+            primaryFont: configData.tipografia_principal,
+            secondaryFont: configData.tipografia_secundaria
+          },
+          colors: {
+            buttonColor: configData.color_botones
+          },
+          logic: {
+            threshold: configData.umbral_estrellas,
+            smartAutoRedirect: configData.redireccion_automatica,
+            publicWorkflow: {
+              thankYouMessage: configData.mensaje_agradecimiento_publico,
+              buttonText: configData.texto_boton_publico
+            },
+            privateWorkflow: {
+              feedbackMessage: configData.mensaje_feedback_privado,
+              thankYouMessage: configData.mensaje_agradecimiento_privado,
+              collectName: configData.solicitar_nombre,
+              nameRequired: configData.nombre_requerido,
+              collectPhone: configData.solicitar_telefono,
+              phoneRequired: configData.telefono_requerido,
+              collectEmail: configData.solicitar_email,
+              emailRequired: configData.email_requerido
+            },
+            prompt: {
+              enabled: configData.prompt_preventivo_activo,
+              text: configData.texto_prompt_preventivo
+            }
+          },
+          created_at: configData.created_at,
+          updated_at: configData.updated_at
+        };
+
+        setConfig(mappedConfig);
+        setViewState('voting');
+
+      } catch (err) {
+        console.error('Error loading voting page data:', err);
+        setViewState('error');
+      }
+    };
+
+    loadData();
+  }, [slug]);
+
+  // Handle star selection
+  const handleStarClick = (stars: number) => {
+    setSelectedStars(stars);
+    
+    if (!config) return;
+
+    // Determine next view based on rating and threshold
+    if (stars >= config.logic.threshold) {
+      // High rating - show public review flow
+      setViewState('public-review');
+    } else {
+      // Low rating - show private feedback flow
+      setViewState('private-feedback');
+    }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Submit voting session
+  const submitVotingSession = async (sessionData: VotingSession) => {
+    if (!branch) return;
+
+    try {
+      const { error } = await supabase
+        .from('voting_sessions')
+        .insert([{
+          branch_id: branch.id,
+          customer_name: sessionData.customer_name || null,
+          customer_email: sessionData.customer_email || null,
+          customer_phone: sessionData.customer_phone || null,
+          rating: sessionData.rating,
+          comment: sessionData.comment || null,
+          is_public: sessionData.is_public,
+          ip_address: null, // Could be populated with actual IP
+          user_agent: navigator.userAgent
+        }]);
+
+      if (error) {
+        throw error;
+      }
+    } catch (err) {
+      console.error('Error submitting voting session:', err);
+      throw err;
+    }
+  };
+
+  // Handle public review submission
+  const handlePublicReview = async () => {
+    if (!config) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await submitVotingSession({
+        rating: selectedStars,
+        is_public: true
+      });
+
+      // Redirect to Google or show success based on config
+      if (config.logic.smartAutoRedirect && business) {
+        // Try to redirect to Google My Business
+        const googleUrl = `https://search.google.com/local/writereview?placeid=${business.name}`;
+        window.open(googleUrl, '_blank');
+      }
+
+    } catch (err) {
+      setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle private feedback submission
+  const handlePrivateFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!config) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Validate required fields
+      if (config.logic.privateWorkflow.nameRequired && !formData.name.trim()) {
+        throw new Error('El nombre es requerido');
+      }
+      if (config.logic.privateWorkflow.emailRequired && !formData.email.trim()) {
+        throw new Error('El email es requerido');
+      }
+      if (config.logic.privateWorkflow.phoneRequired && !formData.phone.trim()) {
+        throw new Error('El teléfono es requerido');
+      }
+
+      await submitVotingSession({
+        customer_name: formData.name || undefined,
+        customer_email: formData.email || undefined,
+        customer_phone: formData.phone || undefined,
+        rating: selectedStars,
+        comment: formData.comment || undefined,
+        is_public: false
+      });
+
+      setViewState('private-thanks');
+
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar tu feedback. Por favor intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Utility functions
+  const getContrastColor = (hexColor: string): string => {
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+  };
+
+  const shouldShowLogo = (viewType: string) => {
+    if (!config?.design.showLogo) return false;
+    if (config.design.logoDisplayPages === 'all') return true;
+    if (config.design.logoDisplayPages === 'voting-only' && viewType === 'voting') return true;
+    return false;
+  };
+
+  const socialIcons = {
+    instagram: Instagram,
+    tiktok: Music,
+    linkedin: Linkedin,
+    twitter: Twitter,
+    youtube: Youtube,
+    website: Globe
+  };
+
+  const getSocialUrl = (platform: string) => {
+    if (!business) return '#';
+    switch (platform) {
+      case 'instagram': return business.instagram_url || '#';
+      case 'tiktok': return business.tiktok_url || '#';
+      case 'linkedin': return business.linkedin_url || '#';
+      case 'twitter': return business.twitter_url || '#';
+      case 'youtube': return business.youtube_url || '#';
+      case 'website': return business.website_url || '#';
+      default: return '#';
+    }
+  };
+
+  const renderSocialIcons = () => {
+    if (!config) return null;
+
+    const activeSocials = Object.entries(config.design.socials)
+      .filter(([key, value]) => value === true);
+
+    if (activeSocials.length === 0) return null;
+
+    return (
+      <div className="flex items-center justify-center space-x-4 pt-6">
+        {activeSocials.map(([platform]) => {
+          const Icon = socialIcons[platform as keyof typeof socialIcons];
+          const url = getSocialUrl(platform);
+          if (!Icon || url === '#') return null;
+          
+          return (
+            <a
+              key={platform}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 hover:scale-110"
+              style={{ backgroundColor: 'rgb(243, 244, 246)' }}
+            >
+              <Icon size={18} style={{ color: 'rgb(107, 114, 128)' }} />
+            </a>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderLogo = () => {
+    if (!shouldShowLogo(viewState) || !business) return null;
+
+    return (
+      <div className="flex justify-center mb-8">
+        {business.logo_url ? (
+          <img
+            src={business.logo_url}
+            alt={`Logo de ${business.name}`}
+            className={`w-20 h-20 object-cover ${
+              config?.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
+            }`}
+          />
+        ) : (
+          <div 
+            className={`w-20 h-20 flex items-center justify-center ${
+              config?.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
+            }`}
+            style={{ backgroundColor: '#075E54' + '20' }}
+          >
+            <Building2 size={32} style={{ color: '#075E54' }} />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Loading state
+  if (viewState === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (viewState === 'error') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold mb-4" style={{ color: '#161616' }}>
+            Página no encontrada
+          </h1>
+          <p className="text-base mb-6" style={{ color: 'rgb(107, 114, 128)' }}>
+            La página de votación que buscas no existe o no está disponible.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 rounded-lg font-medium text-base transition-all duration-200"
+            style={{
+              backgroundColor: '#075E54',
+              color: 'white'
+            }}
+          >
+            Ir al inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!config || !business || !branch) {
+    return null;
+  }
+
+  // Voting page
+  if (viewState === 'voting') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="flex-1 flex flex-col justify-center px-6 py-12">
+          <div className="max-w-md mx-auto w-full">
+            {renderLogo()}
+
+            {/* Message */}
+            <div className="text-center mb-8 space-y-3">
+              <h1 
+                className="text-2xl font-bold leading-tight" 
+                style={{ 
+                  color: '#161616',
+                  fontFamily: config.typography.primaryFont
+                }}
+              >
+                {config.design.message.headline}
+              </h1>
+              <p 
+                className="text-base leading-relaxed" 
+                style={{ 
+                  color: 'rgb(107, 114, 128)',
+                  fontFamily: config.typography.secondaryFont
+                }}
+              >
+                {config.design.message.body}
+              </p>
+            </div>
+
+            {/* Stars */}
+            <div className="flex justify-center mb-6 relative">
+              <div className="flex items-center space-x-2 relative">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div key={star} className="relative">
+                    <button
+                      onMouseEnter={() => setHoveredStars(star)}
+                      onMouseLeave={() => setHoveredStars(0)}
+                      onClick={() => handleStarClick(star)}
+                      className="p-2 transition-transform duration-200 hover:scale-110"
+                      disabled={isSubmitting}
+                    >
+                      <Star
+                        size={32}
+                        className={`transition-colors duration-200 ${
+                          star <= (hoveredStars || selectedStars)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    </button>
+                    
+                    {config.design.starLabels.enabled && hoveredStars === star && (
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10">
+                        <div 
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg border"
+                          style={{ 
+                            backgroundColor: '#161616',
+                            color: 'white',
+                            borderColor: 'rgb(75, 85, 99)'
+                          }}
+                        >
+                          {config.design.starLabels.labels[star as keyof typeof config.design.starLabels.labels]}
+                          <div 
+                            className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
+                            style={{ borderTopColor: '#161616' }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Special Offer */}
+            {config.design.specialOffer.enabled && (
+              <div 
+                className="p-6 rounded-lg border text-center mb-6"
+                style={{ 
+                  backgroundColor: '#075E54' + '08',
+                  borderColor: '#075E54' + '30'
+                }}
+              >
+                <h3 className="font-bold mb-2" style={{ color: '#075E54' }}>
+                  {config.design.specialOffer.headline}
+                </h3>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  {config.design.specialOffer.body}
+                </p>
+              </div>
+            )}
+
+            {renderSocialIcons()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Private feedback page
+  if (viewState === 'private-feedback') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col justify-center px-6 py-12">
+        <div className="max-w-md mx-auto w-full">
+          {renderLogo()}
+          
+          <div className="text-center space-y-6">
+            <h2 
+              className="text-2xl font-bold" 
+              style={{ 
+                color: '#161616',
+                fontFamily: config.typography.primaryFont
+              }}
+            >
+              Tu Opinión es Valiosa
+            </h2>
+            
+            <p 
+              className="text-base" 
+              style={{ 
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont
+              }}
+            >
+              {config.logic.privateWorkflow.feedbackMessage}
+            </p>
+
+            {/* Prompt Preventivo */}
+            {config.logic.prompt.enabled && (
+              <div 
+                className="p-4 rounded-lg border text-center"
+                style={{ 
+                  backgroundColor: '#075E54' + '08',
+                  borderColor: '#075E54' + '30'
+                }}
+              >
+                <p className="text-sm leading-relaxed" style={{ color: 'rgb(107, 114, 128)' }}>
+                  {config.logic.prompt.text}
+                </p>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div 
+                className="p-3 rounded-lg border text-sm"
+                style={{
+                  backgroundColor: '#fee2e2',
+                  borderColor: '#fecaca',
+                  color: '#dc2626'
+                }}
+              >
+                {error}
+              </div>
+            )}
+            
+            <form onSubmit={handlePrivateFeedback} className="space-y-4">
+              {/* Campos adicionales */}
+              {config.logic.privateWorkflow.collectName && (
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder={`Nombre${config.logic.privateWorkflow.nameRequired ? ' *' : ''}`}
+                  required={config.logic.privateWorkflow.nameRequired}
+                  className="w-full px-3 py-3 rounded-lg border text-sm"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                />
+              )}
+              
+              {config.logic.privateWorkflow.collectEmail && (
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder={`Email${config.logic.privateWorkflow.emailRequired ? ' *' : ''}`}
+                  required={config.logic.privateWorkflow.emailRequired}
+                  className="w-full px-3 py-3 rounded-lg border text-sm"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                />
+              )}
+
+              {config.logic.privateWorkflow.collectPhone && (
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder={`Teléfono${config.logic.privateWorkflow.phoneRequired ? ' *' : ''}`}
+                  required={config.logic.privateWorkflow.phoneRequired}
+                  className="w-full px-3 py-3 rounded-lg border text-sm"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                />
+              )}
+              
+              <textarea
+                name="comment"
+                value={formData.comment}
+                onChange={handleInputChange}
+                placeholder="Comparte tus comentarios aquí..."
+                rows={4}
+                className="w-full px-3 py-3 rounded-lg border text-sm resize-none"
+                style={{
+                  borderColor: 'rgb(209, 213, 219)',
+                  color: '#161616',
+                  backgroundColor: 'white'
+                }}
+              />
+              
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: config.colors.buttonColor,
+                  color: getContrastColor(config.colors.buttonColor)
+                }}
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar Comentarios'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Public review page
+  if (viewState === 'public-review') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col justify-center px-6 py-12">
+        <div className="max-w-md mx-auto w-full text-center space-y-6">
+          {renderLogo()}
+          
+          <div className="flex justify-center space-x-1 mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={24}
+                className={`${
+                  star <= selectedStars
+                    ? 'text-yellow-400 fill-current'
+                    : 'text-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+          
+          <h2 
+            className="text-2xl font-bold" 
+            style={{ 
+              color: '#161616',
+              fontFamily: config.typography.primaryFont
+            }}
+          >
+            ¡Gracias por tu Calificación!
+          </h2>
+          
+          <p 
+            className="text-base" 
+            style={{ 
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont
+            }}
+          >
+            {config.logic.publicWorkflow.thankYouMessage}
+          </p>
+          
+          <button
+            onClick={handlePublicReview}
+            disabled={isSubmitting}
+            className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: config.colors.buttonColor,
+              color: getContrastColor(config.colors.buttonColor)
+            }}
+          >
+            {isSubmitting ? 'Redirigiendo...' : config.logic.publicWorkflow.buttonText}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Private thanks page
+  if (viewState === 'private-thanks') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col justify-center px-6 py-12">
+        <div className="max-w-md mx-auto w-full text-center space-y-6">
+          {renderLogo()}
+          
+          <h2 
+            className="text-2xl font-bold" 
+            style={{ 
+              color: '#161616',
+              fontFamily: config.typography.primaryFont
+            }}
+          >
+            Comentarios Recibidos
+          </h2>
+          
+          <p 
+            className="text-base" 
+            style={{ 
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont
+            }}
+          >
+            {config.logic.privateWorkflow.thankYouMessage}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default VotingPage;
