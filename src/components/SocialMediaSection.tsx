@@ -237,7 +237,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                   height={20}
                 />
               ) : (
-                <social.icon size={20} style={{ color: social.color }} fill="currentColor" />
+                <social.icon size={20} style={{ color: social.color }} />
               )}
             </div>
             <div className="flex-1">
