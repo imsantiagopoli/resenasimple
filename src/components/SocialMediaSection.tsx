@@ -162,8 +162,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
               e.currentTarget.style.backgroundColor = 'white';
             }}
           >
-            {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
-            <Globe size={14} fill="currentColor" />
+            <Globe size={14} />
             <span>Editar</span>
           </button>
         ) : (
@@ -191,8 +190,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                // CAMBIO AQUÍ: Añadido fill="currentColor" 
-                <Save size={14} fill="currentColor" />
+                <Save size={14} />
               )}
               <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
             </button>
@@ -217,8 +215,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                 }
               }}
             >
-              {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
-              <X size={14} fill="currentColor" />
+              <X size={14} />
               <span>Cancelar</span>
             </button>
           </div>
@@ -240,8 +237,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                   height={20}
                 />
               ) : (
-                // CAMBIO AQUÍ: Añadido fill={social.color} y cambiado style por prop 'color'
-                <social.icon size={20} color={social.color} fill={social.color} />
+                <social.icon size={20} style={{ color: social.color }} />
               )}
             </div>
             <div className="flex-1">
@@ -269,8 +265,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
                 onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
               >
-                {/* CAMBIO AQUÍ: Añadido fill="currentColor" */}
-                <ExternalLink size={16} fill="currentColor" />
+                <ExternalLink size={16} />
               </a>
             )}
           </div>
@@ -280,4 +275,4 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
   );
 };
 
-export default SocialMediaSection;
+export default SocialMediaSection; 
