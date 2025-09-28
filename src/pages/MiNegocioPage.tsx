@@ -19,6 +19,17 @@ const MiNegocioPage: React.FC = () => {
   } = useBusiness();
 
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isSocialMediaEditing, setIsSocialMediaEditing] = useState(false);
+  const [isSavingSocialMedia, setIsSavingSocialMedia] = useState(false);
+  const [tempSocialMediaData, setTempSocialMediaData] = useState({
+    facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+    linkedin_url: '',
+    twitter_url: '',
+    youtube_url: '',
+    website_url: ''
+  });
 
   const [socialMediaData, setSocialMediaData] = useState({
     facebook_url: '',
@@ -33,7 +44,7 @@ const MiNegocioPage: React.FC = () => {
   // Initialize social media data from profile
   useEffect(() => {
     if (profile) {
-      setSocialMediaData({
+      const socialData = {
         facebook_url: profile.facebook_url || '',
         instagram_url: profile.instagram_url || '',
         tiktok_url: profile.tiktok_url || '',
@@ -41,13 +52,43 @@ const MiNegocioPage: React.FC = () => {
         twitter_url: profile.twitter_url || '',
         youtube_url: profile.youtube_url || '',
         website_url: profile.website_url || ''
-      });
+      };
+      setSocialMediaData(socialData);
+      setTempSocialMediaData(socialData);
     }
   }, [profile]);
 
   const showMessage = (type: 'success' | 'error', text: string) => {
     setSaveMessage({ type, text });
     setTimeout(() => setSaveMessage(null), 5000);
+  };
+
+  const handleEditSocialMedia = () => {
+    setTempSocialMediaData(socialMediaData);
+    setIsSocialMediaEditing(true);
+  };
+
+  const handleSaveSocialMedia = async () => {
+    setIsSavingSocialMedia(true);
+    try {
+      const { error } = await updateBusinessProfile(tempSocialMediaData);
+      if (error) {
+        showMessage('error', error);
+      } else {
+        setSocialMediaData(tempSocialMediaData);
+        setIsSocialMediaEditing(false);
+        showMessage('success', 'Redes sociales actualizadas correctamente');
+      }
+    } catch (err: any) {
+      showMessage('error', err.message || 'Error al actualizar las redes sociales');
+    } finally {
+      setIsSavingSocialMedia(false);
+    }
+  };
+
+  const handleCancelSocialMedia = () => {
+    setTempSocialMediaData(socialMediaData);
+    setIsSocialMediaEditing(false);
   };
 
   // Función para actualizar solo la información del negocio
@@ -156,9 +197,83 @@ const MiNegocioPage: React.FC = () => {
 
       {/* Social Media */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <h2 className="text-lg font-semibold mb-4" style={{ color: '#161616' }}>
-          Redes Sociales
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Redes Sociales
+          </h2>
+          <div className="flex items-center space-x-2">
+            {!isSocialMediaEditing ? (
+              <button
+                onClick={handleEditSocialMedia}
+                className="px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors duration-200"
+                style={{
+                  borderColor: '#075E54',
+                  color: '#075E54',
+                  backgroundColor: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.color = '#075E54';
+                }}
+              >
+                Editar
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleCancelSocialMedia}
+                  disabled={isSavingSocialMedia}
+                  className="px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    borderColor: 'rgb(156, 163, 175)',
+                    color: 'rgb(75, 85, 99)',
+                    backgroundColor: 'white'
+                  }}
+                  onMouseEnter={(e) => !isSavingSocialMedia && (() => {
+                    e.currentTarget.style.backgroundColor = 'rgb(75, 85, 99)';
+                    e.currentTarget.style.color = 'white';
+                  })()}
+                  onMouseLeave={(e) => !isSavingSocialMedia && (() => {
+                    e.currentTarget.style.backgroundColor = 'white';
+                    e.currentTarget.style.color = 'rgb(75, 85, 99)';
+                  })()}
+                >
+                  {isSavingSocialMedia ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'rgb(75, 85, 99)' }}></div>
+                    </div>
+                  ) : (
+                    <X size={16} />
+                  )}
+                </button>
+                <button
+                  onClick={handleSaveSocialMedia}
+                  disabled={isSavingSocialMedia}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: '#075E54',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => !isSavingSocialMedia && (e.currentTarget.style.backgroundColor = '#064540')}
+                  onMouseLeave={(e) => !isSavingSocialMedia && (e.currentTarget.style.backgroundColor = '#075E54')}
+                >
+                  {isSavingSocialMedia ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Guardando...</span>
+                    </div>
+                  ) : (
+                    'Guardar'
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
         
         <div className="space-y-4">
           <div className="flex items-center space-x-4">
@@ -171,19 +286,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.facebook_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, facebook_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.facebook_url : socialMediaData.facebook_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, facebook_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://facebook.com/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.facebook_url && (
+            {!isSocialMediaEditing && socialMediaData.facebook_url && (
               <a 
                 href={socialMediaData.facebook_url} 
                 target="_blank" 
@@ -208,19 +323,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.instagram_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, instagram_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.instagram_url : socialMediaData.instagram_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, instagram_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://instagram.com/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.instagram_url && (
+            {!isSocialMediaEditing && socialMediaData.instagram_url && (
               <a 
                 href={socialMediaData.instagram_url} 
                 target="_blank" 
@@ -245,19 +360,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.website_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, website_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.website_url : socialMediaData.website_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, website_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://tu-restaurante.com"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.website_url && (
+            {!isSocialMediaEditing && socialMediaData.website_url && (
               <a 
                 href={socialMediaData.website_url} 
                 target="_blank" 
@@ -282,19 +397,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.tiktok_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, tiktok_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.tiktok_url : socialMediaData.tiktok_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, tiktok_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://tiktok.com/@tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.tiktok_url && (
+            {!isSocialMediaEditing && socialMediaData.tiktok_url && (
               <a 
                 href={socialMediaData.tiktok_url} 
                 target="_blank" 
@@ -321,19 +436,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.linkedin_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, linkedin_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.linkedin_url : socialMediaData.linkedin_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, linkedin_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://linkedin.com/company/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.linkedin_url && (
+            {!isSocialMediaEditing && socialMediaData.linkedin_url && (
               <a 
                 href={socialMediaData.linkedin_url} 
                 target="_blank" 
@@ -360,19 +475,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.twitter_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, twitter_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.twitter_url : socialMediaData.twitter_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, twitter_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://twitter.com/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.twitter_url && (
+            {!isSocialMediaEditing && socialMediaData.twitter_url && (
               <a 
                 href={socialMediaData.twitter_url} 
                 target="_blank" 
@@ -399,19 +514,19 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMediaData.youtube_url}
-                onChange={(e) => setSocialMediaData({...socialMediaData, youtube_url: e.target.value})}
-                disabled={!isEditing}
+                value={isSocialMediaEditing ? tempSocialMediaData.youtube_url : socialMediaData.youtube_url}
+                onChange={(e) => setTempSocialMediaData({...tempSocialMediaData, youtube_url: e.target.value})}
+                disabled={!isSocialMediaEditing}
                 placeholder="https://youtube.com/@tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{
                   borderColor: 'rgb(209, 213, 219)',
                   color: '#161616',
-                  backgroundColor: isEditing ? 'white' : 'rgb(249, 250, 251)'
+                  backgroundColor: isSocialMediaEditing ? 'white' : 'rgb(249, 250, 251)'
                 }}
               />
             </div>
-            {!isEditing && socialMediaData.youtube_url && (
+            {!isSocialMediaEditing && socialMediaData.youtube_url && (
               <a 
                 href={socialMediaData.youtube_url} 
                 target="_blank" 
