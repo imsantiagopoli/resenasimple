@@ -720,10 +720,8 @@ const MiNegocioPage: React.FC = () => {
             )}
           </div>
         </div>
-                    disabled={!isEditing}
-                      disabled={!isEditing}
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          title="Guardar sucursal"
+      </div>
+
       {/* Branches Section */}
       <BranchesSection 
         branches={branches}
@@ -737,4 +735,3 @@ const MiNegocioPage: React.FC = () => {
 };
 
 export default MiNegocioPage;
-                      value={currentData.name}
