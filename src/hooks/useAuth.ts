@@ -97,7 +97,7 @@ export const useAuth = () => {
 
         // Step 3: Create main branch
         const branchName = `${restaurantName}`
-        const branchSlug = `${generateSlug(restaurantName)}-principal`
+        const branchSlug = `${generateSlug(restaurantName)}`
 
         const { error: branchError } = await supabase
           .from('business_branches')
