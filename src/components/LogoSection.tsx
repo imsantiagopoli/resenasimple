@@ -131,7 +131,7 @@ const LogoSection: React.FC<LogoSectionProps> = ({ profile, onLogoUpdate, showMe
             }}
           >
             <Camera size={14} />
-            <span>Editar Logo</span>
+            <span>Editar</span>
           </button>
         ) : (
           <div className="flex items-center space-x-2">
