@@ -12,78 +12,61 @@ import {
   QrCode,
   Building2
 } from 'lucide-react';
+import { useVotingSessions } from '../hooks/useVotingSessions';
 
 const InicioPage: React.FC = () => {
+  const { sessions, loading, getStatistics, getTodayStatistics } = useVotingSessions();
+  
+  const statistics = getStatistics();
+  const todayStats = getTodayStatistics();
+
   const stats = [
     {
       title: 'Votaciones Este Mes',
-      value: '1,247',
-      change: '+12.5%',
-      changeType: 'increase',
+      value: statistics.totalSessions.toString(),
+      change: `+${todayStats.totalToday}`,
+      changeType: 'increase' as const,
       icon: Users,
       color: '#075E54'
     },
     {
       title: 'Rating Promedio',
-      value: '4.6',
+      value: statistics.averageRating,
       change: '+0.3',
-      changeType: 'increase',
+      changeType: 'increase' as const,
       icon: Star,
       color: '#f59e0b'
     },
     {
       title: 'Reseñas en Google',
-      value: '89',
-      change: '+7',
-      changeType: 'increase',
+      value: statistics.publicSessions.toString(),
+      change: `+${todayStats.publicToday}`,
+      changeType: 'increase' as const,
       icon: MessageCircle,
       color: '#3b82f6'
     },
     {
-      title: 'Tasa de Conversión',
-      value: '73%',
+      title: 'Tasa de Reseñas Positivas',
+      value: `${statistics.positiveReviewsRate}%`,
       change: '+2.1%',
-      changeType: 'increase',
+      changeType: 'increase' as const,
       icon: TrendingUp,
       color: '#10b981'
     }
   ];
 
-  const recentActivity = [
-    {
-      type: 'positive',
-      customer: 'María García',
-      stars: 5,
-      comment: '¡Excelente comida y servicio! Definitivamente volveré.',
-      time: '2 horas',
-      status: 'Enviado a Google'
-    },
-    {
-      type: 'positive',
-      customer: 'Carlos Martínez',
-      stars: 4,
-      comment: 'Muy buena experiencia, solo la espera fue un poco larga.',
-      time: '4 horas',
-      status: 'Enviado a Google'
-    },
-    {
-      type: 'negative',
-      customer: 'Ana López',
-      stars: 2,
-      comment: 'El servicio fue lento y la comida llegó fría.',
-      time: '6 horas',
-      status: 'Retenido internamente'
-    },
-    {
-      type: 'positive',
-      customer: 'Roberto Silva',
-      stars: 5,
-      comment: 'Ambiente perfecto para una cena romántica. Todo perfecto.',
-      time: '8 horas',
-      status: 'Enviado a Google'
-    }
-  ];
-
+  // Recent activity from real sessions data (last 10)
+  const recentActivity = sessions.slice(0, 4).map(session => {
+    const timeAgo = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60));
+    return {
+      type: session.is_public ? 'positive' : 'negative',
+      customer: session.customer_name || 'Cliente Anónimo',
+      stars: session.rating,
+      comment: session.comment || 'Sin comentarios',
+      time: timeAgo < 1 ? 'Hace menos de 1 hora' : `${timeAgo} hora${timeAgo > 1 ? 's' : ''}`,
+      status: session.is_public ? 'Enviado a Google' : 'Retenido internamente'
+    };
+  });
   const quickActions = [
     {
       title: 'Generar Código QR',
@@ -104,6 +87,14 @@ const InicioPage: React.FC = () => {
       action: () => console.log('Configurar')
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -263,15 +254,15 @@ const InicioPage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgb(107, 114, 128)' }}>Votaciones:</span>
-                <span className="font-medium" style={{ color: '#161616' }}>47</span>
+                <span className="font-medium" style={{ color: '#161616' }}>{todayStats.totalToday}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgb(107, 114, 128)' }}>A Google:</span>
-                <span className="font-medium text-green-600">34</span>
+                <span className="font-medium text-green-600">{todayStats.publicToday}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgb(107, 114, 128)' }}>Retenidas:</span>
-                <span className="font-medium text-orange-600">13</span>
+                <span className="font-medium text-orange-600">{todayStats.privateToday}</span>
               </div>
             </div>
           </div>

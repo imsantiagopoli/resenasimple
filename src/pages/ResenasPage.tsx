@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Star, 
   MessageCircle, 
@@ -13,8 +13,12 @@ import {
   ChevronDown,
   User
 } from 'lucide-react';
+import { useVotingSessions } from '../hooks/useVotingSessions';
+import { useBusiness } from '../hooks/useBusiness';
 
 const ResenasPage: React.FC = () => {
+  const { sessions, loading, error, getStatistics, getTodayStatistics } = useVotingSessions();
+  const { branches } = useBusiness();
   const [filters, setFilters] = useState({
     status: 'all', // all, public, private
     minStars: 1,
@@ -24,90 +28,28 @@ const ResenasPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Mock data para reseñas
-  const resenas = [
-    {
-      id: 1,
-      customer: 'María García',
-      email: 'maria.garcia@email.com',
-      phone: '+54 9 11 1234-5678',
-      stars: 5,
-      comment: '¡Excelente comida y servicio! La pizza napolitana estaba perfecta, la masa crujiente y los ingredientes frescos. Definitivamente volveremos pronto.',
-      date: '2024-01-20',
-      time: '19:30',
-      branch: 'Sucursal Centro',
-      type: 'public', // enviado a Google
-      status: 'sent_to_google'
-    },
-    {
-      id: 2,
-      customer: 'Carlos Martínez',
-      email: 'carlos.martinez@email.com',
-      phone: '',
-      stars: 4,
-      comment: 'Muy buena experiencia en general. La comida deliciosa, solo la espera fue un poco larga pero valió la pena.',
-      date: '2024-01-20',
-      time: '18:45',
-      branch: 'Sucursal Palermo',
-      type: 'public',
-      status: 'sent_to_google'
-    },
-    {
-      id: 3,
-      customer: 'Ana López',
-      email: '',
-      phone: '+54 9 11 9876-5432',
-      stars: 2,
-      comment: 'El servicio fue muy lento y la comida llegó fría. Además, el ambiente era muy ruidoso. Esperaba mucho más por el precio.',
-      date: '2024-01-19',
-      time: '20:15',
-      branch: 'Sucursal Centro',
-      type: 'private', // retenido internamente
-      status: 'retained_internally'
-    },
-    {
-      id: 4,
-      customer: 'Roberto Silva',
-      email: 'roberto.silva@email.com',
-      phone: '+54 9 11 5555-4444',
-      stars: 5,
-      comment: 'Ambiente perfecto para una cena romántica. La atención fue excelente y los platos increíbles. ¡Muy recomendable!',
-      date: '2024-01-19',
-      time: '21:00',
-      branch: 'Sucursal Palermo',
-      type: 'public',
-      status: 'sent_to_google'
-    },
-    {
-      id: 5,
-      customer: 'Laura Fernández',
-      email: 'laura.fernandez@email.com',
-      phone: '',
-      stars: 3,
-      comment: 'La pizza estaba bien pero nada extraordinario. El precio me pareció un poco elevado para lo que ofrecen.',
-      date: '2024-01-18',
-      time: '19:20',
-      branch: 'Sucursal Centro',
-      type: 'private',
-      status: 'retained_internally'
-    },
-    {
-      id: 6,
-      customer: 'Diego Morales',
-      email: '',
-      phone: '+54 9 11 7777-8888',
-      stars: 1,
-      comment: 'Pésima experiencia. La comida llegó después de 1 hora de espera y estaba fría. El personal poco amable. No volvería.',
-      date: '2024-01-18',
-      time: '20:45',
-      branch: 'Sucursal Palermo',
-      type: 'private',
-      status: 'retained_internally'
-    }
-  ];
+  // Transform sessions data for display
+  const resenas = useMemo(() => {
+    return sessions.map(session => ({
+      id: session.id,
+      customer: session.customer_name || 'Cliente Anónimo',
+      email: session.customer_email || '',
+      phone: session.customer_phone || '',
+      stars: session.rating,
+      comment: session.comment || 'Sin comentarios',
+      date: session.created_at.split('T')[0],
+      time: new Date(session.created_at).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      branch: session.branch_name || 'Sucursal desconocida',
+      type: session.is_public ? 'public' : 'private',
+      status: session.is_public ? 'sent_to_google' : 'retained_internally'
+    }));
+  }, [sessions]);
 
   // Obtener sucursales únicas
-  const uniqueBranches = [...new Set(resenas.map(r => r.branch))];
+  const uniqueBranches = branches.map(branch => branch.name);
 
   const updateFilters = (key: keyof typeof filters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -123,11 +65,8 @@ const ResenasPage: React.FC = () => {
   };
 
   // Estadísticas del resumen
-  const totalResenas = resenas.length;
-  const publicResenas = resenas.filter(r => r.type === 'public').length;
-  const privateResenas = resenas.filter(r => r.type === 'private').length;
-  const averageRating = (resenas.reduce((sum, r) => sum + r.stars, 0) / resenas.length).toFixed(1);
-  const conversionRate = ((publicResenas / totalResenas) * 100).toFixed(1);
+  const statistics = getStatistics();
+  const todayStats = getTodayStatistics();
 
   const filteredResenas = resenas.filter(resena => {
     // Filtro por estado
@@ -172,6 +111,29 @@ const ResenasPage: React.FC = () => {
     window.open(mailtoUrl);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <MessageCircle size={20} className="text-red-600" />
+            <p className="text-red-800">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
@@ -197,7 +159,7 @@ const ResenasPage: React.FC = () => {
           </div>
           <div className="space-y-1">
             <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-              {totalResenas}
+              {statistics.totalSessions}
             </p>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Total de Reseñas
@@ -216,7 +178,7 @@ const ResenasPage: React.FC = () => {
           </div>
           <div className="space-y-1">
             <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-              {averageRating}
+              {statistics.averageRating}
             </p>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Rating Promedio
@@ -235,7 +197,7 @@ const ResenasPage: React.FC = () => {
           </div>
           <div className="space-y-1">
             <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-              {publicResenas}
+              {statistics.publicSessions}
             </p>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Enviadas a Google
@@ -254,10 +216,10 @@ const ResenasPage: React.FC = () => {
           </div>
           <div className="space-y-1">
             <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-              {conversionRate}%
+              {statistics.positiveReviewsRate}%
             </p>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Tasa de Conversión
+              Tasa de Reseñas Positivas
             </p>
           </div>
         </div>
@@ -298,9 +260,9 @@ const ResenasPage: React.FC = () => {
                     </h4>
                     <div className="space-y-2">
                       {[
-                        { id: 'all', label: 'Todas las reseñas', count: resenas.length },
-                        { id: 'public', label: 'Enviadas a Google', count: resenas.filter(r => r.type === 'public').length },
-                        { id: 'private', label: 'Retenidas internamente', count: resenas.filter(r => r.type === 'private').length }
+                        { id: 'all', label: 'Todas las reseñas', count: statistics.totalSessions },
+                        { id: 'public', label: 'Enviadas a Google', count: statistics.publicSessions },
+                        { id: 'private', label: 'Retenidas internamente', count: statistics.totalSessions - statistics.publicSessions }
                       ].map(option => (
                         <label key={option.id} className="flex items-center space-x-3 cursor-pointer group">
                           <input
@@ -375,7 +337,7 @@ const ResenasPage: React.FC = () => {
                       Sucursales
                     </h4>
                     <div className="space-y-2">
-                      {uniqueBranches.map(branch => (
+                      {uniqueBranches.map((branch, index) => (
                         <label key={branch} className="flex items-center space-x-3 cursor-pointer group">
                           <input
                             type="checkbox"
@@ -394,7 +356,7 @@ const ResenasPage: React.FC = () => {
                               color: 'rgb(107, 114, 128)'
                             }}
                           >
-                            {resenas.filter(r => r.branch === branch).length}
+                            {sessions.filter(s => s.branch_name === branch).length}
                           </span>
                         </label>
                       ))}
@@ -411,10 +373,10 @@ const ResenasPage: React.FC = () => {
                     </h4>
                     <div className="space-y-2">
                       {[
-                        { id: 'all', label: 'Todos los clientes', count: resenas.length },
-                        { id: 'with-phone', label: 'Con teléfono', count: resenas.filter(r => r.phone).length },
-                        { id: 'with-email', label: 'Con email', count: resenas.filter(r => r.email).length },
-                        { id: 'no-contact', label: 'Sin contacto', count: resenas.filter(r => !r.phone && !r.email).length }
+                        { id: 'all', label: 'Todos los clientes', count: statistics.totalSessions },
+                        { id: 'with-phone', label: 'Con teléfono', count: sessions.filter(s => s.customer_phone).length },
+                        { id: 'with-email', label: 'Con email', count: sessions.filter(s => s.customer_email).length },
+                        { id: 'no-contact', label: 'Sin contacto', count: sessions.filter(s => !s.customer_phone && !s.customer_email).length }
                       ].map(option => (
                         <label key={option.id} className="flex items-center space-x-3 cursor-pointer group">
                           <input
@@ -559,7 +521,7 @@ const ResenasPage: React.FC = () => {
         <div className="mb-4">
           <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
             Mostrando {filteredResenas.length} de {resenas.length} reseñas
-            {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || searchQuery.trim()) && (
+            {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || searchQuery.trim()) && filteredResenas.length !== resenas.length && (
               <button
                 onClick={() => {
                   setFilters({
@@ -674,7 +636,11 @@ const ResenasPage: React.FC = () => {
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-1 text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                       <Calendar size={14} />
-                      <span>{new Date(resena.date).toLocaleDateString('es-ES')}</span>
+                      <span>{new Date(resena.date).toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}</span>
                     </div>
                   </td>
 
@@ -744,8 +710,8 @@ const ResenasPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Empty State */}
-        {filteredResenas.length === 0 && (
+        {/* Empty State cuando no hay datos filtrados */}
+        {filteredResenas.length === 0 && resenas.length > 0 && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
@@ -753,6 +719,19 @@ const ResenasPage: React.FC = () => {
             </h3>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Ajusta los filtros o la búsqueda para ver más resultados.
+            </p>
+          </div>
+        )}
+
+        {/* Empty State cuando no hay reseñas en absoluto */}
+        {resenas.length === 0 && (
+          <div className="text-center py-12">
+            <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
+            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+              Aún no hay reseñas
+            </h3>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Las reseñas aparecerán aquí cuando los clientes empiecen a votar.
             </p>
           </div>
         )}
