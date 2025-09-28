@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { BusinessProvider } from '../contexts/BusinessContext';
 import { useUpload } from './UploadContext';
 import { FileText, Receipt, Scale, Clock, User, Star } from 'lucide-react';
 import Sidebar from './Sidebar';
@@ -18,7 +17,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { openUploadModal } = useUpload();
 
   return (
-    <BusinessProvider>
     // CAMBIO 1: Añadido fondo gris al contenedor principal.
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
@@ -42,7 +40,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </div>
     </div>
-    </BusinessProvider>
   );
 };
 
