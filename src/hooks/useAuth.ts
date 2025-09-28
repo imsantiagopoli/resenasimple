@@ -55,13 +55,7 @@ export const useAuth = () => {
     firstName: string, 
     lastName: string,
     restaurantName: string,
-    businessType: string,
-    socialMedia?: {
-      facebook?: string;
-      instagram?: string;
-      website?: string;
-      tiktok?: string;
-    }
+    businessType: string
   ) => {
     try {
       // Step 1: Create user account
@@ -183,28 +177,6 @@ export const useAuth = () => {
           if (configError) {
             console.error('Error creating voting config:', configError)
             // Don't return error here as it's not critical for account creation
-          }
-        }
-
-        // Step 5: Create social media entries if provided
-        if (socialMedia) {
-          const socialEntries = Object.entries(socialMedia)
-            .filter(([key, value]) => value && value.trim() !== '')
-            .map(([platform, url]) => ({
-              business_id: businessData.id,
-              platform,
-              url: url as string
-            }));
-
-          if (socialEntries.length > 0) {
-            const { error: socialError } = await supabase
-              .from('business_social_media')
-              .insert(socialEntries);
-
-            if (socialError) {
-              console.error('Error creating social media entries:', socialError);
-              // Don't return error here as it's not critical for account creation
-            }
           }
         }
       }

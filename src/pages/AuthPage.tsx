@@ -14,9 +14,7 @@ import {
   EyeOff,
   Star,
   Quote,
-  ArrowLeft,
-  Globe,
-  Music
+  ArrowLeft
 } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
@@ -40,12 +38,7 @@ const AuthPage: React.FC = () => {
     confirmPassword: '',
     // Paso 2
     restaurantName: '',
-    businessType: '',
-    // Paso 3 - Redes Sociales (opcional)
-    facebook: '',
-    instagram: '',
-    website: '',
-    tiktok: ''
+    businessType: ''
   });
 
   // Testimonials carousel data
@@ -158,25 +151,8 @@ const AuthPage: React.FC = () => {
     setCurrentStep(2);
   };
 
-  const handleStep2Submit = (e: React.FormEvent) => {
+  const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearMessages();
-    
-    // Ir al paso 3 (redes sociales)
-    setCurrentStep(3);
-  };
-
-  const handleStep3Submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleFinalRegistration();
-  };
-
-  const handleSkipSocialMedia = async () => {
-    // Saltear redes sociales y proceder con el registro
-    await handleFinalRegistration();
-  };
-
-  const handleFinalRegistration = async () => {
     clearMessages();
     setIsSubmitting(true);
 
@@ -187,13 +163,7 @@ const AuthPage: React.FC = () => {
         formData.firstName,
         formData.lastName,
         formData.restaurantName,
-        formData.businessType,
-        {
-          facebook: formData.facebook,
-          instagram: formData.instagram,
-          website: formData.website,
-          tiktok: formData.tiktok
-        }
+        formData.businessType
       );
 
       if (error) {
@@ -215,11 +185,7 @@ const AuthPage: React.FC = () => {
             password: '',
             confirmPassword: '',
             restaurantName: '',
-            businessType: '',
-            facebook: '',
-            instagram: '',
-            website: '',
-            tiktok: ''
+            businessType: ''
           });
         } else {
           // Auto login if email confirmation is disabled
@@ -357,9 +323,9 @@ const AuthPage: React.FC = () => {
               <h2 className="text-3xl font-bold mb-2" style={{ color: '#161616' }}>
                 {isLogin 
                   ? 'Bienvenido de vuelta' 
-                  : currentStep === 1 ? 'Crea tu cuenta'
-                  : currentStep === 2 ? 'Detalles del restaurante'  
-                  : 'Conecta tus redes'
+                  : currentStep === 1 
+                    ? 'Crea tu cuenta' 
+                    : 'Detalles del restaurante'
                 }
               </h2>
               <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
@@ -367,9 +333,7 @@ const AuthPage: React.FC = () => {
                   ? 'Accede a tu panel de gestión de reseñas' 
                   : currentStep === 1
                     ? 'Comienza a filtrar reseñas hoy mismo'
-                    : currentStep === 2
-                      ? 'Ya casi terminamos, cuéntanos sobre tu negocio'
-                      : 'Opcional: Muestra tus redes en la página de votación'
+                    : 'Ya casi terminamos, cuéntanos sobre tu negocio'
                 }
               </p>
             </div>
@@ -413,9 +377,9 @@ const AuthPage: React.FC = () => {
             )}
 
             {/* Paso 2 - Botón Volver */}
-            {!isLogin && (currentStep === 2 || currentStep === 3) && (
+            {!isLogin && currentStep === 2 && (
               <button
-                onClick={() => setCurrentStep(currentStep - 1)}
+                onClick={() => setCurrentStep(1)}
                 className="flex items-center space-x-2 text-sm transition-colors duration-200"
                 style={{ color: '#075E54' }}
               >
@@ -1037,7 +1001,7 @@ const AuthPage: React.FC = () => {
                 {/* Create Account Button */}
                 <button 
                   type="submit"
-                  disabled={!formData.restaurantName || !formData.businessType}
+                  disabled={isSubmitting}
                   className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: '#075E54',
@@ -1053,233 +1017,18 @@ const AuthPage: React.FC = () => {
                     e.currentTarget.style.borderColor = '#075E54';
                   }}
                 >
-                  <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                    Continuar
-                  </span>
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  {isSubmitting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
+                        Crear Cuenta
+                      </span>
+                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
                 </button>
               </form>
-            )}
-
-            {/* REGISTRO PASO 3 - REDES SOCIALES (OPCIONAL) */}
-            {!isLogin && currentStep === 3 && (
-              <div className="space-y-6">
-                {/* Header del paso opcional */}
-                <div className="text-center">
-                
-                </div>
-
-                <form onSubmit={handleStep3Submit} className="space-y-6">
-                  {/* Facebook */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="facebook"
-                      className="flex items-center space-x-2 text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: '#1877f2' }}>
-                        <svg className="w-3 h-3 fill-white" viewBox="0 0 24 24">
-                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                      </div>
-                      <span>Facebook</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="facebook"
-                      name="facebook"
-                      value={formData.facebook}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://facebook.com/tu-restaurante"
-                    />
-                  </div>
-
-                  {/* Instagram */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="instagram"
-                      className="flex items-center space-x-2 text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      <div className="w-5 h-5 rounded flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500">
-                        <svg className="w-3 h-3 fill-white" viewBox="0 0 24 24">
-                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
-                      </div>
-                      <span>Instagram</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="instagram"
-                      name="instagram"
-                      value={formData.instagram}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://instagram.com/tu-restaurante"
-                    />
-                  </div>
-
-                  {/* Website */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="website"
-                      className="flex items-center space-x-2 text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: 'rgb(107, 114, 128)' }}>
-                        <Globe size={12} className="text-white" />
-                      </div>
-                      <span>Sitio Web</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="website"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://tu-restaurante.com"
-                    />
-                  </div>
-
-                  {/* TikTok */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="tiktok"
-                      className="flex items-center space-x-2 text-sm font-medium"
-                      style={{ color: '#161616' }}
-                    >
-                      <div className="w-5 h-5 rounded flex items-center justify-center bg-black">
-                        <Music size={12} className="text-white" />
-                      </div>
-                      <span>TikTok</span>
-                    </label>
-                    <input
-                      type="url"
-                      id="tiktok"
-                      name="tiktok"
-                      value={formData.tiktok}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      style={{
-                        backgroundColor: 'white',
-                        borderColor: 'rgb(209, 213, 219)',
-                        color: '#161616',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#075E54';
-                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(7, 94, 84, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      placeholder="https://tiktok.com/@tu-restaurante"
-                    />
-                  </div>
-
-                  {/* Botones */}
-                  <div className="space-y-3 pt-4">
-                    {/* Botón completar */}
-                    <button 
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="group w-full flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        backgroundColor: '#075E54',
-                        color: 'white',
-                        border: '1px solid #075E54'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#064e45';
-                        e.currentTarget.style.borderColor = '#064e45';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#075E54';
-                        e.currentTarget.style.borderColor = '#075E54';
-                      }}
-                    >
-                      {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                            Crear Cuenta
-                          </span>
-                          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                        </>
-                      )}
-                    </button>
-
-                    {/* Botón saltear */}
-                    <button 
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={handleSkipSocialMedia}
-                      className="w-full py-3 px-6 rounded-lg font-medium text-sm border transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        backgroundColor: 'white',
-                        color: 'rgb(107, 114, 128)',
-                        borderColor: 'rgb(209, 213, 219)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                        e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white';
-                        e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                      }}
-                    >
-                      {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
-                      ) : (
-                        'Completar más tarde'
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
             )}
 
           </div>
