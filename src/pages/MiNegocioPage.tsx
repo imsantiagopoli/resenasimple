@@ -171,7 +171,7 @@ const MiNegocioPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
       </div>
     );
@@ -179,7 +179,7 @@ const MiNegocioPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center space-x-2">
             <AlertCircle size={20} className="text-red-600" />
@@ -192,7 +192,7 @@ const MiNegocioPage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="p-6">
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center space-x-2">
             <AlertCircle size={20} className="text-yellow-600" />

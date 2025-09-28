@@ -42,6 +42,7 @@ interface BusinessData {
   socialMedia: BusinessSocialMedia[]
   loading: boolean
   error: string | null
+  loaded: boolean
 }
 
 export const useBusiness = () => {
@@ -52,12 +53,13 @@ export const useBusiness = () => {
     socialMedia: [],
     loading: true,
     error: null
+    loaded: false
   })
 
   // Fetch business data
   const fetchBusinessData = async () => {
     if (!user) {
-      setBusinessData(prev => ({ ...prev, loading: false }))
+      setBusinessData(prev => ({ ...prev, loading: false, loaded: true }))
       return
     }
 
@@ -103,6 +105,7 @@ export const useBusiness = () => {
           socialMedia: socialMedia || [],
           loading: false,
           error: null
+          loaded: true
         })
       } else {
         setBusinessData({
@@ -111,6 +114,7 @@ export const useBusiness = () => {
           socialMedia: [],
           loading: false,
           error: null
+          loaded: true
         })
       }
     } catch (err: any) {
@@ -119,6 +123,7 @@ export const useBusiness = () => {
         ...prev,
         loading: false,
         error: err.message || 'Error al cargar los datos del negocio'
+        loaded: true
       }))
     }
   }
@@ -271,7 +276,10 @@ export const useBusiness = () => {
   }
 
   useEffect(() => {
+    // Solo fetch si no se han cargado los datos aún o si el usuario cambió
+    if (!businessData.loaded || (user && !businessData.profile && !businessData.loading)) {
     fetchBusinessData()
+    }
   }, [user])
 
   return {
