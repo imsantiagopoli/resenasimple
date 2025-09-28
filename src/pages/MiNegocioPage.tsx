@@ -1,68 +1,207 @@
-import React, { useState } from 'react';
-import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, CreditCard as Edit, Save, X, Plus, Trash2, ExternalLink, Music } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, Save, X, Plus, Trash2, ExternalLink, Music, AlertCircle, CheckCircle } from 'lucide-react';
+import { useBusiness } from '../hooks/useBusiness';
 
 const MiNegocioPage: React.FC = () => {
+  const { 
+    profile, 
+    branches, 
+    socialMedia, 
+    loading, 
+    error,
+    updateBusinessProfile,
+    upsertBranch,
+    deleteBranch,
+    updateSocialMedia,
+    generateSlug
+  } = useBusiness();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   const [businessData, setBusinessData] = useState({
-    name: 'Pizzería Napolitana',
-    description: 'Auténtica pizza napolitana con ingredientes frescos importados de Italia.',
-    phone: '+54 11 4567-8901',
-    email: 'info@pizzerianapolitana.com',
-    website: 'www.pizzerianapolitana.com'
+    name: '',
+    description: '',
+    phone: '',
+    email: '',
+    website: ''
   });
 
-  const [socialMedia, setSocialMedia] = useState({
-    facebook: 'https://facebook.com/pizzerianapolitana',
-    instagram: 'https://instagram.com/pizzerianapolitana',
-    website: 'https://pizzerianapolitana.com',
-    tiktok: 'https://tiktok.com/@pizzerianapolitana'
+  const [socialMediaData, setSocialMediaData] = useState({
+    facebook: '',
+    instagram: '',
+    website: '',
+    tiktok: ''
   });
 
-  const [branches, setBranches] = useState([
-    {
-      id: 1,
-      name: 'Sucursal Centro',
-      address: 'Av. Corrientes 1234, Buenos Aires',
-      phone: '+54 11 4567-8901',
-      isMain: true,
-      googleMapsLink: 'https://maps.google.com/place/Av.+Corrientes+1234+Buenos+Aires'
-    },
-    {
-      id: 2,
-      name: 'Sucursal Palermo',
-      address: 'Thames 456, Palermo, Buenos Aires',
-      phone: '+54 11 4567-8902',
-      isMain: false,
-      googleMapsLink: 'https://maps.google.com/place/Thames+456+Palermo+Buenos+Aires'
+  const [branchesData, setBranchesData] = useState<any[]>([]);
+
+  // Initialize data when profile loads
+  useEffect(() => {
+    if (profile) {
+      setBusinessData({
+        name: profile.name || '',
+        description: profile.description || '',
+        phone: profile.phone || '',
+        email: profile.email || '',
+        website: profile.website || ''
+      });
     }
-  ]);
+  }, [profile]);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log('Datos guardados:', { businessData, socialMedia, branches });
+  // Initialize social media data
+  useEffect(() => {
+    if (socialMedia) {
+      const socialObj = socialMedia.reduce((acc, social) => {
+        acc[social.platform] = social.url;
+        return acc;
+      }, {} as Record<string, string>);
+
+      setSocialMediaData({
+        facebook: socialObj.facebook || '',
+        instagram: socialObj.instagram || '',
+        website: socialObj.website || '',
+        tiktok: socialObj.tiktok || ''
+      });
+    }
+  }, [socialMedia]);
+
+  // Initialize branches data
+  useEffect(() => {
+    if (branches) {
+      setBranchesData(branches.map(branch => ({
+        id: branch.id,
+        name: branch.name,
+        address: branch.address || '',
+        phone: branch.phone || '',
+        isMain: branch.is_main,
+        googleMapsLink: branch.google_maps_link || '',
+        slug: branch.slug
+      })));
+    }
+  }, [branches]);
+
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setSaveMessage({ type, text });
+    setTimeout(() => setSaveMessage(null), 5000);
+  };
+
+  const handleSave = async () => {
+    if (!profile) return;
+
+    setIsSaving(true);
+    
+    try {
+      // Update business profile
+      const { error: profileError } = await updateBusinessProfile(businessData);
+      if (profileError) {
+        throw new Error(profileError);
+      }
+
+      // Update social media
+      const { error: socialError } = await updateSocialMedia(socialMediaData);
+      if (socialError) {
+        throw new Error(socialError);
+      }
+
+      // Update branches
+      for (const branch of branchesData) {
+        const branchToSave = {
+          ...branch,
+          slug: branch.slug || generateSlug(branch.name)
+        };
+        
+        const { error: branchError } = await upsertBranch(branchToSave);
+        if (branchError) {
+          throw new Error(branchError);
+        }
+      }
+
+      setIsEditing(false);
+      showMessage('success', 'Datos guardados correctamente');
+    } catch (err: any) {
+      console.error('Error saving data:', err);
+      showMessage('error', err.message || 'Error al guardar los datos');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAddBranch = () => {
     const newBranch = {
-      id: branches.length + 1,
+      id: null, // null for new branches
       name: 'Nueva Sucursal',
       address: '',
       phone: '',
       isMain: false,
-      googleMapsLink: ''
+      googleMapsLink: '',
+      slug: ''
     };
-    setBranches([...branches, newBranch]);
+    setBranchesData([...branchesData, newBranch]);
   };
 
-  const handleRemoveBranch = (id: number) => {
-    setBranches(branches.filter(branch => branch.id !== id));
+  const handleRemoveBranch = async (index: number) => {
+    const branch = branchesData[index];
+    
+    if (branch.id) {
+      // Delete from database
+      const { error } = await deleteBranch(branch.id);
+      if (error) {
+        showMessage('error', error);
+        return;
+      }
+    }
+    
+    // Remove from local state
+    setBranchesData(branchesData.filter((_, i) => i !== index));
   };
 
-  const updateBranch = (id: number, field: string, value: string | boolean) => {
-    setBranches(branches.map(branch => 
-      branch.id === id ? { ...branch, [field]: value } : branch
-    ));
+  const updateBranch = (index: number, field: string, value: string | boolean) => {
+    const updatedBranches = [...branchesData];
+    updatedBranches[index] = { ...updatedBranches[index], [field]: value };
+    
+    // Auto-generate slug when name changes
+    if (field === 'name' && typeof value === 'string') {
+      updatedBranches[index].slug = generateSlug(value);
+    }
+    
+    setBranchesData(updatedBranches);
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle size={20} className="text-red-600" />
+            <p className="text-red-800">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle size={20} className="text-yellow-600" />
+            <p className="text-yellow-800">No se encontró información del negocio. Contacta al soporte.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -79,27 +218,52 @@ const MiNegocioPage: React.FC = () => {
         
         <button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
-          className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none"
+          disabled={isSaving}
+          className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             backgroundColor: isEditing ? '#075E54' : 'white',
             color: isEditing ? 'white' : '#161616',
             border: isEditing ? '1px solid #075E54' : '1px solid rgb(209, 213, 219)'
           }}
           onMouseEnter={(e) => {
-            if (!isEditing) {
+            if (!isEditing && !isSaving) {
               e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
             }
           }}
           onMouseLeave={(e) => {
-            if (!isEditing) {
+            if (!isEditing && !isSaving) {
               e.currentTarget.style.backgroundColor = 'white';
             }
           }}
         >
-          {isEditing ? <Save size={16} /> : <Edit size={16} />}
-          <span>{isEditing ? 'Guardar Cambios' : 'Editar'}</span>
+          {isSaving ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>{isEditing ? <Save size={16} /> : <MapPin size={16} />}</>
+          )}
+          <span>{isSaving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Editar'}</span>
         </button>
       </div>
+
+      {/* Save Message */}
+      {saveMessage && (
+        <div 
+          className={`p-3 rounded-lg border text-sm ${
+            saveMessage.type === 'success' 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            {saveMessage.type === 'success' ? (
+              <CheckCircle size={16} />
+            ) : (
+              <AlertCircle size={16} />
+            )}
+            <span>{saveMessage.text}</span>
+          </div>
+        </div>
+      )}
 
       {/* Logo Section */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
@@ -261,8 +425,8 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMedia.facebook}
-                onChange={(e) => setSocialMedia({...socialMedia, facebook: e.target.value})}
+                value={socialMediaData.facebook}
+                onChange={(e) => setSocialMediaData({...socialMediaData, facebook: e.target.value})}
                 disabled={!isEditing}
                 placeholder="https://facebook.com/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
@@ -273,9 +437,9 @@ const MiNegocioPage: React.FC = () => {
                 }}
               />
             </div>
-            {!isEditing && socialMedia.facebook && (
+            {!isEditing && socialMediaData.facebook && (
               <a 
-                href={socialMedia.facebook} 
+                href={socialMediaData.facebook} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg transition-colors duration-200"
@@ -298,8 +462,8 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMedia.instagram}
-                onChange={(e) => setSocialMedia({...socialMedia, instagram: e.target.value})}
+                value={socialMediaData.instagram}
+                onChange={(e) => setSocialMediaData({...socialMediaData, instagram: e.target.value})}
                 disabled={!isEditing}
                 placeholder="https://instagram.com/tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
@@ -310,9 +474,9 @@ const MiNegocioPage: React.FC = () => {
                 }}
               />
             </div>
-            {!isEditing && socialMedia.instagram && (
+            {!isEditing && socialMediaData.instagram && (
               <a 
-                href={socialMedia.instagram} 
+                href={socialMediaData.instagram} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg transition-colors duration-200"
@@ -335,8 +499,8 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMedia.website}
-                onChange={(e) => setSocialMedia({...socialMedia, website: e.target.value})}
+                value={socialMediaData.website}
+                onChange={(e) => setSocialMediaData({...socialMediaData, website: e.target.value})}
                 disabled={!isEditing}
                 placeholder="https://tu-restaurante.com"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
@@ -347,9 +511,9 @@ const MiNegocioPage: React.FC = () => {
                 }}
               />
             </div>
-            {!isEditing && socialMedia.website && (
+            {!isEditing && socialMediaData.website && (
               <a 
-                href={socialMedia.website} 
+                href={socialMediaData.website} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg transition-colors duration-200"
@@ -372,8 +536,8 @@ const MiNegocioPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="url"
-                value={socialMedia.tiktok}
-                onChange={(e) => setSocialMedia({...socialMedia, tiktok: e.target.value})}
+                value={socialMediaData.tiktok}
+                onChange={(e) => setSocialMediaData({...socialMediaData, tiktok: e.target.value})}
                 disabled={!isEditing}
                 placeholder="https://tiktok.com/@tu-restaurante"
                 className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
@@ -384,9 +548,9 @@ const MiNegocioPage: React.FC = () => {
                 }}
               />
             </div>
-            {!isEditing && socialMedia.tiktok && (
+            {!isEditing && socialMediaData.tiktok && (
               <a 
-                href={socialMedia.tiktok} 
+                href={socialMediaData.tiktok} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg transition-colors duration-200"
@@ -424,9 +588,9 @@ const MiNegocioPage: React.FC = () => {
         </div>
         
         <div className="space-y-4">
-          {branches.map((branch) => (
+          {branchesData.map((branch, index) => (
             <div 
-              key={branch.id}
+              key={branch.id || index}
               className="p-4 rounded-lg border transition-all duration-200"
               style={{ 
                 borderColor: 'rgb(229, 231, 235)',
@@ -456,7 +620,7 @@ const MiNegocioPage: React.FC = () => {
                 
                 {isEditing && !branch.isMain && (
                   <button
-                    onClick={() => handleRemoveBranch(branch.id)}
+                    onClick={() => handleRemoveBranch(index)}
                     className="p-1 rounded transition-colors duration-200"
                     style={{ color: 'rgb(107, 114, 128)' }}
                     onMouseEnter={(e) => {
@@ -481,7 +645,7 @@ const MiNegocioPage: React.FC = () => {
                   <input
                     type="text"
                     value={branch.name}
-                    onChange={(e) => updateBranch(branch.id, 'name', e.target.value)}
+                    onChange={(e) => updateBranch(index, 'name', e.target.value)}
                     disabled={!isEditing}
                     className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     style={{
@@ -499,7 +663,7 @@ const MiNegocioPage: React.FC = () => {
                   <input
                     type="tel"
                     value={branch.phone}
-                    onChange={(e) => updateBranch(branch.id, 'phone', e.target.value)}
+                    onChange={(e) => updateBranch(index, 'phone', e.target.value)}
                     disabled={!isEditing}
                     className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     style={{
@@ -517,7 +681,7 @@ const MiNegocioPage: React.FC = () => {
                   <input
                     type="text"
                     value={branch.address}
-                    onChange={(e) => updateBranch(branch.id, 'address', e.target.value)}
+                    onChange={(e) => updateBranch(index, 'address', e.target.value)}
                     disabled={!isEditing}
                     className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     style={{
@@ -536,7 +700,7 @@ const MiNegocioPage: React.FC = () => {
                     <input
                       type="url"
                       value={branch.googleMapsLink}
-                      onChange={(e) => updateBranch(branch.id, 'googleMapsLink', e.target.value)}
+                      onChange={(e) => updateBranch(index, 'googleMapsLink', e.target.value)}
                       disabled={!isEditing}
                       placeholder="https://maps.google.com/place/..."
                       className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
