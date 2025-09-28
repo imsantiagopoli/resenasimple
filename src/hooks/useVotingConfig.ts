@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { useBusiness } from './useBusiness'
 
 // Database row structure
 export interface VotingConfigurationRecord {
   id: string
-  branch_id: string
+  business_id: string
   encabezado: string
   cuerpo: string
   mostrar_logo: boolean
@@ -50,7 +51,7 @@ export interface VotingConfigurationRecord {
 // UI-friendly structure that components expect
 export interface VotingConfiguration {
   id: string
-  branch_id: string
+  business_id: string
   design: {
     message: {
       headline: string
@@ -120,7 +121,7 @@ export interface VotingConfiguration {
 const mapRecordToConfig = (record: VotingConfigurationRecord): VotingConfiguration => {
   return {
     id: record.id,
-    branch_id: record.branch_id,
+    business_id: record.business_id,
     design: {
       message: {
         headline: record.encabezado,
@@ -188,8 +189,8 @@ const mapRecordToConfig = (record: VotingConfigurationRecord): VotingConfigurati
 }
 
 // Convert UI structure back to database format
-const mapConfigToRecord = (config: Partial<VotingConfiguration>): Partial<Omit<VotingConfigurationRecord, 'id' | 'branch_id' | 'created_at' | 'updated_at'>> => {
-  const updates: Partial<Omit<VotingConfigurationRecord, 'id' | 'branch_id' | 'created_at' | 'updated_at'>> = {}
+const mapConfigToRecord = (config: Partial<VotingConfiguration>): Partial<Omit<VotingConfigurationRecord, 'id' | 'business_id' | 'created_at' | 'updated_at'>> => {
+  const updates: Partial<Omit<VotingConfigurationRecord, 'id' | 'business_id' | 'created_at' | 'updated_at'>> = {}
   
   if (config.design?.message?.headline !== undefined) updates.encabezado = config.design.message.headline
   if (config.design?.message?.body !== undefined) updates.cuerpo = config.design.message.body
@@ -234,23 +235,30 @@ const mapConfigToRecord = (config: Partial<VotingConfiguration>): Partial<Omit<V
 
 interface VotingConfigState {
   config: VotingConfiguration | null
+  originalConfig: VotingConfiguration | null
   loading: boolean
   error: string | null
   loaded: boolean
+  hasChanges: boolean
+  isSaving: boolean
 }
 
-export const useVotingConfig = (branchId?: string) => {
+export const useVotingConfig = () => {
   const { user } = useAuth()
+  const { profile } = useBusiness()
   const [configState, setConfigState] = useState<VotingConfigState>({
     config: null,
+    originalConfig: null,
     loading: true,
     error: null,
-    loaded: false
+    loaded: false,
+    hasChanges: false,
+    isSaving: false
   })
 
-  // Fetch voting configuration
-  const fetchVotingConfig = async (targetBranchId?: string): Promise<VotingConfiguration | null> => {
-    if (!targetBranchId) {
+  // Fetch voting configuration for business
+  const fetchVotingConfig = async (): Promise<VotingConfiguration | null> => {
+    if (!profile?.id) {
       setConfigState(prev => ({ ...prev, loading: false, loaded: true }))
       return null
     }
@@ -261,8 +269,8 @@ export const useVotingConfig = (branchId?: string) => {
       const { data: record, error } = await supabase
         .from('voting_configuration')
         .select('*')
-        .eq('branch_id', targetBranchId)
-        .maybeSingle() // Use maybeSingle() instead of single() to handle no rows gracefully
+        .eq('business_id', profile.id)
+        .maybeSingle()
 
       if (error) {
         throw error
@@ -270,32 +278,42 @@ export const useVotingConfig = (branchId?: string) => {
 
       const config = record ? mapRecordToConfig(record) : null
 
-      setConfigState({
+      setConfigState(prev => ({
+        ...prev,
         config,
+        originalConfig: config ? JSON.parse(JSON.stringify(config)) : null,
         loading: false,
         error: null,
-        loaded: true
-      })
+        loaded: true,
+        hasChanges: false
+      }))
 
       return config
     } catch (err: any) {
       console.error('Error fetching voting config:', err)
-      setConfigState({
+      setConfigState(prev => ({
+        ...prev,
         config: null,
+        originalConfig: null,
         loading: false,
         error: err.message || 'Error al cargar la configuración de votación',
-        loaded: true
-      })
+        loaded: true,
+        hasChanges: false
+      }))
       return null
     }
   }
 
-  // Create default configuration for a branch
-  const createDefaultConfig = async (targetBranchId: string): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+  // Create default configuration for business
+  const createDefaultConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    if (!profile?.id) {
+      return { data: null, error: 'No se encontró el perfil del negocio' }
+    }
+
     try {
       const { data: record, error } = await supabase
         .from('voting_configuration')
-        .insert([{ branch_id: targetBranchId }])
+        .insert([{ business_id: profile.id }])
         .select()
         .single()
 
@@ -304,9 +322,13 @@ export const useVotingConfig = (branchId?: string) => {
       }
 
       const config = mapRecordToConfig(record)
+      const originalConfig = JSON.parse(JSON.stringify(config))
+      
       setConfigState(prev => ({
         ...prev,
-        config
+        config,
+        originalConfig,
+        hasChanges: false
       }))
 
       return { data: config, error: null }
@@ -316,14 +338,51 @@ export const useVotingConfig = (branchId?: string) => {
     }
   }
 
-  // Update voting configuration (real-time)
-  const updateVotingConfig = async (updates: Partial<VotingConfiguration>): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
-    if (!configState.config) {
-      throw new Error('No hay configuración para actualizar')
+  // Update config locally (no database save yet)
+  const updateConfig = (updates: Partial<VotingConfiguration>) => {
+    if (!configState.config || !configState.originalConfig) return
+
+    const newConfig = {
+      ...configState.config,
+      ...updates,
+      design: {
+        ...configState.config.design,
+        ...(updates.design || {})
+      },
+      typography: {
+        ...configState.config.typography,
+        ...(updates.typography || {})
+      },
+      colors: {
+        ...configState.config.colors,
+        ...(updates.colors || {})
+      },
+      logic: {
+        ...configState.config.logic,
+        ...(updates.logic || {})
+      }
     }
 
+    // Check if there are changes
+    const hasChanges = JSON.stringify(newConfig) !== JSON.stringify(configState.originalConfig)
+
+    setConfigState(prev => ({
+      ...prev,
+      config: newConfig,
+      hasChanges
+    }))
+  }
+
+  // Save configuration to database
+  const saveConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    if (!configState.config || !configState.hasChanges) {
+      return { data: configState.config, error: null }
+    }
+
+    setConfigState(prev => ({ ...prev, isSaving: true }))
+
     try {
-      const recordUpdates = mapConfigToRecord(updates)
+      const recordUpdates = mapConfigToRecord(configState.config)
       
       const { data: record, error } = await supabase
         .from('voting_configuration')
@@ -337,27 +396,33 @@ export const useVotingConfig = (branchId?: string) => {
       }
 
       const updatedConfig = mapRecordToConfig(record)
+      const originalConfig = JSON.parse(JSON.stringify(updatedConfig))
+      
       setConfigState(prev => ({
         ...prev,
-        config: updatedConfig
+        config: updatedConfig,
+        originalConfig,
+        hasChanges: false,
+        isSaving: false
       }))
 
       return { data: updatedConfig, error: null }
     } catch (err: any) {
-      console.error('Error updating voting config:', err)
-      return { data: null, error: err.message || 'Error al actualizar la configuración' }
+      console.error('Error saving voting config:', err)
+      setConfigState(prev => ({ ...prev, isSaving: false }))
+      return { data: null, error: err.message || 'Error al guardar la configuración' }
     }
   }
 
-  // Get or create configuration for a branch
-  const getOrCreateConfig = async (targetBranchId: string): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+  // Get or create configuration for business
+  const getOrCreateConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
     try {
       // First try to fetch existing config
-      let config = await fetchVotingConfig(targetBranchId)
+      let config = await fetchVotingConfig()
       
       // If no config exists, create default one
       if (!config) {
-        const { data, error } = await createDefaultConfig(targetBranchId)
+        const { data, error } = await createDefaultConfig()
         if (error) {
           throw new Error(error)
         }
@@ -371,17 +436,30 @@ export const useVotingConfig = (branchId?: string) => {
     }
   }
 
-  useEffect(() => {
-    if (branchId && !configState.loaded) {
-      fetchVotingConfig(branchId)
+  // Reset changes (revert to original)
+  const resetChanges = () => {
+    if (configState.originalConfig) {
+      setConfigState(prev => ({
+        ...prev,
+        config: JSON.parse(JSON.stringify(prev.originalConfig)),
+        hasChanges: false
+      }))
     }
-  }, [branchId, configState.loaded])
+  }
+
+  useEffect(() => {
+    if (profile?.id && !configState.loaded) {
+      fetchVotingConfig()
+    }
+  }, [profile?.id, configState.loaded])
 
   return {
     ...configState,
-    updateVotingConfig,
+    updateConfig,
+    saveConfig,
     createDefaultConfig,
     getOrCreateConfig,
-    refetch: () => fetchVotingConfig(branchId)
+    resetChanges,
+    refetch: fetchVotingConfig
   }
 }

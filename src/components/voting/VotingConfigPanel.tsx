@@ -1,28 +1,29 @@
 import React, { useState } from 'react';
-import { Palette, Brain, Link, Building2, ChevronDown } from 'lucide-react';
+import { Palette, Brain, Link, Save, RotateCcw } from 'lucide-react';
 import DesignConfigTab from './DesignConfigTab';
 import LogicConfigTab from './LogicConfigTab';
 import LinksConfigTab from './LinksConfigTab';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
-import { BusinessBranch } from '../../hooks/useBusiness';
 
 interface VotingConfigPanelProps {
   config: VotingConfiguration;
   onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
-  branches: BusinessBranch[];
-  selectedBranchId: string;
-  onBranchChange: (branchId: string) => void;
+  hasChanges: boolean;
+  onSave: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
+  onReset: () => void;
+  isSaving: boolean;
 }
 
 const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({ 
   config, 
   onConfigUpdate, 
-  branches, 
-  selectedBranchId, 
-  onBranchChange 
+  hasChanges,
+  onSave,
+  onReset,
+  isSaving
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'logic' | 'links'>('design');
-  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const tabs = [
     {
@@ -42,104 +43,30 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
     }
   ];
 
-  const selectedBranch = branches.find(branch => branch.id === selectedBranchId) || branches[0];
+  const handleSave = async () => {
+    try {
+      const { error } = await onSave();
+      if (error) {
+        setSaveMessage({ type: 'error', text: error });
+      } else {
+        setSaveMessage({ type: 'success', text: 'Configuración guardada correctamente' });
+      }
+    } catch (err) {
+      setSaveMessage({ type: 'error', text: 'Error al guardar la configuración' });
+    }
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const handleReset = () => {
+    onReset();
+    setSaveMessage({ type: 'success', text: 'Cambios descartados' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Branch Selector */}
-      <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="space-y-2">
-          <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-            Configuración para:
-          </label>
-          <div className="relative">
-            <button
-              onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm transition-all duration-200"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: 'white'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-              }}
-            >
-              <div className="flex items-center space-x-2">
-                <Building2 size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-                <span>{selectedBranch?.name}</span>
-                {selectedBranch?.is_main && (
-                  <span 
-                    className="px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{
-                      backgroundColor: '#075E54' + '20',
-                      color: '#075E54'
-                    }}
-                  >
-                    Principal
-                  </span>
-                )}
-              </div>
-              <ChevronDown 
-                size={16} 
-                className={`transition-transform duration-200 ${isBranchDropdownOpen ? 'rotate-180' : ''}`}
-                style={{ color: 'rgb(107, 114, 128)' }}
-              />
-            </button>
-            
-            {isBranchDropdownOpen && (
-              <div 
-                className="absolute top-full left-0 right-0 mt-1 rounded-lg border shadow-lg bg-white z-10 overflow-hidden"
-                style={{ borderColor: 'rgb(229, 231, 235)' }}
-              >
-                {branches.map((branch) => (
-                  <button
-                    key={branch.id}
-                    onClick={() => {
-                      onBranchChange(branch.id);
-                      setIsBranchDropdownOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-sm text-left transition-colors duration-200 flex items-center justify-between"
-                    style={{ 
-                      color: '#161616',
-                      backgroundColor: selectedBranchId === branch.id ? '#075E54' + '10' : 'white'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedBranchId !== branch.id) {
-                        e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedBranchId !== branch.id) {
-                        e.currentTarget.style.backgroundColor = 'white';
-                      }
-                    }}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span>{branch.name}</span>
-                      {branch.is_main && (
-                        <span 
-                          className="px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={{
-                            backgroundColor: '#075E54' + '20',
-                            color: '#075E54'
-                          }}
-                        >
-                          Principal
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Tabs Header */}
       <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
         <div className="flex">
@@ -185,6 +112,78 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
           <LinksConfigTab config={config} onConfigUpdate={onConfigUpdate} />
         )}
       </div>
+      
+      {/* Save Button Section */}
+      {hasChanges && (
+        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+          {/* Save Message */}
+          {saveMessage && (
+            <div 
+              className={`mb-3 p-2 rounded-lg text-xs ${
+                saveMessage.type === 'success' 
+                  ? 'bg-green-50 border-green-200 text-green-800' 
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {saveMessage.text}
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white',
+                border: '1px solid #075E54'
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = '#064e45';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }
+              }}
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save size={16} />
+              )}
+              <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
+            </button>
+            
+            <button
+              onClick={handleReset}
+              disabled={isSaving}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Descartar</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

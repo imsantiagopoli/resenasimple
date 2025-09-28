@@ -1,37 +1,34 @@
 import React, { useState } from 'react';
-import { useBusiness } from '../hooks/useBusiness';
 import { useVotingConfig } from '../hooks/useVotingConfig';
 import VotingConfigPanel from '../components/voting/VotingConfigPanel';
 import VotingPreviewPanel from '../components/voting/VotingPreviewPanel';
 
 const PaginaVotacionPage: React.FC = () => {
-  const { branches, loading: branchesLoading } = useBusiness();
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
-  
-  // Get the main branch by default
-  const mainBranch = branches.find(branch => branch.is_main) || branches[0];
-  const currentBranchId = selectedBranchId || mainBranch?.id || '';
-  
-  const { config, loading: configLoading, updateVotingConfig, getOrCreateConfig } = useVotingConfig(currentBranchId);
+  const { 
+    config, 
+    loading: configLoading, 
+    updateConfig, 
+    saveConfig,
+    resetChanges,
+    getOrCreateConfig, 
+    hasChanges,
+    isSaving
+  } = useVotingConfig();
 
   // Initialize config if it doesn't exist
   React.useEffect(() => {
-    if (currentBranchId && !config && !configLoading) {
-      getOrCreateConfig(currentBranchId);
+    if (!config && !configLoading) {
+      getOrCreateConfig();
     }
-  }, [currentBranchId, config, configLoading]);
+  }, [config, configLoading]);
 
-  const handleConfigUpdate = async (updates: Partial<typeof config>) => {
+  const handleConfigUpdate = (updates: Partial<typeof config>) => {
     if (!config) return;
     
-    try {
-      await updateVotingConfig(updates);
-    } catch (error) {
-      console.error('Error updating config:', error);
-    }
+    updateConfig(updates);
   };
 
-  if (branchesLoading || configLoading) {
+  if (configLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
@@ -62,9 +59,10 @@ const PaginaVotacionPage: React.FC = () => {
           <VotingConfigPanel 
             config={config} 
             onConfigUpdate={handleConfigUpdate}
-            branches={branches}
-            selectedBranchId={currentBranchId}
-            onBranchChange={setSelectedBranchId}
+            hasChanges={hasChanges}
+            onSave={saveConfig}
+            onReset={resetChanges}
+            isSaving={isSaving}
           />
         </div>
         

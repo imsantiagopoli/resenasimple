@@ -1,39 +1,25 @@
 import React, { useState } from 'react';
 import { Building2, ExternalLink, Copy, Eye, Check } from 'lucide-react';
-import { VotingConfig } from '../../pages/PaginaVotacionPage';
+import { VotingConfiguration } from '../../hooks/useVotingConfig';
+import { useBusiness } from '../../hooks/useBusiness';
 
 interface LinksConfigTabProps {
-  config: VotingConfig;
-  onConfigUpdate: (updates: Partial<VotingConfig>) => void;
+  config: VotingConfiguration;
+  onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
 }
 
 const LinksConfigTab: React.FC<LinksConfigTabProps> = ({ config, onConfigUpdate }) => {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const { branches } = useBusiness();
 
-  // Mock data para sucursales - en una implementación real vendría de MiNegocioPage
-  const branches = [
-    {
-      id: 1,
-      name: 'Sucursal Centro',
-      address: 'Av. Corrientes 1234, Buenos Aires',
-      slug: 'pizzeria-napolitana-centro',
-      isMain: true
-    },
-    {
-      id: 2,
-      name: 'Sucursal Palermo',
-      address: 'Thames 456, Palermo, Buenos Aires',
-      slug: 'pizzeria-napolitana-palermo',
-      isMain: false
-    },
-    {
-      id: 3,
-      name: 'Sucursal Belgrano',
-      address: 'Cabildo 789, Belgrano, Buenos Aires',
-      slug: 'pizzeria-napolitana-belgrano',
-      isMain: false
-    }
-  ];
+  // Use real branches data
+  const branchesData = branches.map(branch => ({
+    id: branch.id,
+    name: branch.name,
+    address: branch.address || 'Sin dirección configurada',
+    slug: branch.slug,
+    isMain: branch.is_main
+  }));
 
   const generateVotingLink = (slug: string) => {
     return `https://reseñasimple.com/v/${slug}`;
@@ -64,7 +50,7 @@ const LinksConfigTab: React.FC<LinksConfigTabProps> = ({ config, onConfigUpdate 
 
       {/* Links por Sucursal */}
       <div className="space-y-4">
-        {branches.map((branch) => {
+        {branchesData.map((branch) => {
           const votingLink = generateVotingLink(branch.slug);
           
           return (
