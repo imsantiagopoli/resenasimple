@@ -117,7 +117,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
         phone: tempBranchData.phone,
         is_main: tempBranchData.isMain,
         google_maps_link: tempBranchData.googleMapsLink,
-        slug: tempBranchData.slug || generateSlug(tempBranchData.name)
+        slug: tempBranchData.slug || await generateSlug(tempBranchData.name)
       };
       
       const { error } = await upsertBranch(branchToSave);
@@ -150,7 +150,11 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       
       // Auto-generate slug when name changes
       if (field === 'name' && typeof value === 'string') {
-        updated.slug = generateSlug(value);
+        updated.slug = value
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
       }
       
       setTempBranchData(updated);

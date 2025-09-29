@@ -17,6 +17,15 @@ const generateSlug = (name: string): string => {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 };
 
+// Helper function for backwards compatibility
+const generateSlugSync = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -97,7 +106,7 @@ export const useAuth = () => {
 
         // Step 3: Create main branch
         const branchName = `${restaurantName}`
-        const branchSlug = `${generateSlug(restaurantName)}`
+        const branchSlug = generateSlugSync(restaurantName) + '-' + Date.now().toString().slice(-6)
 
         const { error: branchError } = await supabase
           .from('business_branches')
