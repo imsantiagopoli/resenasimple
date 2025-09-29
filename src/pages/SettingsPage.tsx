@@ -467,84 +467,31 @@ const SettingsPage: React.FC = () => {
               Se cobrará ${subscriptionData.amount}
             </p>
           </div>
-
-          <div 
-            className="p-4 rounded-lg border"
-            style={{ 
-              backgroundColor: 'rgb(249, 250, 251)',
-              borderColor: 'rgb(229, 231, 235)'
-            }}
-          >
-            <div className="flex items-center space-x-3 mb-2">
-              <CreditCard size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Método de Pago
-              </h4>
-            </div>
-            <p className="text-lg font-semibold" style={{ color: '#161616' }}>
-              •••• 4242
-            </p>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Visa terminada en 4242
-            </p>
-          </div>
         </div>
 
-        {/* Subscription Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium border transition-all duration-200"
+        {/* Subscription Management */}
+        <div className="flex justify-center">
+          <a
+            href="https://resenasimple.lemonsqueezy.com/billing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200"
             style={{
-              backgroundColor: 'white',
-              borderColor: 'rgb(209, 213, 219)',
-              color: '#161616'
+              backgroundColor: '#075E54',
+              color: 'white',
+              border: '1px solid #075E54'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              e.currentTarget.style.backgroundColor = '#064e45';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-            }}
-          >
-            <Crown size={16} />
-            <span>Cambiar Plan</span>
-          </button>
-
-          <button
-            className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium border transition-all duration-200"
-            style={{
-              backgroundColor: 'white',
-              borderColor: 'rgb(209, 213, 219)',
-              color: '#161616'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
+              e.currentTarget.style.backgroundColor = '#075E54';
             }}
           >
             <CreditCard size={16} />
-            <span>Actualizar Pago</span>
-          </button>
-
-          <button
-            className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium border transition-all duration-200"
-            style={{
-              backgroundColor: 'white',
-              borderColor: 'rgb(209, 213, 219)',
-              color: '#161616'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-            }}
-          >
-            <ExternalLink size={16} />
-            <span>Ver Facturas</span>
-          </button>
+            <span>Gestionar Suscripción</span>
+            <ExternalLink size={14} />
+          </a>
         </div>
       </div>
 
