@@ -65,13 +65,21 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
           </h3>
           
           <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Tamaño: {config.qr.size}px
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                Tamaño del QR
+              </label>
+              <span className="text-sm font-medium px-2 py-1 rounded" style={{ 
+                backgroundColor: '#075E54' + '20', 
+                color: '#075E54' 
+              }}>
+                {config.qr.size}px
+              </span>
+            </div>
             <input
               type="range"
               min="100"
-              max="400"
+              max="600"
               value={config.qr.size}
               onChange={(e) => updateQR({ size: parseInt(e.target.value) })}
               className="w-full"
@@ -79,7 +87,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             />
             <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
               <span>100px</span>
-              <span>400px</span>
+              <span>600px</span>
             </div>
           </div>
         </div>
@@ -93,21 +101,31 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             Colores del QR
           </h3>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium" style={{ color: '#161616' }}>
                 Color del código
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <input
                   type="color"
                   value={config.qr.foregroundColor}
                   onChange={(e) => updateQR({ foregroundColor: e.target.value })}
-                  className="w-8 h-8 rounded border"
+                  className="w-12 h-10 rounded-lg border cursor-pointer"
+                  style={{ borderColor: 'rgb(209, 213, 219)' }}
                 />
-                <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  {config.qr.foregroundColor}
-                </span>
+                <input
+                  type="text"
+                  value={config.qr.foregroundColor}
+                  onChange={(e) => updateQR({ foregroundColor: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border text-sm"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                  placeholder="#000000"
+                />
               </div>
             </div>
             
@@ -115,17 +133,126 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
               <label className="block text-sm font-medium" style={{ color: '#161616' }}>
                 Color de fondo
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <input
                   type="color"
                   value={config.qr.backgroundColor}
                   onChange={(e) => updateQR({ backgroundColor: e.target.value })}
-                  className="w-8 h-8 rounded border"
+                  className="w-12 h-10 rounded-lg border cursor-pointer"
+                  style={{ borderColor: 'rgb(209, 213, 219)' }}
                 />
-                <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  {config.qr.backgroundColor}
+                <input
+                  type="text"
+                  value={config.qr.backgroundColor}
+                  onChange={(e) => updateQR({ backgroundColor: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border text-sm"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                  placeholder="#FFFFFF"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick color presets */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Combinaciones rápidas
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { name: 'Clásico', fg: '#000000', bg: '#FFFFFF' },
+                { name: 'Verde', fg: '#075E54', bg: '#FFFFFF' },
+                { name: 'Invertido', fg: '#FFFFFF', bg: '#000000' }
+              ].map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => updateQR({ 
+                    foregroundColor: preset.fg, 
+                    backgroundColor: preset.bg 
+                  })}
+                  className="p-2 text-xs font-medium rounded-lg border transition-all duration-200"
+                  style={{
+                    backgroundColor: 'white',
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }}
+                >
+                  {preset.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+        {/* Margen y Calidad */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Configuración Avanzada
+          </h3>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Margen
+                </label>
+                <span className="text-sm font-medium px-2 py-1 rounded" style={{ 
+                  backgroundColor: '#075E54' + '20', 
+                  color: '#075E54' 
+                }}>
+                  {config.qr.margin}px
                 </span>
               </div>
+              <input
+                type="range"
+                min="0"
+                max="20"
+                value={config.qr.margin}
+                onChange={(e) => updateQR({ margin: parseInt(e.target.value) })}
+                className="w-full"
+                style={{ accentColor: '#075E54' }}
+              />
+              <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                <span>0px</span>
+                <span>20px</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                Nivel de corrección de errores
+              </label>
+              <select
+                value={config.qr.errorCorrectionLevel}
+                onChange={(e) => updateQR({ errorCorrectionLevel: e.target.value as 'L' | 'M' | 'Q' | 'H' })}
+                className="w-full px-3 py-2 rounded-lg border text-sm"
+                style={{
+                  borderColor: 'rgb(209, 213, 219)',
+                  color: '#161616',
+                  backgroundColor: 'white'
+                }}
+              >
+                <option value="L">Bajo (L) - Hasta 7% de daño</option>
+                <option value="M">Medio (M) - Hasta 15% de daño</option>
+                <option value="Q">Alto (Q) - Hasta 25% de daño</option>
+                <option value="H">Muy Alto (H) - Hasta 30% de daño</option>
+              </select>
+              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                Niveles más altos permiten que el QR funcione aún si está dañado, pero será más denso
+              </p>
             </div>
           </div>
         </div>

@@ -41,6 +41,18 @@ const PaginaQRPage: React.FC = () => {
     updateConfig(updates);
   };
 
+  // Force regenerate QR when config is saved
+  const handleSaveConfig = async () => {
+    const result = await saveConfig();
+    
+    // If save was successful, force a re-render of the QR preview
+    if (!result.error && selectedBranch) {
+      // The QR will automatically regenerate due to the useEffect in QRPreviewPanel
+    }
+    
+    return result;
+  };
+
   const handleDownload = () => {
     if (!selectedBranch) return;
     const qrURL = generateQRURL(selectedBranch.slug, config);
@@ -181,7 +193,7 @@ const PaginaQRPage: React.FC = () => {
             config={config} 
             onConfigUpdate={handleConfigUpdate}
             hasChanges={hasChanges}
-            onSave={saveConfig}
+            onSave={handleSaveConfig}
             onReset={resetChanges}
             isSaving={isSaving}
             onDownload={handleDownload}

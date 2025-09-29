@@ -686,6 +686,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   // Generate QR URL
   const generateQRURL = (branchSlug: string, qrConfig?: QRConfiguration): string => {
+    // Always prioritize the passed config to ensure real-time updates
     const config = qrConfig || qrConfiguration;
     const baseURL = 'https://resenasimple.com';
     const votingURL = `${baseURL}/v/${branchSlug}`;
@@ -704,17 +705,24 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       return `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
     }
     
+    // Ensure colors don't have # prefix for QR API
+    const foregroundColor = config.qr.foregroundColor.replace('#', '');
+    const backgroundColor = config.qr.backgroundColor.replace('#', '');
+    
     const params = new URLSearchParams({
       size: `${config.qr.size}x${config.qr.size}`,
       data: votingURL,
       format: 'png',
-      bgcolor: config.qr.backgroundColor.replace('#', ''),
-      color: config.qr.foregroundColor.replace('#', ''),
+      bgcolor: backgroundColor,
+      color: foregroundColor,
       ecc: config.qr.errorCorrectionLevel,
       margin: config.qr.margin.toString()
     });
 
-    return `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
+    const qrURL = `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
+    
+    // Add cache busting parameter to ensure fresh QR generation
+    return `${qrURL}&t=${Date.now()}`;
   };
 
   // Fetch voting configuration

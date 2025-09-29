@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, ChevronDown, Download, Printer } from 'lucide-react';
+import { Building2, ChevronDown, Download, Printer, RefreshCw } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { BusinessBranch } from '../../hooks/useBusiness';
 
@@ -16,6 +16,20 @@ interface QRPreviewPanelProps {
 const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const { config, selectedBranch, branches, onBranchChange, generateQRURL } = qrData;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [qrImageUrl, setQrImageUrl] = useState<string>('');
+  const [isLoadingQR, setIsLoadingQR] = useState(false);
+
+  // Generate QR URL whenever config or selected branch changes
+  React.useEffect(() => {
+    if (selectedBranch && config) {
+      setIsLoadingQR(true);
+      const newQRUrl = generateQRURL(selectedBranch.slug, config);
+      setQrImageUrl(newQRUrl);
+      
+      // Add a small delay to show loading state
+      setTimeout(() => setIsLoadingQR(false), 300);
+    }
+  }, [selectedBranch, config, generateQRURL]);
 
   const handleDownload = () => {
     const qrURL = generateQRURL(selectedBranch.slug, config);
@@ -219,6 +233,11 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             
             {/* QR Code Container */}
             <div className="relative mb-6 inline-block">
+              {isLoadingQR && (
+                <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+                  <RefreshCw size={24} className="animate-spin" style={{ color: '#075E54' }} />
+                </div>
+              )}
               <div 
                 className="p-4 rounded-lg"
                 style={{
@@ -228,13 +247,15 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
               >
                 <div className="relative">
                   <img 
-                    src={generateQRURL(selectedBranch.slug, config)}
+                    src={qrImageUrl}
                     alt="Código QR"
                     className="block"
                     style={{ 
                       width: config.qr.size,
                       height: config.qr.size
                     }}
+                    onLoad={() => setIsLoadingQR(false)}
+                    onError={() => setIsLoadingQR(false)}
                   />
                 </div>
               </div>

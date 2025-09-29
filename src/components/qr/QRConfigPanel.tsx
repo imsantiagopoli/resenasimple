@@ -67,6 +67,12 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
+  // Show real-time preview notice
+  const showPreviewNotice = () => {
+    setSaveMessage({ type: 'success', text: 'Los cambios se ven en tiempo real en la vista previa' });
+    setTimeout(() => setSaveMessage(null), 2000);
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Tabs Header */}
@@ -104,6 +110,26 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
+        {/* Preview Notice for Design Tab */}
+        {activeTab === 'design' && (
+          <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <div 
+              className="p-3 rounded-lg text-sm"
+              style={{ 
+                backgroundColor: '#075E54' + '08',
+                border: '1px solid #075E54' + '30'
+              }}
+            >
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span style={{ color: '#075E54' }}>
+                  <strong>Vista previa en tiempo real:</strong> Los cambios se reflejan inmediatamente
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <QRConfigTab 
           activeTab={activeTab} 
           config={config} 
