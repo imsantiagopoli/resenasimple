@@ -184,7 +184,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
                 Cerrar Sesión
               </span>
             </button>
-          </div>
         </div>
       </div>
     </div>
