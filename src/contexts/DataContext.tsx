@@ -249,6 +249,293 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [sessionsError, setSessionsError] = useState<string | null>(null);
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
 
+  // Voting configuration state
+  const [votingConfiguration, setVotingConfiguration] = useState<VotingConfiguration | null>(null);
+  const [originalVotingConfiguration, setOriginalVotingConfiguration] = useState<VotingConfiguration | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [configHasChanges, setConfigHasChanges] = useState(false);
+  const [configIsSaving, setConfigIsSaving] = useState(false);
+
+  // Helper functions for voting configuration
+  const mapRecordToConfigUI = (record: VotingConfigurationRecord): VotingConfiguration => {
+    return {
+      id: record.id,
+      business_id: record.business_id,
+      design: {
+        message: {
+          headline: record.encabezado,
+          body: record.cuerpo
+        },
+        showLogo: record.mostrar_logo,
+        logoShape: record.forma_logo,
+        logoDisplayPages: record.mostrar_logo_en,
+        starLabels: {
+          enabled: record.mostrar_etiquetas_estrellas,
+          labels: {
+            1: record.etiqueta_1_estrella,
+            2: record.etiqueta_2_estrellas,
+            3: record.etiqueta_3_estrellas,
+            4: record.etiqueta_4_estrellas,
+            5: record.etiqueta_5_estrellas
+          }
+        },
+        specialOffer: {
+          enabled: record.oferta_especial_activa,
+          headline: record.oferta_especial_titulo,
+          body: record.oferta_especial_descripcion
+        },
+        socials: {
+          instagram: record.mostrar_instagram,
+          tiktok: record.mostrar_tiktok,
+          linkedin: record.mostrar_linkedin,
+          twitter: record.mostrar_twitter,
+          youtube: record.mostrar_youtube,
+          website: record.mostrar_website
+        }
+      },
+      typography: {
+        primaryFont: record.tipografia_principal,
+        secondaryFont: record.tipografia_secundaria
+      },
+      colors: {
+        buttonColor: record.color_botones
+      },
+      logic: {
+        threshold: record.umbral_estrellas,
+        smartAutoRedirect: record.redireccion_automatica,
+        publicWorkflow: {
+          thankYouMessage: record.mensaje_agradecimiento_publico,
+          buttonText: record.texto_boton_publico
+        },
+        privateWorkflow: {
+          feedbackMessage: record.mensaje_feedback_privado,
+          thankYouMessage: record.mensaje_agradecimiento_privado,
+          collectName: record.solicitar_nombre,
+          nameRequired: record.nombre_requerido,
+          collectPhone: record.solicitar_telefono,
+          phoneRequired: record.telefono_requerido,
+          collectEmail: record.solicitar_email,
+          emailRequired: record.email_requerido
+        },
+        prompt: {
+          enabled: record.prompt_preventivo_activo,
+          text: record.texto_prompt_preventivo
+        }
+      },
+      created_at: record.created_at,
+      updated_at: record.updated_at
+    };
+  };
+
+  const mapConfigUIToRecord = (config: VotingConfiguration): Omit<VotingConfigurationRecord, 'created_at' | 'updated_at'> => {
+    return {
+      id: config.id,
+      business_id: config.business_id,
+      encabezado: config.design.message.headline,
+      cuerpo: config.design.message.body,
+      mostrar_logo: config.design.showLogo,
+      forma_logo: config.design.logoShape,
+      mostrar_logo_en: config.design.logoDisplayPages,
+      tipografia_principal: config.typography.primaryFont,
+      tipografia_secundaria: config.typography.secondaryFont,
+      color_botones: config.colors.buttonColor,
+      mostrar_etiquetas_estrellas: config.design.starLabels.enabled,
+      etiqueta_1_estrella: config.design.starLabels.labels[1],
+      etiqueta_2_estrellas: config.design.starLabels.labels[2],
+      etiqueta_3_estrellas: config.design.starLabels.labels[3],
+      etiqueta_4_estrellas: config.design.starLabels.labels[4],
+      etiqueta_5_estrellas: config.design.starLabels.labels[5],
+      oferta_especial_activa: config.design.specialOffer.enabled,
+      oferta_especial_titulo: config.design.specialOffer.headline,
+      oferta_especial_descripcion: config.design.specialOffer.body,
+      mostrar_instagram: config.design.socials.instagram,
+      mostrar_tiktok: config.design.socials.tiktok,
+      mostrar_linkedin: config.design.socials.linkedin,
+      mostrar_twitter: config.design.socials.twitter,
+      mostrar_youtube: config.design.socials.youtube,
+      mostrar_website: config.design.socials.website,
+      umbral_estrellas: config.logic.threshold,
+      redireccion_automatica: config.logic.smartAutoRedirect,
+      mensaje_agradecimiento_publico: config.logic.publicWorkflow.thankYouMessage,
+      texto_boton_publico: config.logic.publicWorkflow.buttonText,
+      mensaje_feedback_privado: config.logic.privateWorkflow.feedbackMessage,
+      mensaje_agradecimiento_privado: config.logic.privateWorkflow.thankYouMessage,
+      solicitar_nombre: config.logic.privateWorkflow.collectName,
+      nombre_requerido: config.logic.privateWorkflow.nameRequired,
+      solicitar_telefono: config.logic.privateWorkflow.collectPhone,
+      telefono_requerido: config.logic.privateWorkflow.phoneRequired,
+      solicitar_email: config.logic.privateWorkflow.collectEmail,
+      email_requerido: config.logic.privateWorkflow.emailRequired,
+      prompt_preventivo_activo: config.logic.prompt.enabled,
+      texto_prompt_preventivo: config.logic.prompt.text
+    };
+  };
+
+  // Fetch voting configuration
+  const fetchVotingConfig = async (): Promise<VotingConfiguration | null> => {
+    if (!businessProfile?.id) {
+      setConfigLoaded(true);
+      return null;
+    }
+
+    try {
+      setConfigLoading(true);
+      setConfigError(null);
+
+      const { data, error } = await supabase
+        .from('voting_configuration')
+        .select('*')
+        .eq('business_id', businessProfile.id)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const config = mapRecordToConfigUI(data);
+        setVotingConfiguration(config);
+        setOriginalVotingConfiguration(config);
+        setConfigLoaded(true);
+        return config;
+      } else {
+        setVotingConfiguration(null);
+        setOriginalVotingConfiguration(null);
+        setConfigLoaded(true);
+        return null;
+      }
+    } catch (err: any) {
+      console.error('Error fetching voting config:', err);
+      setConfigError(err.message || 'Error al cargar la configuración');
+      setConfigLoaded(true);
+      return null;
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // Create default voting configuration
+  const createDefaultVotingConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    if (!businessProfile?.id) {
+      return { data: null, error: 'No hay perfil de negocio' };
+    }
+
+    try {
+      setConfigLoading(true);
+      setConfigError(null);
+
+      const { data, error } = await supabase
+        .from('voting_configuration')
+        .insert([{ business_id: businessProfile.id }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const config = mapRecordToConfigUI(data);
+      setVotingConfiguration(config);
+      setOriginalVotingConfiguration(config);
+      setConfigHasChanges(false);
+      
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error creating default config:', err);
+      const errorMessage = err.message || 'Error al crear la configuración';
+      setConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // Get or create voting configuration
+  const getOrCreateVotingConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    try {
+      let config = await fetchVotingConfig();
+      
+      if (!config) {
+        const result = await createDefaultVotingConfig();
+        config = result.data;
+        if (result.error) {
+          return result;
+        }
+      }
+      
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error in getOrCreateVotingConfig:', err);
+      return { data: null, error: err.message || 'Error al obtener la configuración' };
+    }
+  };
+
+  // Update voting configuration (local state only)
+  const updateVotingConfig = (updates: Partial<VotingConfiguration>) => {
+    if (!votingConfiguration) return;
+
+    const updatedConfig = {
+      ...votingConfiguration,
+      ...updates
+    };
+    
+    setVotingConfiguration(updatedConfig);
+    
+    // Check if there are changes compared to original
+    if (originalVotingConfiguration) {
+      const hasChanges = JSON.stringify(updatedConfig) !== JSON.stringify(originalVotingConfiguration);
+      setConfigHasChanges(hasChanges);
+    }
+  };
+
+  // Save voting configuration
+  const saveVotingConfig = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    if (!votingConfiguration || !businessProfile?.id) {
+      return { data: null, error: 'No hay configuración para guardar' };
+    }
+
+    try {
+      setConfigIsSaving(true);
+      setConfigError(null);
+
+      const recordData = mapConfigUIToRecord(votingConfiguration);
+      
+      const { data, error } = await supabase
+        .from('voting_configuration')
+        .upsert([recordData])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const updatedConfig = mapRecordToConfigUI(data);
+      setVotingConfiguration(updatedConfig);
+      setOriginalVotingConfiguration(updatedConfig);
+      setConfigHasChanges(false);
+      
+      return { data: updatedConfig, error: null };
+    } catch (err: any) {
+      console.error('Error saving voting config:', err);
+      const errorMessage = err.message || 'Error al guardar la configuración';
+      setConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setConfigIsSaving(false);
+    }
+  };
+
+  // Reset voting configuration changes
+  const resetVotingConfigChanges = () => {
+    if (originalVotingConfiguration) {
+      setVotingConfiguration(originalVotingConfiguration);
+      setConfigHasChanges(false);
+    }
+  };
+
   // Fetch business data
   const fetchBusinessData = async () => {
     if (!user) {
@@ -527,6 +814,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       fetchVotingConfig();
     }
   }, [businessProfile?.id, configLoaded]);
+  
   // Reset state when user changes
   useEffect(() => {
     if (!user) {
