@@ -424,48 +424,25 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
-              Incluye:
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {subscriptionData.features.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Check size={14} style={{ color: '#10b981' }} />
-                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    {feature}
-                  </span>
-                </div>
-              ))}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-2">
+                <Calendar size={16} style={{ color: 'rgb(107, 114, 128)' }} />
+                <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
+                  Próxima Facturación
+                </h4>
+              </div>
+              <p className="text-lg font-semibold" style={{ color: '#161616' }}>
+                {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </p>
+              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                Se cobrará ${subscriptionData.amount}
+              </p>
             </div>
-          </div>
-        </div>
-
-        {/* Billing Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div 
-            className="p-4 rounded-lg border"
-            style={{ 
-              backgroundColor: 'rgb(249, 250, 251)',
-              borderColor: 'rgb(229, 231, 235)'
-            }}
-          >
-            <div className="flex items-center space-x-3 mb-2">
-              <Calendar size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Próxima Facturación
-              </h4>
-            </div>
-            <p className="text-lg font-semibold" style={{ color: '#161616' }}>
-              {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </p>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Se cobrará ${subscriptionData.amount}
-            </p>
           </div>
         </div>
 
