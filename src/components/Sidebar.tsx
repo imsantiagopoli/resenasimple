@@ -107,28 +107,49 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
           <div className="space-y-3">
             {/* User Info */}
             <div 
-              className="flex items-center p-3 rounded-lg transition-colors duration-200"
+              className="flex items-center justify-between p-3 rounded-lg transition-colors duration-200"
               style={{ backgroundColor: 'rgb(249, 250, 251)' }}
             >
-              <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: '#075E54' }}
-              >
-                <User size={16} style={{ color: 'rgb(255, 255, 255)' }} />
+              <div className="flex items-center overflow-hidden">
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#075E54' }}
+                >
+                  <User size={16} style={{ color: 'rgb(255, 255, 255)' }} />
+                </div>
+                <div className="ml-3 overflow-hidden">
+                  <p 
+                    className="font-medium text-sm truncate"
+                    style={{ color: 'rgb(17, 24, 39)' }}
+                  >
+                    {user?.user_metadata?.full_name || 'Usuario'}
+                  </p>
+                  <p 
+                    className="text-xs truncate"
+                    style={{ color: 'rgb(107, 114, 128)' }}
+                  >
+                    {user?.email || ''}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3 overflow-hidden">
-                <p 
-                  className="font-medium text-sm truncate"
-                  style={{ color: 'rgb(17, 24, 39)' }}
-                >
-                  {user?.user_metadata?.full_name || 'Usuario'}
-                </p>
-                <p 
-                  className="text-xs truncate"
-                  style={{ color: 'rgb(107, 114, 128)' }}
-                >
-                  {user?.email || ''}
-                </p>
+              
+              {/* Settings Button */}
+              <button
+                onClick={() => navigate('/app/configuracion')}
+                className="p-2 rounded-lg transition-all duration-200 flex-shrink-0"
+                style={{ color: 'rgb(107, 114, 128)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  e.currentTarget.style.color = '#075E54';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgb(107, 114, 128)';
+                }}
+                title="Configuración"
+              >
+                <Settings size={16} />
+              </button>
               </div>
             </div>
 
