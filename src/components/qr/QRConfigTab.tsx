@@ -1,5 +1,5 @@
 import React from 'react';
-import { QrCode, FileText, Printer } from 'lucide-react';
+import { QrCode, FileText, Printer, Type } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
 interface QRConfigTabProps {
@@ -30,6 +30,15 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
     onConfigUpdate({
       design: {
         ...config.design,
+        ...updates
+      }
+    });
+  };
+
+  const updateTypography = (updates: Partial<QRConfiguration['typography']>) => {
+    onConfigUpdate({
+      typography: {
+        ...config.typography,
         ...updates
       }
     });
@@ -252,6 +261,168 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
               </select>
               <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
                 Niveles más altos permiten que el QR funcione aún si está dañado, pero será más denso
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+        {/* Tipografía */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Tipografía
+          </h3>
+          
+          <div className="space-y-6">
+            {/* Tipografía Principal */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
+                Tipografía Principal (Títulos)
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Fuente
+                  </label>
+                  <select
+                    value={config.typography.primaryFont}
+                    onChange={(e) => updateTypography({ primaryFont: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
+                    style={{
+                      borderColor: 'rgb(209, 213, 219)',
+                      color: '#161616',
+                      backgroundColor: 'white'
+                    }}
+                  >
+                    <option value="Cabinet Grotesk">Cabinet Grotesk</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                    <option value="Impact">Impact</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Color
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.typography.primaryColor}
+                      onChange={(e) => updateTypography({ primaryColor: e.target.value })}
+                      className="w-8 h-8 rounded border cursor-pointer"
+                      style={{ borderColor: 'rgb(209, 213, 219)' }}
+                    />
+                    <input
+                      type="text"
+                      value={config.typography.primaryColor}
+                      onChange={(e) => updateTypography({ primaryColor: e.target.value })}
+                      className="flex-1 px-2 py-2 rounded border text-xs"
+                      style={{
+                        borderColor: 'rgb(209, 213, 219)',
+                        color: '#161616',
+                        backgroundColor: 'white'
+                      }}
+                      placeholder="#161616"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Tipografía Secundaria */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
+                Tipografía Secundaria (Subtítulos)
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Fuente
+                  </label>
+                  <select
+                    value={config.typography.secondaryFont}
+                    onChange={(e) => updateTypography({ secondaryFont: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
+                    style={{
+                      borderColor: 'rgb(209, 213, 219)',
+                      color: '#161616',
+                      backgroundColor: 'white'
+                    }}
+                  >
+                    <option value="Cabinet Grotesk">Cabinet Grotesk</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                    <option value="Tahoma">Tahoma</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Color
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.typography.secondaryColor}
+                      onChange={(e) => updateTypography({ secondaryColor: e.target.value })}
+                      className="w-8 h-8 rounded border cursor-pointer"
+                      style={{ borderColor: 'rgb(209, 213, 219)' }}
+                    />
+                    <input
+                      type="text"
+                      value={config.typography.secondaryColor}
+                      onChange={(e) => updateTypography({ secondaryColor: e.target.value })}
+                      className="flex-1 px-2 py-2 rounded border text-xs"
+                      style={{
+                        borderColor: 'rgb(209, 213, 219)',
+                        color: '#161616',
+                        backgroundColor: 'white'
+                      }}
+                      placeholder="#6b7280"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Vista Previa de Tipografía */}
+            <div 
+              className="p-4 rounded-lg border text-center"
+              style={{ 
+                backgroundColor: 'rgb(249, 250, 251)',
+                borderColor: 'rgb(229, 231, 235)'
+              }}
+            >
+              <h4 
+                className="text-lg font-bold mb-2"
+                style={{ 
+                  fontFamily: config.typography.primaryFont,
+                  color: config.typography.primaryColor
+                }}
+              >
+                Vista Previa - Título Principal
+              </h4>
+              <p 
+                className="text-sm"
+                style={{ 
+                  fontFamily: config.typography.secondaryFont,
+                  color: config.typography.secondaryColor
+                }}
+              >
+                Vista previa del subtítulo y texto secundario
               </p>
             </div>
           </div>

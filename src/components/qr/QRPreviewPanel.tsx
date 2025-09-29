@@ -219,14 +219,26 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           <div className="text-center max-w-md">
             {/* Título */}
             {config.content.showTitle && (
-              <h1 className="text-2xl font-bold mb-4" style={{ color: '#161616' }}>
+              <h1 
+                className="text-2xl font-bold mb-4" 
+                style={{ 
+                  color: config.typography.primaryColor,
+                  fontFamily: config.typography.primaryFont
+                }}
+              >
                 {config.content.title}
               </h1>
             )}
             
             {/* Subtítulo */}
             {config.content.showSubtitle && (
-              <p className="text-lg mb-8" style={{ color: 'rgb(107, 114, 128)' }}>
+              <p 
+                className="text-lg mb-8" 
+                style={{ 
+                  color: config.typography.secondaryColor,
+                  fontFamily: config.typography.secondaryFont
+                }}
+              >
                 {config.content.subtitle}
               </p>
             )}
@@ -263,7 +275,13 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             
             {/* Call to Action */}
             {config.content.showCallToAction && (
-              <p className="text-lg font-semibold" style={{ color: '#075E54' }}>
+              <p 
+                className="text-lg font-semibold" 
+                style={{ 
+                  color: config.typography.primaryColor,
+                  fontFamily: config.typography.primaryFont
+                }}
+              >
                 {config.content.callToAction}
               </p>
             )}

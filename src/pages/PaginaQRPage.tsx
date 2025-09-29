@@ -90,8 +90,11 @@ const PaginaQRPage: React.FC = () => {
           <head>
             <title>Código QR - ${selectedBranch.name}</title>
             <style>
+              @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+              @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@100,200,300,400,500,700,800,900&display=swap');
+              
               body {
-                font-family: Arial, sans-serif;
+                font-family: '${config.typography.secondaryFont}', Arial, sans-serif;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -107,9 +110,22 @@ const PaginaQRPage: React.FC = () => {
                 border-radius: 8px;
                 background: ${config.qr.backgroundColor};
               }
-              h1 { color: #161616; margin-bottom: 10px; }
-              h2 { color: rgb(107, 114, 128); margin-bottom: 20px; font-weight: normal; }
-              .cta { color: #075E54; margin-top: 20px; font-weight: bold; }
+              h1 { 
+                color: ${config.typography.primaryColor}; 
+                font-family: '${config.typography.primaryFont}', Arial, sans-serif;
+                margin-bottom: 10px; 
+              }
+              h2 { 
+                color: ${config.typography.secondaryColor}; 
+                font-family: '${config.typography.secondaryFont}', Arial, sans-serif;
+                margin-bottom: 20px; font-weight: normal; 
+              }
+              .cta { 
+                color: ${config.typography.primaryColor}; 
+                font-family: '${config.typography.primaryFont}', Arial, sans-serif;
+                margin-top: 20px; 
+                font-weight: bold; 
+              }
               .instructions {
                 margin-top: 30px;
                 padding: 15px;

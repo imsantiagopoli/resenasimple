@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download } from 'lucide-react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Type } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
@@ -32,6 +32,11 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'design' as const,
       label: 'Diseño',
       icon: QrCode
+    },
+    {
+      id: 'typography' as const,
+      label: 'Tipografía',
+      icon: Type
     },
     {
       id: 'content' as const,
