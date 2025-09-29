@@ -14,6 +14,7 @@ import PaginaVotacionPage from './pages/PaginaVotacionPage';
 import PaginaQRPage from './pages/PaginaQRPage';
 import ResenasPage from './pages/ResenasPage';
 import VotingPage from './pages/VotingPage';
+import SettingsPage from './pages/SettingsPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -75,6 +76,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <DashboardLayout activePage="resenas">
                 <ResenasPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/app/configuracion" 
+          element={
+            <ProtectedRoute>
+              <DashboardLayout activePage="configuracion">
+                <SettingsPage />
               </DashboardLayout>
             </ProtectedRoute>
           } 
