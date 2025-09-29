@@ -379,14 +379,14 @@ const SettingsPage: React.FC = () => {
 
       {/* Subscription Section */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="flex items-center space-x-3 mb-6">
+        <div className="flex items-center justify-between mb-6">
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center"
             style={{ backgroundColor: '#f59e0b' + '20' }}
           >
             <Crown size={20} style={{ color: '#f59e0b' }} />
           </div>
-          <div>
+          <div className="flex-1 mx-4">
             <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
               Suscripción
             </h2>
@@ -394,6 +394,28 @@ const SettingsPage: React.FC = () => {
               Gestiona tu plan y facturación
             </p>
           </div>
+          
+          <a
+            href="https://resenasimple.lemonsqueezy.com/billing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200"
+            style={{
+              backgroundColor: '#075E54',
+              color: 'white',
+              border: '1px solid #075E54'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#064e45';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#075E54';
+            }}
+          >
+            <CreditCard size={16} />
+            <span>Gestionar Suscripción</span>
+            <ExternalLink size={14} />
+          </a>
         </div>
 
         {/* Plan and Billing Info - Two Columns */}
@@ -452,31 +474,6 @@ const SettingsPage: React.FC = () => {
               Se cobrará ${subscriptionData.amount}
             </p>
           </div>
-        </div>
-
-        {/* Subscription Management */}
-        <div className="flex justify-center">
-          <a
-            href="https://resenasimple.lemonsqueezy.com/billing"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200"
-            style={{
-              backgroundColor: '#075E54',
-              color: 'white',
-              border: '1px solid #075E54'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#064e45';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#075E54';
-            }}
-          >
-            <CreditCard size={16} />
-            <span>Gestionar Suscripción</span>
-            <ExternalLink size={14} />
-          </a>
         </div>
       </div>
 
