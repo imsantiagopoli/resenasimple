@@ -10,7 +10,8 @@ import {
   ArrowDown,
   BarChart3,
   QrCode,
-  Building2
+  Building2,
+  Vote
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVotingSessions } from '../hooks/useVotingSessions';
