@@ -52,6 +52,118 @@ export interface VotingSession {
   branch_slug?: string;
 }
 
+// Voting Configuration Types
+export interface VotingConfigurationRecord {
+  id: string
+  business_id: string
+  encabezado: string
+  cuerpo: string
+  mostrar_logo: boolean
+  forma_logo: 'circular' | 'square'
+  mostrar_logo_en: 'all' | 'voting-only'
+  tipografia_principal: string
+  tipografia_secundaria: string
+  color_botones: string
+  mostrar_etiquetas_estrellas: boolean
+  etiqueta_1_estrella: string
+  etiqueta_2_estrellas: string
+  etiqueta_3_estrellas: string
+  etiqueta_4_estrellas: string
+  etiqueta_5_estrellas: string
+  oferta_especial_activa: boolean
+  oferta_especial_titulo: string
+  oferta_especial_descripcion: string
+  mostrar_instagram: boolean
+  mostrar_tiktok: boolean
+  mostrar_linkedin: boolean
+  mostrar_twitter: boolean
+  mostrar_youtube: boolean
+  mostrar_website: boolean
+  umbral_estrellas: number
+  redireccion_automatica: boolean
+  mensaje_agradecimiento_publico: string
+  texto_boton_publico: string
+  mensaje_feedback_privado: string
+  mensaje_agradecimiento_privado: string
+  solicitar_nombre: boolean
+  nombre_requerido: boolean
+  solicitar_telefono: boolean
+  telefono_requerido: boolean
+  solicitar_email: boolean
+  email_requerido: boolean
+  prompt_preventivo_activo: boolean
+  texto_prompt_preventivo: string
+  created_at: string
+  updated_at: string
+}
+
+export interface VotingConfiguration {
+  id: string
+  business_id: string
+  design: {
+    message: {
+      headline: string
+      body: string
+    }
+    showLogo: boolean
+    logoShape: 'circular' | 'square'
+    logoDisplayPages: 'all' | 'voting-only'
+    starLabels: {
+      enabled: boolean
+      labels: {
+        1: string
+        2: string
+        3: string
+        4: string
+        5: string
+      }
+    }
+    specialOffer: {
+      enabled: boolean
+      headline: string
+      body: string
+    }
+    socials: {
+      instagram: boolean
+      tiktok: boolean
+      linkedin: boolean
+      twitter: boolean
+      youtube: boolean
+      website: boolean
+    }
+  }
+  typography: {
+    primaryFont: string
+    secondaryFont: string
+  }
+  colors: {
+    buttonColor: string
+  }
+  logic: {
+    threshold: number
+    smartAutoRedirect: boolean
+    publicWorkflow: {
+      thankYouMessage: string
+      buttonText: string
+    }
+    privateWorkflow: {
+      feedbackMessage: string
+      thankYouMessage: string
+      collectName: boolean
+      nameRequired: boolean
+      collectPhone: boolean
+      phoneRequired: boolean
+      collectEmail: boolean
+      emailRequired: boolean
+    }
+    prompt: {
+      enabled: boolean
+      text: string
+    }
+  }
+  created_at: string
+  updated_at: string
+}
 interface DataContextType {
   // Business data
   businessProfile: BusinessProfile | null;
@@ -66,6 +178,15 @@ interface DataContextType {
   sessionsError: string | null;
   sessionsLoaded: boolean;
   
+  // Voting configuration data
+  votingConfiguration: VotingConfiguration | null;
+  originalVotingConfiguration: VotingConfiguration | null;
+  configLoading: boolean;
+  configError: string | null;
+  configLoaded: boolean;
+  configHasChanges: boolean;
+  configIsSaving: boolean;
+  
   // Actions
   updateBusinessProfile: (updates: Partial<Omit<BusinessProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => Promise<{ data: any; error: string | null }>;
   upsertBranch: (branch: Partial<BusinessBranch>) => Promise<{ data: any; error: string | null }>;
@@ -73,6 +194,14 @@ interface DataContextType {
   refetchBusinessData: () => Promise<void>;
   refetchSessionsData: () => Promise<void>;
   generateSlug: (name: string) => string;
+  
+  // Voting config actions
+  updateVotingConfig: (updates: Partial<VotingConfiguration>) => void;
+  saveVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
+  createDefaultVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
+  getOrCreateVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
+  resetVotingConfigChanges: () => void;
+  refetchVotingConfig: () => Promise<VotingConfiguration | null>;
   
   // Statistics helpers
   getStatistics: () => {
