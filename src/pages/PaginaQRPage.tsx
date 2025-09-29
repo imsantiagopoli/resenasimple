@@ -41,6 +41,89 @@ const PaginaQRPage: React.FC = () => {
     updateConfig(updates);
   };
 
+  const handleDownload = () => {
+    if (!selectedBranch) return;
+    const qrURL = generateQRURL(selectedBranch.slug, config);
+    const link = document.createElement('a');
+    link.href = qrURL;
+    link.download = `qr-${selectedBranch.slug}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    if (!selectedBranch || !config) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const qrURL = generateQRURL(selectedBranch.slug, config);
+      const content = `
+        <html>
+          <head>
+            <title>Código QR - ${selectedBranch.name}</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 20px;
+                text-align: center;
+              }
+              .qr-container {
+                border: ${config.design.showFrame ? `${config.design.frameThickness}px solid ${config.design.frameColor}` : 'none'};
+                padding: 20px;
+                border-radius: 8px;
+                background: ${config.qr.backgroundColor};
+              }
+              h1 { color: #161616; margin-bottom: 10px; }
+              h2 { color: rgb(107, 114, 128); margin-bottom: 20px; font-weight: normal; }
+              .cta { color: #075E54; margin-top: 20px; font-weight: bold; }
+              .instructions {
+                margin-top: 30px;
+                padding: 15px;
+                background: #f9fafb;
+                border-radius: 8px;
+                color: rgb(107, 114, 128);
+                font-size: 14px;
+                max-width: 400px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="qr-container">
+              ${config.content.showTitle ? `<h1>${config.content.title}</h1>` : ''}
+              ${config.content.showSubtitle ? `<h2>${config.content.subtitle}</h2>` : ''}
+              <img src="${qrURL}" alt="Código QR" style="width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+              ${config.content.showCallToAction ? `<div class="cta">${config.content.callToAction}</div>` : ''}
+            </div>
+            ${config.print.includeInstructions ? `
+              <div class="instructions">
+                <strong>Instrucciones:</strong><br/>
+                1. Abre la cámara de tu teléfono<br/>
+                2. Apunta al código QR<br/>
+                3. Toca el enlace que aparece<br/>
+                4. Comparte tu experiencia
+              </div>
+            ` : ''}
+          </body>
+        </html>
+      `;
+      
+      printWindow.document.open();
+      printWindow.document.write(content);
+      printWindow.document.close();
+      
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
+
   const selectedBranch = branches.find(b => b.id === selectedBranchId);
 
   if (configLoading || !selectedBranch) {
@@ -86,6 +169,8 @@ const PaginaQRPage: React.FC = () => {
             onSave={saveConfig}
             onReset={resetChanges}
             isSaving={isSaving}
+            onDownload={handleDownload}
+            onPrint={handlePrint}
           />
         </div>
         

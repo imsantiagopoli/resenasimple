@@ -1,14 +1,24 @@
 import React from 'react';
-import { QrCode, FileText, Printer, Download } from 'lucide-react';
+import { QrCode, FileText, Printer } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
 interface QRConfigTabProps {
   activeTab: 'design' | 'content' | 'print';
   config: QRConfiguration;
   onConfigUpdate: (updates: Partial<QRConfiguration>) => void;
+  onDownload?: () => void;
+  onPrint?: () => void;
+  onDownload?: () => void;
+  onPrint?: () => void;
 }
 
-const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUpdate }) => {
+const QRConfigTab: React.FC<QRConfigTabProps> = ({ 
+  activeTab, 
+  config, 
+  onConfigUpdate,
+  onDownload,
+  onPrint
+}) => {
   const updateQR = (updates: Partial<QRConfiguration['qr']>) => {
     onConfigUpdate({
       qr: {
@@ -46,20 +56,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
   };
 
   // Funciones para manejo de descarga e impresión
-  const handleDownload = () => {
-    // This will be called from QRPreviewPanel with actual branch data
-    const link = document.createElement('a');
-    link.href = '#'; // This will be overridden by parent component
-    link.download = `qr-code.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handlePrint = () => {
-    // This will be handled by parent component with actual branch data
-    console.log('Print functionality will be handled by parent');
-  };
 
   if (activeTab === 'design') {
     return (
@@ -323,8 +319,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
 
   if (activeTab === 'print') {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex-1 p-6 space-y-8 overflow-y-auto">
+      <div className="p-6 space-y-8">
         {/* Formato de Impresión */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
@@ -425,48 +420,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                 </div>
               )}
             </div>
-          </div>
-        </div>
-        </div>
-        
-        {/* Botones fijos en el bottom */}
-        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center space-x-3">
-            <button
-              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border flex-1"
-              style={{
-                backgroundColor: 'white',
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-             <Download size={16} />
-              <span>Descargar QR</span>
-            </button>
-            
-            <button
-             className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
-              style={{
-                background: 'linear-gradient(135deg, #075E54 0%, #064e45 100%)',
-                color: 'white',
-                border: '1px solid #075E54'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #064e45 0%, #053d36 100%)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #075E54 0%, #064e45 100%)';
-              }}
-            >
-             <Printer size={16} />
-              <span>Imprimir QR</span>
-            </button>
           </div>
         </div>
       </div>

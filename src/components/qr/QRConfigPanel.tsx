@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer, Save, RotateCcw } from 'lucide-react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
@@ -10,6 +10,8 @@ interface QRConfigPanelProps {
   onSave: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   onReset: () => void;
   isSaving: boolean;
+  onDownload?: () => void;
+  onPrint?: () => void;
 }
 
 const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ 
@@ -18,7 +20,9 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   hasChanges,
   onSave,
   onReset,
-  isSaving
+  isSaving,
+  onDownload,
+  onPrint
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -100,11 +104,17 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        <QRConfigTab activeTab={activeTab} config={config} onConfigUpdate={onConfigUpdate} />
+        <QRConfigTab 
+          activeTab={activeTab} 
+          config={config} 
+          onConfigUpdate={onConfigUpdate}
+          onDownload={onDownload}
+          onPrint={onPrint}
+        />
       </div>
       
       {/* Save Button Section */}
-      {hasChanges && (
+      {hasChanges && activeTab !== 'print' && (
         <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           {/* Save Message */}
           {saveMessage && (
@@ -170,6 +180,51 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             >
               <RotateCcw size={16} />
               <span>Descartar</span>
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Print Actions Section - Only show in print tab */}
+      {activeTab === 'print' && (
+        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onDownload}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border flex-1"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <Download size={16} />
+              <span>Descargar QR</span>
+            </button>
+            
+            <button
+              onClick={onPrint}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white',
+                border: '1px solid #075E54'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#064e45';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#075E54';
+              }}
+            >
+              <Printer size={16} />
+              <span>Imprimir QR</span>
             </button>
           </div>
         </div>
