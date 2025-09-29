@@ -24,7 +24,6 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   onDownload,
   onPrint
 }) => {
-  const [activeTab, setActiveTab] = useState<'design' | 'content' | 'print'>('design');
   const [activeTab, setActiveTab] = useState<'design' | 'typography' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -33,6 +32,11 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'design' as const,
       label: 'Diseño',
       icon: QrCode
+    },
+    {
+      id: 'typography' as const,
+      label: 'Tipografía',
+      icon: Palette
     },
     {
       id: 'content' as const,
