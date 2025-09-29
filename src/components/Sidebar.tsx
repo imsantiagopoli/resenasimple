@@ -103,10 +103,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
 
         {/* User Section */}
         <div className="p-4" style={{ borderTop: '1px solid rgb(229, 231, 235)' }}>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* User Info */}
             <div 
-              className="flex items-center p-2.5 rounded-lg transition-colors duration-200"
+              className="flex items-center p-3 rounded-lg transition-colors duration-200"
               style={{ backgroundColor: 'rgb(249, 250, 251)' }}
             >
               <div 
@@ -131,63 +131,37 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
               </div>
             </div>
 
-            {/* Profile and Settings */}
-            <div className="space-y-1">
-              <button
-                onClick={() => navigate('/app/settings')}
-                className="flex items-center px-2 py-1.5 rounded-md transition-colors duration-200 focus:outline-none"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(254, 242, 242)';
+                const icon = e.currentTarget.querySelector('svg');
+                const text = e.currentTarget.querySelector('span');
+                if (icon) icon.style.color = 'rgb(185, 28, 28)';
+                if (text) text.style.color = 'rgb(185, 28, 28)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                const icon = e.currentTarget.querySelector('svg');
+                const text = e.currentTarget.querySelector('span');
+                if (icon) icon.style.color = 'rgb(75, 85, 99)';
+                if (text) text.style.color = '#161616';
+              }}
+            >
+              <LogOut 
+                size={16} 
+                className="mr-3 flex-shrink-0" 
+                style={{ color: 'rgb(75, 85, 99)' }}
+              />
+              <span 
+                className="text-sm font-medium" 
+                style={{ color: '#161616' }}
               >
-                <Settings 
-                  size={16} 
-                  className="mr-2 flex-shrink-0" 
-                  style={{ color: 'rgb(75, 85, 99)' }}
-                />
-                <span 
-                  className="text-sm" 
-                  style={{ color: '#161616' }}
-                >
-                  Profile Settings
-                </span>
-              </button>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center px-2 py-1.5 rounded-md transition-all duration-200"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(254, 242, 242)';
-                  const icon = e.currentTarget.querySelector('svg');
-                  const text = e.currentTarget.querySelector('span');
-                  if (icon) icon.style.color = 'rgb(185, 28, 28)';
-                  if (text) text.style.color = 'rgb(185, 28, 28)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  const icon = e.currentTarget.querySelector('svg');
-                  const text = e.currentTarget.querySelector('span');
-                  if (icon) icon.style.color = 'rgb(75, 85, 99)';
-                  if (text) text.style.color = '#161616';
-                }}
-              >
-                <LogOut 
-                  size={16} 
-                  className="mr-2 flex-shrink-0" 
-                  style={{ color: 'rgb(75, 85, 99)' }}
-                />
-                <span 
-                  className="text-sm" 
-                  style={{ color: '#161616' }}
-                >
-                  Sign Out
-                </span>
-              </button>
-            </div>
+                Cerrar Sesión
+              </span>
+            </button>
           </div>
         </div>
       </div>
