@@ -548,113 +548,6 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Account Section */}
-      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="flex items-center space-x-3 mb-6">
-          <div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'rgb(107, 114, 128)' + '20' }}
-          >
-            <Shield size={20} style={{ color: 'rgb(107, 114, 128)' }} />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-              Cuenta y Seguridad
-            </h2>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Configuraciones de seguridad y privacidad
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div>
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Cambiar Contraseña
-              </h4>
-              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Actualiza tu contraseña de acceso
-              </p>
-            </div>
-            <button
-              className="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
-              style={{
-                backgroundColor: 'white',
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-              Cambiar
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div>
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Notificaciones por Email
-              </h4>
-              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Recibe actualizaciones y reportes por email
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" defaultChecked className="sr-only peer" />
-              <div 
-                className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-opacity-100 transition-colors duration-200"
-                style={{
-                  backgroundColor: 'rgb(209, 213, 219)',
-                  '--tw-peer-checked-bg-opacity': '1'
-                }}
-                onMouseEnter={(e) => {
-                  if (!(e.target as HTMLElement).previousElementSibling?.checked) {
-                    e.currentTarget.style.backgroundColor = 'rgb(156, 163, 175)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!(e.target as HTMLElement).previousElementSibling?.checked) {
-                    e.currentTarget.style.backgroundColor = 'rgb(209, 213, 219)';
-                  }
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div>
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Exportar Datos
-              </h4>
-              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Descarga todos tus datos en formato CSV
-              </p>
-            </div>
-            <button
-              className="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
-              style={{
-                backgroundColor: 'white',
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-              Exportar
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Danger Zone */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#ef4444' }}>
         <div className="flex items-center space-x-3 mb-6">
@@ -675,35 +568,6 @@ const SettingsPage: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: '#fed7d7' }}>
-            <div>
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Cancelar Suscripción
-              </h4>
-              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Tu plan se cancelará al final del período actual
-              </p>
-            </div>
-            <button
-              className="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
-              style={{
-                backgroundColor: 'white',
-                borderColor: '#ef4444',
-                color: '#ef4444'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#ef4444';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.color = '#ef4444';
-              }}
-            >
-              Cancelar Plan
-            </button>
-          </div>
-
           <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: '#fed7d7' }}>
             <div>
               <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
@@ -754,7 +618,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <a
             href="mailto:hola@resenasimple.com"
             className="flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm"
@@ -776,27 +640,6 @@ const SettingsPage: React.FC = () => {
               </p>
             </div>
           </a>
-
-          <button
-            className="flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm"
-            style={{ borderColor: 'rgb(229, 231, 235)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
-            }}
-          >
-            <ExternalLink size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-            <div>
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                Centro de Ayuda
-              </h4>
-              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Guías y documentación
-              </p>
-            </div>
-          </button>
         </div>
       </div>
     </div>
