@@ -12,9 +12,11 @@ import {
   QrCode,
   Building2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useVotingSessions } from '../hooks/useVotingSessions';
 
 const InicioPage: React.FC = () => {
+  const navigate = useNavigate();
   const { sessions, loading, getStatistics, getTodayStatistics } = useVotingSessions();
   
   const statistics = getStatistics();
@@ -69,22 +71,22 @@ const InicioPage: React.FC = () => {
   });
   const quickActions = [
     {
-      title: 'Generar Código QR',
-      description: 'Crear nuevo código QR para mesa',
-      icon: QrCode,
-      action: () => console.log('Generar QR')
-    },
-    {
-      title: 'Ver Estadísticas',
-      description: 'Análisis detallado de votaciones',
-      icon: BarChart3,
-      action: () => console.log('Ver stats')
-    },
-    {
       title: 'Configurar Negocio',
-      description: 'Actualizar información del restaurante',
+      description: 'Actualizar información y sucursales',
       icon: Building2,
-      action: () => console.log('Configurar')
+      action: () => navigate('/app/mi-negocio')
+    },
+    {
+      title: 'Ver Reseñas',
+      description: 'Gestionar feedback de clientes',
+      icon: MessageCircle,
+      action: () => navigate('/app/resenas')
+    },
+    {
+      title: 'Modificar Página de Votación',
+      description: 'Personalizar diseño y configuración',
+      icon: Vote,
+      action: () => navigate('/app/pagina-votacion')
     }
   ];
 
