@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UploadProvider } from './components/UploadContext';
+import { DataProvider } from './contexts/DataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import UploadDocumentModal from './components/UploadDocumentModal';
 import { useUpload } from './components/UploadContext';
@@ -93,9 +94,11 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <UploadProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <DataProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </DataProvider>
     </UploadProvider>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, ExternalLink, Copy, Eye, Check } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
-import { useBusiness } from '../../hooks/useBusiness';
+import { useData } from '../../contexts/DataContext';
 
 interface LinksConfigTabProps {
   config: VotingConfiguration;
@@ -10,7 +10,7 @@ interface LinksConfigTabProps {
 
 const LinksConfigTab: React.FC<LinksConfigTabProps> = ({ config, onConfigUpdate }) => {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-  const { branches } = useBusiness();
+  const { businessBranches: branches } = useData();
 
   // Use real branches data
   const branchesData = branches.map(branch => ({

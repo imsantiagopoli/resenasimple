@@ -1,0 +1,444 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+
+// Types
+export interface BusinessProfile {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  logo_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  website_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BusinessBranch {
+  id: string;
+  business_id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  google_maps_link: string | null;
+  slug: string;
+  is_main: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VotingSession {
+  id: string;
+  branch_id: string;
+  customer_name: string | null;
+  customer_email: string | null;
+  customer_phone: string | null;
+  rating: number;
+  comment: string | null;
+  is_public: boolean;
+  google_redirect_clicked: boolean | null;
+  google_redirect_attempted_at: string | null;
+  created_at: string;
+  branch_name?: string;
+  branch_slug?: string;
+}
+
+interface DataContextType {
+  // Business data
+  businessProfile: BusinessProfile | null;
+  businessBranches: BusinessBranch[];
+  businessLoading: boolean;
+  businessError: string | null;
+  businessLoaded: boolean;
+  
+  // Voting sessions data
+  votingSessions: VotingSession[];
+  sessionsLoading: boolean;
+  sessionsError: string | null;
+  sessionsLoaded: boolean;
+  
+  // Actions
+  updateBusinessProfile: (updates: Partial<Omit<BusinessProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => Promise<{ data: any; error: string | null }>;
+  upsertBranch: (branch: Partial<BusinessBranch>) => Promise<{ data: any; error: string | null }>;
+  deleteBranch: (branchId: string) => Promise<{ error: string | null }>;
+  refetchBusinessData: () => Promise<void>;
+  refetchSessionsData: () => Promise<void>;
+  generateSlug: (name: string) => string;
+  
+  // Statistics helpers
+  getStatistics: () => {
+    totalSessions: number;
+    publicSessions: number;
+    privateSessions: number;
+    averageRating: string;
+    positiveReviews: number;
+    positiveReviewsRate: string;
+  };
+  getTodayStatistics: () => {
+    totalToday: number;
+    publicToday: number;
+    privateToday: number;
+  };
+}
+
+const DataContext = createContext<DataContextType | undefined>(undefined);
+
+export const useData = () => {
+  const context = useContext(DataContext);
+  if (context === undefined) {
+    throw new Error('useData must be used within a DataProvider');
+  }
+  return context;
+};
+
+interface DataProviderProps {
+  children: ReactNode;
+}
+
+export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
+  const { user } = useAuth();
+  
+  // Business state
+  const [businessProfile, setBusinessProfile] = useState<BusinessProfile | null>(null);
+  const [businessBranches, setBusinessBranches] = useState<BusinessBranch[]>([]);
+  const [businessLoading, setBusinessLoading] = useState(true);
+  const [businessError, setBusinessError] = useState<string | null>(null);
+  const [businessLoaded, setBusinessLoaded] = useState(false);
+  
+  // Voting sessions state
+  const [votingSessions, setVotingSessions] = useState<VotingSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [sessionsLoaded, setSessionsLoaded] = useState(false);
+
+  // Fetch business data
+  const fetchBusinessData = async () => {
+    if (!user) {
+      setBusinessLoading(false);
+      setBusinessLoaded(true);
+      return;
+    }
+
+    try {
+      setBusinessLoading(true);
+      setBusinessError(null);
+
+      // Fetch business profile
+      const { data: profile, error: profileError } = await supabase
+        .from('business_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (profile) {
+        setBusinessProfile(profile);
+        
+        // Fetch branches
+        const { data: branches, error: branchesError } = await supabase
+          .from('business_branches')
+          .select('*')
+          .eq('business_id', profile.id)
+          .order('is_main', { ascending: false });
+
+        if (branchesError) {
+          throw branchesError;
+        }
+
+        setBusinessBranches(branches || []);
+      } else {
+        setBusinessProfile(null);
+        setBusinessBranches([]);
+      }
+
+      setBusinessLoaded(true);
+    } catch (err: any) {
+      console.error('Error fetching business data:', err);
+      setBusinessError(err.message || 'Error al cargar los datos del negocio');
+      setBusinessLoaded(true);
+    } finally {
+      setBusinessLoading(false);
+    }
+  };
+
+  // Fetch voting sessions
+  const fetchVotingSessions = async () => {
+    if (!user || !businessProfile || businessBranches.length === 0) {
+      setSessionsLoading(false);
+      setSessionsLoaded(true);
+      return;
+    }
+
+    try {
+      setSessionsLoading(true);
+      setSessionsError(null);
+
+      // Get all branch IDs for this business
+      const branchIds = businessBranches.map(branch => branch.id);
+
+      // Fetch voting sessions for all branches
+      const { data: sessions, error } = await supabase
+        .from('voting_sessions')
+        .select(`
+          *,
+          business_branches!inner(
+            name,
+            slug
+          )
+        `)
+        .in('branch_id', branchIds)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      // Map sessions with branch data
+      const mappedSessions: VotingSession[] = (sessions || []).map(session => ({
+        id: session.id,
+        branch_id: session.branch_id,
+        customer_name: session.customer_name,
+        customer_email: session.customer_email,
+        customer_phone: session.customer_phone,
+        rating: session.rating,
+        comment: session.comment,
+        is_public: session.is_public,
+        google_redirect_clicked: session.google_redirect_clicked,
+        google_redirect_attempted_at: session.google_redirect_attempted_at,
+        created_at: session.created_at,
+        branch_name: session.business_branches?.name,
+        branch_slug: session.business_branches?.slug
+      }));
+
+      setVotingSessions(mappedSessions);
+      setSessionsLoaded(true);
+    } catch (err: any) {
+      console.error('Error fetching voting sessions:', err);
+      setSessionsError(err.message || 'Error al cargar las reseñas');
+      setSessionsLoaded(true);
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  // Update business profile
+  const updateBusinessProfile = async (updates: Partial<Omit<BusinessProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    if (!user || !businessProfile) {
+      throw new Error('No hay perfil de negocio para actualizar');
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('business_profiles')
+        .update(updates)
+        .eq('id', businessProfile.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setBusinessProfile(data);
+      return { data, error: null };
+    } catch (err: any) {
+      console.error('Error updating business profile:', err);
+      return { data: null, error: err.message || 'Error al actualizar el perfil' };
+    }
+  };
+
+  // Add or update branch
+  const upsertBranch = async (branch: Partial<BusinessBranch>) => {
+    if (!user || !businessProfile) {
+      throw new Error('No hay perfil de negocio');
+    }
+
+    try {
+      let result;
+      if (branch.id) {
+        // Update existing branch
+        const branchData = {
+          ...branch,
+          business_id: businessProfile.id
+        };
+        result = await supabase
+          .from('business_branches')
+          .update(branchData)
+          .eq('id', branch.id)
+          .select()
+          .single();
+      } else {
+        // Create new branch
+        const { id, ...branchDataWithoutId } = branch;
+        const branchData = {
+          ...branchDataWithoutId,
+          business_id: businessProfile.id
+        };
+        result = await supabase
+          .from('business_branches')
+          .insert([branchData])
+          .select()
+          .single();
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      // Refresh branches data
+      await fetchBusinessData();
+      return { data: result.data, error: null };
+    } catch (err: any) {
+      console.error('Error upserting branch:', err);
+      return { data: null, error: err.message || 'Error al guardar la sucursal' };
+    }
+  };
+
+  // Delete branch
+  const deleteBranch = async (branchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('business_branches')
+        .delete()
+        .eq('id', branchId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh branches data
+      await fetchBusinessData();
+      return { error: null };
+    } catch (err: any) {
+      console.error('Error deleting branch:', err);
+      return { error: err.message || 'Error al eliminar la sucursal' };
+    }
+  };
+
+  // Generate slug from name
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Get statistics from sessions
+  const getStatistics = () => {
+    const totalSessions = votingSessions.length;
+    const publicSessions = votingSessions.filter(s => s.is_public).length;
+    const privateSessions = votingSessions.filter(s => !s.is_public).length;
+    
+    const averageRating = totalSessions > 0 
+      ? (votingSessions.reduce((sum, s) => sum + s.rating, 0) / totalSessions).toFixed(1)
+      : '0.0';
+    
+    // Calcular tasa de reseñas positivas (4 o 5 estrellas)
+    const positiveReviews = votingSessions.filter(s => s.rating >= 4).length;
+    const positiveReviewsRate = totalSessions > 0 
+      ? ((positiveReviews / totalSessions) * 100).toFixed(1)
+      : '0.0';
+
+    return {
+      totalSessions,
+      publicSessions,
+      privateSessions,
+      averageRating,
+      positiveReviews,
+      positiveReviewsRate
+    };
+  };
+
+  // Get today's statistics
+  const getTodayStatistics = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todaySessions = votingSessions.filter(session => 
+      session.created_at.startsWith(today)
+    );
+    
+    const totalToday = todaySessions.length;
+    const publicToday = todaySessions.filter(s => s.is_public).length;
+    const privateToday = todaySessions.filter(s => !s.is_public).length;
+
+    return {
+      totalToday,
+      publicToday,
+      privateToday
+    };
+  };
+
+  // Effects
+  useEffect(() => {
+    if (user && !businessLoaded) {
+      fetchBusinessData();
+    }
+  }, [user, businessLoaded]);
+
+  useEffect(() => {
+    if (businessProfile && businessBranches.length > 0 && !sessionsLoaded) {
+      fetchVotingSessions();
+    }
+  }, [businessProfile, businessBranches, sessionsLoaded]);
+
+  // Reset state when user changes
+  useEffect(() => {
+    if (!user) {
+      setBusinessProfile(null);
+      setBusinessBranches([]);
+      setBusinessLoading(true);
+      setBusinessError(null);
+      setBusinessLoaded(false);
+      
+      setVotingSessions([]);
+      setSessionsLoading(true);
+      setSessionsError(null);
+      setSessionsLoaded(false);
+    }
+  }, [user]);
+
+  const value: DataContextType = {
+    // Business data
+    businessProfile,
+    businessBranches,
+    businessLoading,
+    businessError,
+    businessLoaded,
+    
+    // Voting sessions data
+    votingSessions,
+    sessionsLoading,
+    sessionsError,
+    sessionsLoaded,
+    
+    // Actions
+    updateBusinessProfile,
+    upsertBranch,
+    deleteBranch,
+    refetchBusinessData: fetchBusinessData,
+    refetchSessionsData: fetchVotingSessions,
+    generateSlug,
+    
+    // Statistics
+    getStatistics,
+    getTodayStatistics
+  };
+
+  return (
+    <DataContext.Provider value={value}>
+      {children}
+    </DataContext.Provider>
+  );
+};

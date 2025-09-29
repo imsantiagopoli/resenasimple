@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import { useBusiness } from './useBusiness'
+import { useData } from '../contexts/DataContext'
 
 // Database row structure
 export interface VotingConfigurationRecord {
@@ -245,7 +245,7 @@ interface VotingConfigState {
 
 export const useVotingConfig = () => {
   const { user } = useAuth()
-  const { profile } = useBusiness()
+  const { businessProfile: profile } = useData()
   const [configState, setConfigState] = useState<VotingConfigState>({
     config: null,
     originalConfig: null,
