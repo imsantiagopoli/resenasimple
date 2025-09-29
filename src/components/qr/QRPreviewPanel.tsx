@@ -257,47 +257,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             }}>
               <strong style={{ color: '#161616' }}>Enlace:</strong> {window.location.origin}/v/{selectedBranch.slug}
             </div>
-            
-            {/* Action Buttons */}
-            <div className="mt-6 flex items-center space-x-3">
-              <button
-                onClick={handleDownload}
-                className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border flex-1"
-                style={{
-                  backgroundColor: 'white',
-                  borderColor: 'rgb(209, 213, 219)',
-                  color: '#161616'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                }}
-              >
-                <Download size={16} />
-                <span>Descargar</span>
-              </button>
-              
-              <button
-                onClick={handlePrint}
-                className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
-                style={{
-                  backgroundColor: '#075E54',
-                  color: 'white',
-                  border: '1px solid #075E54'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#064e45';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#075E54';
-                }}
-              >
-                <Printer size={16} />
-                <span>Imprimir</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
