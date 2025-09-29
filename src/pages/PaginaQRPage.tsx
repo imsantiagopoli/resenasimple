@@ -1,106 +1,77 @@
 import React, { useState } from 'react';
 import QRConfigPanel from '../components/qr/QRConfigPanel';
 import QRPreviewPanel from '../components/qr/QRPreviewPanel';
-
-export interface QRConfig {
-  // Configuración del QR
-  qr: {
-    size: number;
-    foregroundColor: string;
-    backgroundColor: string;
-    errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
-    margin: number;
-  };
-  // Diseño
-  design: {
-    showFrame: boolean;
-    frameColor: string;
-    frameThickness: number;
-  };
-  // Texto y llamada a la acción
-  content: {
-    showTitle: boolean;
-    title: string;
-    showSubtitle: boolean;
-    subtitle: string;
-    showCallToAction: boolean;
-    callToAction: string;
-  };
-  // Configuración de sucursal
-  branch: {
-    selectedBranchId: number;
-    branchName: string;
-    branchSlug: string;
-  };
-  // Configuración de impresión
-  print: {
-    format: 'A4' | 'Letter' | 'Custom';
-    orientation: 'portrait' | 'landscape';
-    qrsPerPage: number;
-    includeInstructions: boolean;
-  };
-}
+import { useQRConfig } from '../hooks/useQRConfig';
+import { useBusiness } from '../hooks/useBusiness';
 
 const PaginaQRPage: React.FC = () => {
-  const [config, setConfig] = useState<QRConfig>({
-    qr: {
-      size: 200,
-      foregroundColor: '#000000',
-      backgroundColor: '#FFFFFF',
-      errorCorrectionLevel: 'M',
-      margin: 4
-    },
-    design: {
-      showFrame: false,
-      frameColor: '#075E54',
-      frameThickness: 4
-    },
-    content: {
-      showTitle: true,
-      title: '¿Cómo fue tu experiencia?',
-      showSubtitle: true,
-      subtitle: 'Escanea el código QR y comparte tu opinión',
-      showCallToAction: true,
-      callToAction: 'Escanear para votar'
-    },
-    branch: {
-      selectedBranchId: 1,
-      branchName: 'Sucursal Centro',
-      branchSlug: 'pizzeria-napolitana-centro'
-    },
-    print: {
-      format: 'A4',
-      orientation: 'portrait',
-      qrsPerPage: 1,
-      includeInstructions: true
-    }
-  });
+  const { 
+    config, 
+    loading: configLoading, 
+    updateConfig, 
+    saveConfig,
+    resetChanges,
+    getOrCreateConfig, 
+    hasChanges,
+    isSaving,
+    generateQRURL
+  } = useQRConfig();
+  
+  const { branches } = useBusiness();
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
 
-  const updateConfig = (updates: Partial<QRConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      ...updates,
-      qr: {
-        ...prev.qr,
-        ...(updates.qr || {})
-      },
-      design: {
-        ...prev.design,
-        ...(updates.design || {})
-      },
-      content: {
-        ...prev.content,
-        ...(updates.content || {})
-      },
-      branch: {
-        ...prev.branch,
-        ...(updates.branch || {})
-      },
-      print: {
-        ...prev.print,
-        ...(updates.print || {})
-      }
-    }));
+  // Initialize config if it doesn't exist
+  React.useEffect(() => {
+    if (!config && !configLoading) {
+      getOrCreateConfig();
+    }
+  }, [config, configLoading]);
+
+  // Set initial branch selection
+  React.useEffect(() => {
+    if (branches.length > 0 && !selectedBranchId) {
+      const mainBranch = branches.find(b => b.is_main) || branches[0];
+      setSelectedBranchId(mainBranch.id);
+    }
+  }, [branches, selectedBranchId]);
+
+  const handleConfigUpdate = (updates: Partial<typeof config>) => {
+    if (!config) return;
+    
+    updateConfig(updates);
+  };
+
+  const selectedBranch = branches.find(b => b.id === selectedBranchId);
+
+  if (configLoading || !selectedBranch) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+            No se pudo cargar la configuración QR
+          </p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+            Intenta recargar la página
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const qrData = {
+    config,
+    selectedBranch,
+    branches,
+    onBranchChange: setSelectedBranchId,
+    generateQRURL
   };
 
   return (
@@ -108,12 +79,19 @@ const PaginaQRPage: React.FC = () => {
       <div className="flex h-screen">
         {/* Columna izquierda - Configuración QR (más estrecha) */}
         <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <QRConfigPanel config={config} onConfigUpdate={updateConfig} />
+          <QRConfigPanel 
+            config={config} 
+            onConfigUpdate={handleConfigUpdate}
+            hasChanges={hasChanges}
+            onSave={saveConfig}
+            onReset={resetChanges}
+            isSaving={isSaving}
+          />
         </div>
         
         {/* Columna derecha - Vista previa QR (más ancha) */}
         <div className="w-3/5 h-screen overflow-hidden">
-          <QRPreviewPanel config={config} />
+          <QRPreviewPanel qrData={qrData} />
         </div>
       </div>
     </div>

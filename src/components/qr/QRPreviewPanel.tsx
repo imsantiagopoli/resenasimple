@@ -1,59 +1,21 @@
 import React, { useState } from 'react';
 import { Building2, ChevronDown } from 'lucide-react';
-import { QRConfig } from '../../pages/PaginaQRPage';
+import { QRConfiguration } from '../../hooks/useQRConfig';
+import { BusinessBranch } from '../../hooks/useBusiness';
 
 interface QRPreviewPanelProps {
-  config: QRConfig;
+  qrData: {
+    config: QRConfiguration;
+    selectedBranch: BusinessBranch;
+    branches: BusinessBranch[];
+    onBranchChange: (branchId: string) => void;
+    generateQRURL: (branchSlug: string, qrConfig?: QRConfiguration) => string;
+  };
 }
 
-const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ config }) => {
+const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
+  const { config, selectedBranch, branches, onBranchChange, generateQRURL } = qrData;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [previewBranchId, setPreviewBranchId] = useState(config.branch.selectedBranchId);
-
-  // Mock branches data
-  const branches = [
-    {
-      id: '1',
-      name: 'Pizzería Napolitana - Centro',
-      slug: 'pizzeria-napolitana-centro',
-      address: 'Av. Corrientes 1234, CABA',
-      isMain: true
-    },
-    {
-      id: '2',
-      name: 'Pizzería Napolitana - Palermo',
-      slug: 'pizzeria-napolitana-palermo', 
-      address: 'Av. Santa Fe 2345, CABA',
-      isMain: false
-    },
-    {
-      id: '3',
-      name: 'Pizzería Napolitana - Belgrano',
-      slug: 'pizzeria-napolitana-belgrano',
-      address: 'Av. Cabildo 3456, CABA', 
-      isMain: false
-    }
-  ];
-
-  // Find the currently selected branch for preview
-  const selectedBranch = branches.find(branch => branch.id === previewBranchId) || branches[0];
-
-  const generateQRURL = () => {
-    const votingURL = `https://reseñasimple.com/v/${selectedBranch.slug}`;
-    const qrAPI = `https://api.qrserver.com/v1/create-qr-code/`;
-    
-    const params = new URLSearchParams({
-      size: `${config.qr.size}x${config.qr.size}`,
-      data: votingURL,
-      format: 'png',
-      bgcolor: config.qr.backgroundColor.replace('#', ''),
-      color: config.qr.foregroundColor.replace('#', ''),
-      ecc: config.qr.errorCorrectionLevel,
-      margin: config.qr.margin.toString()
-    });
-
-    return `${qrAPI}?${params.toString()}`;
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -102,28 +64,28 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ config }) => {
                 <button
                   key={branch.id}
                   onClick={() => {
-                    setPreviewBranchId(branch.id);
+                    onBranchChange(branch.id);
                     setIsDropdownOpen(false);
                   }}
                   className="w-full px-3 py-2 text-sm text-left transition-colors duration-200 flex items-center justify-between"
                   style={{ 
                     color: '#161616',
-                    backgroundColor: previewBranchId === branch.id ? '#075E54' + '10' : 'white'
+                    backgroundColor: selectedBranch.id === branch.id ? '#075E54' + '10' : 'white'
                   }}
                   onMouseEnter={(e) => {
-                    if (previewBranchId !== branch.id) {
+                    if (selectedBranch.id !== branch.id) {
                       e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (previewBranchId !== branch.id) {
+                    if (selectedBranch.id !== branch.id) {
                       e.currentTarget.style.backgroundColor = 'white';
                     }
                   }}
                 >
                   <div className="flex items-center space-x-2">
                     <span>{branch.name}</span>
-                    {branch.isMain && (
+                    {branch.is_main && (
                       <span 
                         className="px-2 py-0.5 rounded-full text-xs font-medium"
                         style={{
@@ -171,7 +133,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ config }) => {
               >
                 <div className="relative">
                   <img 
-                    src={generateQRURL()}
+                    src={generateQRURL(selectedBranch.slug, config)}
                     alt="Código QR"
                     className="block"
                     style={{ 
@@ -206,6 +168,15 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ config }) => {
                 </ol>
               </div>
             )}
+
+            {/* URL Display */}
+            <div className="mt-6 p-3 rounded-lg border text-xs" style={{
+              backgroundColor: 'rgb(249, 250, 251)',
+              borderColor: 'rgb(229, 231, 235)',
+              color: 'rgb(107, 114, 128)'
+            }}>
+              <strong style={{ color: '#161616' }}>Enlace:</strong> {window.location.origin}/v/{selectedBranch.slug}
+            </div>
           </div>
         </div>
       </div>

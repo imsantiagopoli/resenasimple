@@ -97,6 +97,65 @@ export interface VotingConfigurationRecord {
   updated_at: string
 }
 
+// QR Configuration Types
+export interface QRConfigurationRecord {
+  id: string
+  business_id: string
+  qr_size: number
+  qr_foreground_color: string
+  qr_background_color: string
+  qr_error_correction_level: 'L' | 'M' | 'Q' | 'H'
+  qr_margin: number
+  show_frame: boolean
+  frame_color: string
+  frame_thickness: number
+  show_title: boolean
+  title: string
+  show_subtitle: boolean
+  subtitle: string
+  show_call_to_action: boolean
+  call_to_action: string
+  print_format: 'A4' | 'Letter' | 'Custom'
+  print_orientation: 'portrait' | 'landscape'
+  qrs_per_page: number
+  include_instructions: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface QRConfiguration {
+  id: string
+  business_id: string
+  qr: {
+    size: number
+    foregroundColor: string
+    backgroundColor: string
+    errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H'
+    margin: number
+  }
+  design: {
+    showFrame: boolean
+    frameColor: string
+    frameThickness: number
+  }
+  content: {
+    showTitle: boolean
+    title: string
+    showSubtitle: boolean
+    subtitle: string
+    showCallToAction: boolean
+    callToAction: string
+  }
+  print: {
+    format: 'A4' | 'Letter' | 'Custom'
+    orientation: 'portrait' | 'landscape'
+    qrsPerPage: number
+    includeInstructions: boolean
+  }
+  created_at: string
+  updated_at: string
+}
+
 export interface VotingConfiguration {
   id: string
   business_id: string
@@ -164,6 +223,7 @@ export interface VotingConfiguration {
   created_at: string
   updated_at: string
 }
+
 interface DataContextType {
   // Business data
   businessProfile: BusinessProfile | null;
@@ -187,6 +247,15 @@ interface DataContextType {
   configHasChanges: boolean;
   configIsSaving: boolean;
   
+  // QR configuration data
+  qrConfiguration: QRConfiguration | null;
+  originalQRConfiguration: QRConfiguration | null;
+  qrConfigLoading: boolean;
+  qrConfigError: string | null;
+  qrConfigLoaded: boolean;
+  qrConfigHasChanges: boolean;
+  qrConfigIsSaving: boolean;
+  
   // Actions
   updateBusinessProfile: (updates: Partial<Omit<BusinessProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => Promise<{ data: any; error: string | null }>;
   upsertBranch: (branch: Partial<BusinessBranch>) => Promise<{ data: any; error: string | null }>;
@@ -202,6 +271,15 @@ interface DataContextType {
   getOrCreateVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   resetVotingConfigChanges: () => void;
   refetchVotingConfig: () => Promise<VotingConfiguration | null>;
+  
+  // QR config actions
+  updateQRConfig: (updates: Partial<QRConfiguration>) => void;
+  saveQRConfig: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
+  createDefaultQRConfig: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
+  getOrCreateQRConfig: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
+  resetQRConfigChanges: () => void;
+  refetchQRConfig: () => Promise<QRConfiguration | null>;
+  generateQRURL: (branchSlug: string, qrConfig?: QRConfiguration) => string;
   
   // Statistics helpers
   getStatistics: () => {
@@ -257,6 +335,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [configLoaded, setConfigLoaded] = useState(false);
   const [configHasChanges, setConfigHasChanges] = useState(false);
   const [configIsSaving, setConfigIsSaving] = useState(false);
+
+  // QR configuration state
+  const [qrConfiguration, setQRConfiguration] = useState<QRConfiguration | null>(null);
+  const [originalQRConfiguration, setOriginalQRConfiguration] = useState<QRConfiguration | null>(null);
+  const [qrConfigLoading, setQRConfigLoading] = useState(true);
+  const [qrConfigError, setQRConfigError] = useState<string | null>(null);
+  const [qrConfigLoaded, setQRConfigLoaded] = useState(false);
+  const [qrConfigHasChanges, setQRConfigHasChanges] = useState(false);
+  const [qrConfigIsSaving, setQRConfigIsSaving] = useState(false);
 
   // Helper functions for voting configuration
   const mapRecordToConfigUI = (record: VotingConfigurationRecord): VotingConfiguration => {
@@ -329,6 +416,67 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     };
   };
 
+  // Helper functions for QR configuration
+  const mapQRRecordToConfigUI = (record: QRConfigurationRecord): QRConfiguration => {
+    return {
+      id: record.id,
+      business_id: record.business_id,
+      qr: {
+        size: record.qr_size,
+        foregroundColor: record.qr_foreground_color,
+        backgroundColor: record.qr_background_color,
+        errorCorrectionLevel: record.qr_error_correction_level,
+        margin: record.qr_margin
+      },
+      design: {
+        showFrame: record.show_frame,
+        frameColor: record.frame_color,
+        frameThickness: record.frame_thickness
+      },
+      content: {
+        showTitle: record.show_title,
+        title: record.title,
+        showSubtitle: record.show_subtitle,
+        subtitle: record.subtitle,
+        showCallToAction: record.show_call_to_action,
+        callToAction: record.call_to_action
+      },
+      print: {
+        format: record.print_format,
+        orientation: record.print_orientation,
+        qrsPerPage: record.qrs_per_page,
+        includeInstructions: record.include_instructions
+      },
+      created_at: record.created_at,
+      updated_at: record.updated_at
+    };
+  };
+
+  const mapQRConfigUIToRecord = (config: QRConfiguration): Omit<QRConfigurationRecord, 'created_at' | 'updated_at'> => {
+    return {
+      id: config.id,
+      business_id: config.business_id,
+      qr_size: config.qr.size,
+      qr_foreground_color: config.qr.foregroundColor,
+      qr_background_color: config.qr.backgroundColor,
+      qr_error_correction_level: config.qr.errorCorrectionLevel,
+      qr_margin: config.qr.margin,
+      show_frame: config.design.showFrame,
+      frame_color: config.design.frameColor,
+      frame_thickness: config.design.frameThickness,
+      show_title: config.content.showTitle,
+      title: config.content.title,
+      show_subtitle: config.content.showSubtitle,
+      subtitle: config.content.subtitle,
+      show_call_to_action: config.content.showCallToAction,
+      call_to_action: config.content.callToAction,
+      print_format: config.print.format,
+      print_orientation: config.print.orientation,
+      qrs_per_page: config.print.qrsPerPage,
+      include_instructions: config.print.includeInstructions
+    };
+  };
+
   const mapConfigUIToRecord = (config: VotingConfiguration): Omit<VotingConfigurationRecord, 'created_at' | 'updated_at'> => {
     return {
       id: config.id,
@@ -371,6 +519,202 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       prompt_preventivo_activo: config.logic.prompt.enabled,
       texto_prompt_preventivo: config.logic.prompt.text
     };
+  };
+
+  // Fetch QR configuration
+  const fetchQRConfig = async (): Promise<QRConfiguration | null> => {
+    if (!businessProfile?.id) {
+      setQRConfigLoaded(true);
+      return null;
+    }
+
+    try {
+      setQRConfigLoading(true);
+      setQRConfigError(null);
+
+      const { data, error } = await supabase
+        .from('qr_configuration')
+        .select('*')
+        .eq('business_id', businessProfile.id)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const config = mapQRRecordToConfigUI(data);
+        setQRConfiguration(config);
+        setOriginalQRConfiguration(config);
+        setQRConfigLoaded(true);
+        return config;
+      } else {
+        setQRConfiguration(null);
+        setOriginalQRConfiguration(null);
+        setQRConfigLoaded(true);
+        return null;
+      }
+    } catch (err: any) {
+      console.error('Error fetching QR config:', err);
+      setQRConfigError(err.message || 'Error al cargar la configuración QR');
+      setQRConfigLoaded(true);
+      return null;
+    } finally {
+      setQRConfigLoading(false);
+    }
+  };
+
+  // Create default QR configuration
+  const createDefaultQRConfig = async (): Promise<{ data: QRConfiguration | null; error: string | null }> => {
+    if (!businessProfile?.id) {
+      return { data: null, error: 'No hay perfil de negocio' };
+    }
+
+    try {
+      setQRConfigLoading(true);
+      setQRConfigError(null);
+
+      const { data, error } = await supabase
+        .from('qr_configuration')
+        .insert([{ business_id: businessProfile.id }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const config = mapQRRecordToConfigUI(data);
+      setQRConfiguration(config);
+      setOriginalQRConfiguration(config);
+      setQRConfigHasChanges(false);
+      
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error creating default QR config:', err);
+      const errorMessage = err.message || 'Error al crear la configuración QR';
+      setQRConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setQRConfigLoading(false);
+    }
+  };
+
+  // Get or create QR configuration
+  const getOrCreateQRConfig = async (): Promise<{ data: QRConfiguration | null; error: string | null }> => {
+    try {
+      let config = await fetchQRConfig();
+      
+      if (!config) {
+        const result = await createDefaultQRConfig();
+        config = result.data;
+        if (result.error) {
+          return result;
+        }
+      }
+      
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error in getOrCreateQRConfig:', err);
+      return { data: null, error: err.message || 'Error al obtener la configuración QR' };
+    }
+  };
+
+  // Update QR configuration (local state only)
+  const updateQRConfig = (updates: Partial<QRConfiguration>) => {
+    if (!qrConfiguration) return;
+
+    const updatedConfig = {
+      ...qrConfiguration,
+      ...updates
+    };
+    
+    setQRConfiguration(updatedConfig);
+    
+    // Check if there are changes compared to original
+    if (originalQRConfiguration) {
+      const hasChanges = JSON.stringify(updatedConfig) !== JSON.stringify(originalQRConfiguration);
+      setQRConfigHasChanges(hasChanges);
+    }
+  };
+
+  // Save QR configuration
+  const saveQRConfig = async (): Promise<{ data: QRConfiguration | null; error: string | null }> => {
+    if (!qrConfiguration || !businessProfile?.id) {
+      return { data: null, error: 'No hay configuración para guardar' };
+    }
+
+    try {
+      setQRConfigIsSaving(true);
+      setQRConfigError(null);
+
+      const recordData = mapQRConfigUIToRecord(qrConfiguration);
+      
+      const { data, error } = await supabase
+        .from('qr_configuration')
+        .upsert([recordData])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const updatedConfig = mapQRRecordToConfigUI(data);
+      setQRConfiguration(updatedConfig);
+      setOriginalQRConfiguration(updatedConfig);
+      setQRConfigHasChanges(false);
+      
+      return { data: updatedConfig, error: null };
+    } catch (err: any) {
+      console.error('Error saving QR config:', err);
+      const errorMessage = err.message || 'Error al guardar la configuración QR';
+      setQRConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setQRConfigIsSaving(false);
+    }
+  };
+
+  // Reset QR configuration changes
+  const resetQRConfigChanges = () => {
+    if (originalQRConfiguration) {
+      setQRConfiguration(originalQRConfiguration);
+      setQRConfigHasChanges(false);
+    }
+  };
+
+  // Generate QR URL
+  const generateQRURL = (branchSlug: string, qrConfig?: QRConfiguration): string => {
+    const config = qrConfig || qrConfiguration;
+    const baseURL = window.location.origin;
+    const votingURL = `${baseURL}/v/${branchSlug}`;
+    
+    if (!config) {
+      // Fallback to default QR settings if no config
+      const params = new URLSearchParams({
+        size: '200x200',
+        data: votingURL,
+        format: 'png',
+        bgcolor: 'FFFFFF',
+        color: '000000',
+        ecc: 'M',
+        margin: '4'
+      });
+      return `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
+    }
+    
+    const params = new URLSearchParams({
+      size: `${config.qr.size}x${config.qr.size}`,
+      data: votingURL,
+      format: 'png',
+      bgcolor: config.qr.backgroundColor.replace('#', ''),
+      color: config.qr.foregroundColor.replace('#', ''),
+      ecc: config.qr.errorCorrectionLevel,
+      margin: config.qr.margin.toString()
+    });
+
+    return `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`;
   };
 
   // Fetch voting configuration
@@ -814,6 +1158,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       fetchVotingConfig();
     }
   }, [businessProfile?.id, configLoaded]);
+
+  useEffect(() => {
+    if (businessProfile?.id && !qrConfigLoaded) {
+      fetchQRConfig();
+    }
+  }, [businessProfile?.id, qrConfigLoaded]);
   
   // Reset state when user changes
   useEffect(() => {
@@ -836,6 +1186,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setConfigLoaded(false);
       setConfigHasChanges(false);
       setConfigIsSaving(false);
+      
+      setQRConfiguration(null);
+      setOriginalQRConfiguration(null);
+      setQRConfigLoading(true);
+      setQRConfigError(null);
+      setQRConfigLoaded(false);
+      setQRConfigHasChanges(false);
+      setQRConfigIsSaving(false);
     }
   }, [user]);
 
@@ -862,6 +1220,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     configHasChanges,
     configIsSaving,
     
+    // QR configuration data
+    qrConfiguration,
+    originalQRConfiguration,
+    qrConfigLoading,
+    qrConfigError,
+    qrConfigLoaded,
+    qrConfigHasChanges,
+    qrConfigIsSaving,
+    
     // Actions
     updateBusinessProfile,
     upsertBranch,
@@ -877,6 +1244,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     getOrCreateVotingConfig,
     resetVotingConfigChanges,
     refetchVotingConfig: fetchVotingConfig,
+    
+    // QR config actions
+    updateQRConfig,
+    saveQRConfig,
+    createDefaultQRConfig,
+    getOrCreateQRConfig,
+    resetQRConfigChanges,
+    refetchQRConfig: fetchQRConfig,
+    generateQRURL,
     
     // Statistics
     getStatistics,

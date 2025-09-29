@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer } from 'lucide-react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
-import { QRConfig } from '../../pages/PaginaQRPage';
+import { QRConfiguration } from '../../hooks/useQRConfig';
 
 interface QRConfigPanelProps {
-  config: QRConfig;
-  onConfigUpdate: (updates: Partial<QRConfig>) => void;
+  config: QRConfiguration;
+  onConfigUpdate: (updates: Partial<QRConfiguration>) => void;
+  hasChanges: boolean;
+  onSave: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
+  onReset: () => void;
+  isSaving: boolean;
 }
 
-const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ config, onConfigUpdate }) => {
+const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ 
+  config, 
+  onConfigUpdate, 
+  hasChanges,
+  onSave,
+  onReset,
+  isSaving
+}) => {
   const [activeTab, setActiveTab] = useState<'design' | 'content' | 'print'>('design');
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const tabs = [
     {
@@ -28,6 +40,28 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ config, onConfigUpdate })
       icon: Printer
     }
   ];
+
+  const handleSave = async () => {
+    try {
+      const { error } = await onSave();
+      if (error) {
+        setSaveMessage({ type: 'error', text: error });
+      } else {
+        setSaveMessage({ type: 'success', text: 'Configuración QR guardada correctamente' });
+      }
+    } catch (err) {
+      setSaveMessage({ type: 'error', text: 'Error al guardar la configuración QR' });
+    }
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const handleReset = () => {
+    onReset();
+    setSaveMessage({ type: 'success', text: 'Cambios descartados' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -68,6 +102,78 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ config, onConfigUpdate })
       <div className="flex-1 overflow-y-auto">
         <QRConfigTab activeTab={activeTab} config={config} onConfigUpdate={onConfigUpdate} />
       </div>
+      
+      {/* Save Button Section */}
+      {hasChanges && (
+        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+          {/* Save Message */}
+          {saveMessage && (
+            <div 
+              className={`mb-3 p-2 rounded-lg text-xs ${
+                saveMessage.type === 'success' 
+                  ? 'bg-green-50 border-green-200 text-green-800' 
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {saveMessage.text}
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white',
+                border: '1px solid #075E54'
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = '#064e45';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }
+              }}
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save size={16} />
+              )}
+              <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
+            </button>
+            
+            <button
+              onClick={handleReset}
+              disabled={isSaving}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving) {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Descartar</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

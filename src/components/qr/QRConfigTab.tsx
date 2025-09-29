@@ -1,15 +1,15 @@
 import React from 'react';
 import { QrCode, FileText, Printer, Download } from 'lucide-react';
-import { QRConfig } from '../../pages/PaginaQRPage';
+import { QRConfiguration } from '../../hooks/useQRConfig';
 
 interface QRConfigTabProps {
   activeTab: 'design' | 'content' | 'print';
-  config: QRConfig;
-  onConfigUpdate: (updates: Partial<QRConfig>) => void;
+  config: QRConfiguration;
+  onConfigUpdate: (updates: Partial<QRConfiguration>) => void;
 }
 
 const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUpdate }) => {
-  const updateQR = (updates: Partial<QRConfig['qr']>) => {
+  const updateQR = (updates: Partial<QRConfiguration['qr']>) => {
     onConfigUpdate({
       qr: {
         ...config.qr,
@@ -18,7 +18,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
     });
   };
 
-  const updateDesign = (updates: Partial<QRConfig['design']>) => {
+  const updateDesign = (updates: Partial<QRConfiguration['design']>) => {
     onConfigUpdate({
       design: {
         ...config.design,
@@ -27,7 +27,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
     });
   };
 
-  const updateContent = (updates: Partial<QRConfig['content']>) => {
+  const updateContent = (updates: Partial<QRConfiguration['content']>) => {
     onConfigUpdate({
       content: {
         ...config.content,
@@ -36,7 +36,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
     });
   };
 
-  const updatePrint = (updates: Partial<QRConfig['print']>) => {
+  const updatePrint = (updates: Partial<QRConfiguration['print']>) => {
     onConfigUpdate({
       print: {
         ...config.print,
@@ -47,17 +47,19 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
 
   // Funciones para manejo de descarga e impresión
   const handleDownload = () => {
-    const qrURL = generateQRURL();
+    // Use a default branch slug for download - this should be passed from parent
+    const qrURL = generateQRURL('default-branch');
     const link = document.createElement('a');
     link.href = qrURL;
-    link.download = `qr-${config.branch.branchSlug}.png`;
+    link.download = `qr-code.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const generateQRURL = () => {
-    const votingURL = `https://reseñasimple.com/v/${config.branch.branchSlug}`;
+  const generateQRURL = (branchSlug: string) => {
+    const baseURL = window.location.origin;
+    const votingURL = `${baseURL}/v/${branchSlug}`;
     const qrAPI = `https://api.qrserver.com/v1/create-qr-code/`;
     
     const params = new URLSearchParams({
@@ -76,11 +78,11 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      const qrURL = generateQRURL();
+      const qrURL = generateQRURL('default-branch');
       const content = `
         <html>
           <head>
-            <title>Código QR - ${config.branch.branchName}</title>
+            <title>Código QR</title>
             <style>
               body {
                 font-family: Arial, sans-serif;
@@ -235,40 +237,40 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                 checked={config.design.showFrame}
                 onChange={(e) => updateDesign({ showFrame: e.target.checked })}
                 className="w-4 h-4"
-                style={{ accentColor: '#075E54' }}
-              />
-              <label htmlFor="showFrame" className="text-sm font-medium" style={{ color: '#161616' }}>
+                  id="showCallToAction"
+                  checked={config.content.showCallToAction}
+                  onChange={(e) => updateContent({ showCallToAction: e.target.checked })}
                 Agregar marco alrededor del QR
               </label>
             </div>
-            
+                <label htmlFor="showCallToAction" className="text-sm font-medium" style={{ color: '#161616' }}>
             {config.design.showFrame && (
               <div className="ml-6 space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Grosor: {config.design.frameWidth}px
+              {config.content.showCallToAction && (
                   </label>
                   <input
                     type="range"
                     min="1"
-                    max="10"
-                    value={config.design.frameWidth}
+                    value={config.content.callToAction}
+                    onChange={(e) => updateContent({ callToAction: e.target.value })}
                     onChange={(e) => updateDesign({ frameThickness: parseInt(e.target.value) })}
                     className="w-full"
                     style={{ accentColor: '#075E54' }}
                   />
                 </div>
                 
-                <div className="space-y-2">
+                        onClick={() => updatePrint({ orientation: orientation.value as 'portrait' | 'landscape' })}
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Color del marco
-                  </label>
+                          config.print.format === size
+                        config.print.format === size
                   <div className="flex items-center space-x-2">
                     <input
                       type="color"
-                      value={config.design.frameColor}
-                      onChange={(e) => updateDesign({ frameColor: e.target.value })}
-                      className="w-8 h-8 rounded border"
+                          backgroundColor: config.print.format === size ? '#075E54' : 'transparent',
+                          color: config.print.format === size ? 'white' : '#161616'
+                        color: config.print.format === size ? 'white' : '#161616'
                     />
                     <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                       {config.design.frameColor}
@@ -389,51 +391,12 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
               <div className="ml-7">
                 <input
                   type="text"
-                  value={config.content.ctaText}
-                  onChange={(e) => updateContent({ ctaText: e.target.value })}
+                  value={config.content.callToAction}
+                  onChange={(e) => updateContent({ callToAction: e.target.value })}
                   placeholder="Ej: ¡Ayúdanos a mejorar!"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:border-transparent text-sm"
                   style={{ focusRingColor: '#075E54' }}
                 />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Separador */}
-        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
-        {/* Instrucciones */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Instrucciones
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="showInstructions"
-                checked={config.content.showInstructions}
-                onChange={(e) => updateContent({ showInstructions: e.target.checked })}
-                className="w-4 h-4"
-                style={{ accentColor: '#075E54' }}
-              />
-              <label htmlFor="showInstructions" className="text-sm font-medium" style={{ color: '#161616' }}>
-                Mostrar instrucciones de uso
-              </label>
-            </div>
-            
-            {config.content.showInstructions && (
-              <div className="ml-7 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Se mostrarán instrucciones básicas como:
-                </p>
-                <ul className="mt-2 text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <li>• Abre la cámara de tu teléfono</li>
-                  <li>• Apunta al código QR</li>
-                  <li>• Toca el enlace que aparece</li>
-                </ul>
               </div>
             )}
           </div>
@@ -506,6 +469,45 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Separador */}
+          <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+          {/* Instrucciones */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Instrucciones
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="includeInstructions"
+                  checked={config.print.includeInstructions}
+                  onChange={(e) => updatePrint({ includeInstructions: e.target.checked })}
+                  className="w-4 h-4"
+                  style={{ accentColor: '#075E54' }}
+                />
+                <label htmlFor="includeInstructions" className="text-sm font-medium" style={{ color: '#161616' }}>
+                  Incluir instrucciones al imprimir
+                </label>
+              </div>
+              
+              {config.print.includeInstructions && (
+                <div className="ml-7 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Se mostrarán instrucciones básicas como:
+                  </p>
+                  <ul className="mt-2 text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
+                    <li>• Abre la cámara de tu teléfono</li>
+                    <li>• Apunta al código QR</li>
+                    <li>• Toca el enlace que aparece</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
