@@ -248,15 +248,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 </ol>
               </div>
             )}
-
-            {/* URL Display */}
-            <div className="mt-6 p-3 rounded-lg border text-xs break-all" style={{
-              backgroundColor: 'rgb(249, 250, 251)',
-              borderColor: 'rgb(229, 231, 235)',
-              color: 'rgb(107, 114, 128)'
-            }}>
-              <strong style={{ color: '#161616' }}>Enlace:</strong> {window.location.origin}/v/{selectedBranch.slug}
-            </div>
           </div>
         </div>
       </div>
