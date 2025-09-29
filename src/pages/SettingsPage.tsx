@@ -380,19 +380,21 @@ const SettingsPage: React.FC = () => {
       {/* Subscription Section */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
         <div className="flex items-center justify-between mb-6">
-          <div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: '#f59e0b' + '20' }}
-          >
-            <Crown size={20} style={{ color: '#f59e0b' }} />
-          </div>
-          <div className="flex-1 mx-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-              Suscripción
-            </h2>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Gestiona tu plan y facturación
-            </p>
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: '#f59e0b' + '20' }}
+            >
+              <Crown size={20} style={{ color: '#f59e0b' }} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+                Suscripción
+              </h2>
+              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                Gestiona tu plan y facturación
+              </p>
+            </div>
           </div>
           
           <a
