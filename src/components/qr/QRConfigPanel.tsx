@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Type } from 'lucide-react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
@@ -25,6 +25,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   onPrint
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'content' | 'print'>('design');
+  const [activeTab, setActiveTab] = useState<'design' | 'typography' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const tabs = [
@@ -32,11 +33,6 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'design' as const,
       label: 'Diseño',
       icon: QrCode
-    },
-    {
-      id: 'typography' as const,
-      label: 'Tipografía',
-      icon: Type
     },
     {
       id: 'content' as const,
@@ -116,7 +112,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Preview Notice for Design Tab */}
-        {activeTab === 'design' && (
+        {(activeTab === 'design' || activeTab === 'typography') && (
           <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
             <div 
               className="p-3 rounded-lg text-sm"
