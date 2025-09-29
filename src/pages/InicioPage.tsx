@@ -165,53 +165,82 @@ const InicioPage: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div className="divide-y" style={{ color: 'rgb(229, 231, 235)' }}>
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
-                  <div className="flex items-start justify-between space-x-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              size={14}
-                              className={`${
-                                star <= activity.stars 
-                                  ? 'text-yellow-400 fill-current' 
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
+            {recentActivity.length > 0 ? (
+              <div className="divide-y" style={{ color: 'rgb(229, 231, 235)' }}>
+                {recentActivity.map((activity, index) => (
+                  <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
+                    <div className="flex items-start justify-between space-x-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="flex">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={14}
+                                className={`${
+                                  star <= activity.stars 
+                                    ? 'text-yellow-400 fill-current' 
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-medium text-sm" style={{ color: '#161616' }}>
+                            {activity.customer}
+                          </span>
                         </div>
-                        <span className="font-medium text-sm" style={{ color: '#161616' }}>
-                          {activity.customer}
-                        </span>
-                      </div>
-                      
-                      <p className="text-sm mb-2" style={{ color: 'rgb(107, 114, 128)' }}>
-                        "{activity.comment}"
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                          Hace {activity.time}
-                        </span>
-                        <span 
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            activity.type === 'positive' 
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-orange-100 text-orange-800'
-                          }`}
-                        >
-                          {activity.status}
-                        </span>
+                        
+                        <p className="text-sm mb-2" style={{ color: 'rgb(107, 114, 128)' }}>
+                          "{activity.comment}"
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                            Hace {activity.time}
+                          </span>
+                          <span 
+                            className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              activity.type === 'positive' 
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-orange-100 text-orange-800'
+                            }`}
+                          >
+                            {activity.status}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-12 text-center">
+                <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
+                <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+                  No hay actividad reciente
+                </h3>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  Las votaciones y reseñas de tus clientes aparecerán aquí cuando empiecen a usar tu página de votación.
+                </p>
+                <button
+                  onClick={() => navigate('/app/pagina-votacion')}
+                  className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  style={{
+                    backgroundColor: '#075E54',
+                    color: 'white',
+                    border: '1px solid #075E54'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#064e45';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#075E54';
+                  }}
+                >
+                  Configurar Página de Votación
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
