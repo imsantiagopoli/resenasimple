@@ -7,9 +7,10 @@ import {
   Vote,
   QrCode,
   Star,
-  Settings, 
   User, 
   LogOut,
+  Settings,
+  ChevronDown,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -20,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const mainMenuItems = [
     { icon: Home, label: 'Inicio', id: 'inicio', route: '/app/inicio', color: 'rgb(75, 85, 99)' },
@@ -103,13 +104,81 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
 
         {/* User Section */}
         <div className="p-4" style={{ borderTop: '1px solid rgb(229, 231, 235)' }}>
-          <div className="space-y-3">
-            {/* User Info */}
-            <div 
-              className="flex items-center justify-between p-3 rounded-lg transition-colors duration-200"
+          {/* User Menu Dropdown */}
+          <div className="relative">
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div 
+                className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border shadow-lg bg-white z-10 overflow-hidden"
+                style={{ borderColor: 'rgb(229, 231, 235)' }}
+              >
+                <button
+                  onClick={() => {
+                    navigate('/app/configuracion');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full flex items-center px-4 py-3 text-sm transition-colors duration-200"
+                  style={{ 
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }}
+                >
+                  <Settings size={16} className="mr-3" style={{ color: 'rgb(107, 114, 128)' }} />
+                  <span>Configuración</span>
+                </button>
+                
+                <div className="border-t" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+                
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full flex items-center px-4 py-3 text-sm transition-colors duration-200"
+                  style={{ 
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgb(254, 242, 242)';
+                    const icon = e.currentTarget.querySelector('svg');
+                    const text = e.currentTarget.querySelector('span');
+                    if (icon) icon.style.color = 'rgb(185, 28, 28)';
+                    if (text) text.style.color = 'rgb(185, 28, 28)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white';
+                    const icon = e.currentTarget.querySelector('svg');
+                    const text = e.currentTarget.querySelector('span');
+                    if (icon) icon.style.color = 'rgb(107, 114, 128)';
+                    if (text) text.style.color = '#161616';
+                  }}
+                >
+                  <LogOut size={16} className="mr-3" style={{ color: 'rgb(107, 114, 128)' }} />
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+            )}
+            
+            {/* User Card Button */}
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full flex items-center p-3 rounded-lg transition-all duration-200"
               style={{ backgroundColor: 'rgb(249, 250, 251)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
+              }}
             >
-              <div className="flex items-center overflow-hidden">
+              <div className="flex items-center overflow-hidden flex-1">
                 <div 
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: '#075E54' }}
@@ -132,57 +201,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
                 </div>
               </div>
               
-              {/* Settings Button */}
-              <button
-                onClick={() => navigate('/app/configuracion')}
-                className="p-2 rounded-lg transition-all duration-200 flex-shrink-0"
-                style={{ color: 'rgb(107, 114, 128)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                  e.currentTarget.style.color = '#075E54';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'rgb(107, 114, 128)';
-                }}
-                title="Configuración"
-              >
-                <Settings size={16} />
-              </button>
-              </div>
-            </div>
-
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgb(254, 242, 242)';
-                const icon = e.currentTarget.querySelector('svg');
-                const text = e.currentTarget.querySelector('span');
-                if (icon) icon.style.color = 'rgb(185, 28, 28)';
-                if (text) text.style.color = 'rgb(185, 28, 28)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                const icon = e.currentTarget.querySelector('svg');
-                const text = e.currentTarget.querySelector('span');
-                if (icon) icon.style.color = 'rgb(75, 85, 99)';
-                if (text) text.style.color = '#161616';
-              }}
-            >
-              <LogOut 
+              {/* Dropdown Arrow */}
+              <ChevronDown 
                 size={16} 
-                className="mr-3 flex-shrink-0" 
-                style={{ color: 'rgb(75, 85, 99)' }}
+                className={`transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                style={{ color: 'rgb(107, 114, 128)' }}
               />
-              <span 
-                className="text-sm font-medium" 
-                style={{ color: '#161616' }}
-              >
-                Cerrar Sesión
-              </span>
             </button>
+          </div>
         </div>
       </div>
     </div>
