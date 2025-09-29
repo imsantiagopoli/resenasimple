@@ -47,102 +47,18 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
 
   // Funciones para manejo de descarga e impresión
   const handleDownload = () => {
-    // Use a default branch slug for download - this should be passed from parent
-    const qrURL = generateQRURL('default-branch');
+    // This will be called from QRPreviewPanel with actual branch data
     const link = document.createElement('a');
-    link.href = qrURL;
+    link.href = '#'; // This will be overridden by parent component
     link.download = `qr-code.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const generateQRURL = (branchSlug: string) => {
-    const baseURL = window.location.origin;
-    const votingURL = `${baseURL}/v/${branchSlug}`;
-    const qrAPI = `https://api.qrserver.com/v1/create-qr-code/`;
-    
-    const params = new URLSearchParams({
-      size: `${config.qr.size}x${config.qr.size}`,
-      data: votingURL,
-      format: 'png',
-      bgcolor: config.qr.backgroundColor.replace('#', ''),
-      color: config.qr.foregroundColor.replace('#', ''),
-      ecc: config.qr.errorCorrectionLevel,
-      margin: config.qr.margin.toString()
-    });
-
-    return `${qrAPI}?${params.toString()}`;
-  };
-
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const qrURL = generateQRURL('default-branch');
-      const content = `
-        <html>
-          <head>
-            <title>Código QR</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                margin: 0;
-                padding: 20px;
-                text-align: center;
-              }
-              .qr-container {
-                border: ${config.design.showFrame ? `${config.design.frameThickness}px solid ${config.design.frameColor}` : 'none'};
-                padding: 20px;
-                border-radius: 8px;
-                background: white;
-              }
-              h1 { color: #161616; margin-bottom: 10px; }
-              h2 { color: rgb(107, 114, 128); margin-bottom: 20px; font-weight: normal; }
-              .cta { color: #075E54; margin-top: 20px; font-weight: bold; }
-              .instructions {
-                margin-top: 30px;
-                padding: 15px;
-                background: #f9fafb;
-                border-radius: 8px;
-                color: rgb(107, 114, 128);
-                font-size: 14px;
-                max-width: 400px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="qr-container">
-              ${config.content.showTitle ? `<h1>${config.content.title}</h1>` : ''}
-              ${config.content.showSubtitle ? `<h2>${config.content.subtitle}</h2>` : ''}
-              <img src="${qrURL}" alt="Código QR" />
-              ${config.content.showCallToAction ? `<div class="cta">${config.content.callToAction}</div>` : ''}
-            </div>
-            ${config.print.includeInstructions ? `
-              <div class="instructions">
-                <strong>Instrucciones:</strong><br/>
-                1. Abre la cámara de tu teléfono<br/>
-                2. Apunta hacia el código QR<br/>
-                3. Toca la notificación que aparece<br/>
-                4. Comparte tu experiencia
-              </div>
-            ` : ''}
-          </body>
-        </html>
-      `;
-      
-      printWindow.document.open();
-      printWindow.document.write(content);
-      printWindow.document.close();
-      
-      printWindow.onload = () => {
-        printWindow.print();
-      };
-    }
+    // This will be handled by parent component with actual branch data
+    console.log('Print functionality will be handled by parent');
   };
 
   if (activeTab === 'design') {
@@ -422,18 +338,18 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
               </label>
               
               <div className="grid grid-cols-2 gap-2">
-                {['A4', 'Letter', 'A5', 'Custom'].map((size) => (
+                {['A4', 'Letter', 'Custom'].map((size) => (
                   <button
                     key={size}
-                    onClick={() => updatePrint({ paperSize: size.toLowerCase() })}
+                    onClick={() => updatePrint({ format: size as 'A4' | 'Letter' | 'Custom' })}
                     className={`p-3 text-sm font-medium rounded-md border-2 transition-colors ${
-                      config.print.paperSize === size.toLowerCase()
+                      config.print.format === size
                         ? 'border-transparent text-white'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                     style={{
-                      backgroundColor: config.print.paperSize === size.toLowerCase() ? '#075E54' : 'transparent',
-                      color: config.print.paperSize === size.toLowerCase() ? 'white' : '#161616'
+                      backgroundColor: config.print.format === size ? '#075E54' : 'transparent',
+                      color: config.print.format === size ? 'white' : '#161616'
                     }}
                   >
                     {size}
@@ -454,7 +370,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                 ].map((orientation) => (
                   <button
                     key={orientation.value}
-                    onClick={() => updatePrint({ orientation: orientation.value })}
+                    onClick={() => updatePrint({ orientation: orientation.value as 'portrait' | 'landscape' })}
                     className={`p-3 text-sm font-medium rounded-md border-2 transition-colors ${
                       config.print.orientation === orientation.value
                         ? 'border-transparent text-white'
@@ -517,7 +433,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
         <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center space-x-3">
             <button
-              onClick={handleDownload}
               className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border flex-1"
               style={{
                 backgroundColor: 'white',
@@ -536,7 +451,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
             </button>
             
             <button
-              onClick={handlePrint}
              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
               style={{
                 background: 'linear-gradient(135deg, #075E54 0%, #064e45 100%)',

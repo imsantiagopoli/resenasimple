@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, ChevronDown } from 'lucide-react';
+import { Building2, ChevronDown, Download, Printer } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { BusinessBranch } from '../../hooks/useBusiness';
 
@@ -16,6 +16,86 @@ interface QRPreviewPanelProps {
 const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const { config, selectedBranch, branches, onBranchChange, generateQRURL } = qrData;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleDownload = () => {
+    const qrURL = generateQRURL(selectedBranch.slug, config);
+    const link = document.createElement('a');
+    link.href = qrURL;
+    link.download = `qr-${selectedBranch.slug}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const qrURL = generateQRURL(selectedBranch.slug, config);
+      const content = `
+        <html>
+          <head>
+            <title>Código QR - ${selectedBranch.name}</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 20px;
+                text-align: center;
+              }
+              .qr-container {
+                border: ${config.design.showFrame ? `${config.design.frameThickness}px solid ${config.design.frameColor}` : 'none'};
+                padding: 20px;
+                border-radius: 8px;
+                background: white;
+              }
+              h1 { color: #161616; margin-bottom: 10px; }
+              h2 { color: rgb(107, 114, 128); margin-bottom: 20px; font-weight: normal; }
+              .cta { color: #075E54; margin-top: 20px; font-weight: bold; }
+              .instructions {
+                margin-top: 30px;
+                padding: 15px;
+                background: #f9fafb;
+                border-radius: 8px;
+                color: rgb(107, 114, 128);
+                font-size: 14px;
+                max-width: 400px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="qr-container">
+              ${config.content.showTitle ? `<h1>${config.content.title}</h1>` : ''}
+              ${config.content.showSubtitle ? `<h2>${config.content.subtitle}</h2>` : ''}
+              <img src="${qrURL}" alt="Código QR" />
+              ${config.content.showCallToAction ? `<div class="cta">${config.content.callToAction}</div>` : ''}
+            </div>
+            ${config.print.includeInstructions ? `
+              <div class="instructions">
+                <strong>Instrucciones:</strong><br/>
+                1. Abre la cámara de tu teléfono<br/>
+                2. Apunta hacia el código QR<br/>
+                3. Toca la notificación que aparece<br/>
+                4. Comparte tu experiencia
+              </div>
+            ` : ''}
+          </body>
+        </html>
+      `;
+      
+      printWindow.document.open();
+      printWindow.document.write(content);
+      printWindow.document.close();
+      
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -170,12 +250,53 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             )}
 
             {/* URL Display */}
-            <div className="mt-6 p-3 rounded-lg border text-xs" style={{
+            <div className="mt-6 p-3 rounded-lg border text-xs break-all" style={{
               backgroundColor: 'rgb(249, 250, 251)',
               borderColor: 'rgb(229, 231, 235)',
               color: 'rgb(107, 114, 128)'
             }}>
               <strong style={{ color: '#161616' }}>Enlace:</strong> {window.location.origin}/v/{selectedBranch.slug}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="mt-6 flex items-center space-x-3">
+              <button
+                onClick={handleDownload}
+                className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border flex-1"
+                style={{
+                  backgroundColor: 'white',
+                  borderColor: 'rgb(209, 213, 219)',
+                  color: '#161616'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }}
+              >
+                <Download size={16} />
+                <span>Descargar</span>
+              </button>
+              
+              <button
+                onClick={handlePrint}
+                className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
+                style={{
+                  backgroundColor: '#075E54',
+                  color: 'white',
+                  border: '1px solid #075E54'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#064e45';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }}
+              >
+                <Printer size={16} />
+                <span>Imprimir</span>
+              </button>
             </div>
           </div>
         </div>
