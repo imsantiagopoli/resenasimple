@@ -520,8 +520,9 @@ const SettingsPage: React.FC = () => {
               <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                 ¿Necesitas ayuda? Estamos aquí para ti
               </p>
+            </div>
           </div>
-
+          
           <div className="grid grid-cols-1 gap-4">
             <a
               href="mailto:hola@resenasimple.com"
@@ -546,61 +547,8 @@ const SettingsPage: React.FC = () => {
             </a>
           </div>
         </div>
+      </div>
 
-        {/* Danger Zone */}
-        <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#ef4444' }}>
-          <div className="flex items-center space-x-3 mb-6">
-            <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#ef4444' + '20' }}
-            >
-              <AlertCircle size={20} style={{ color: '#ef4444' }} />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold" style={{ color: '#ef4444' }}>
-                Zona de Peligro
-              </h2>
-              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Acciones irreversibles para tu cuenta
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Nombre
-            </label>
-            <input
-              type="text"
-              value={isEditingProfile ? tempProfileData.firstName : profileData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
-              disabled={!isEditingProfile}
-              className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: isEditingProfile ? 'white' : 'rgb(249, 250, 251)'
-              }}
-              placeholder="Tu nombre"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Apellido
-            </label>
-            <input
-              type="text"
-              value={isEditingProfile ? tempProfileData.lastName : profileData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
-              disabled={!isEditingProfile}
-              className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: 'rgb(249, 250, 251)'
-              }}
-              Se cobrará ${subscriptionData.amount}
       {/* Danger Zone - Full Width */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#ef4444' }}>
         <div className="flex items-center space-x-3 mb-6">
