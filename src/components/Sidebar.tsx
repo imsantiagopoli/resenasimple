@@ -28,7 +28,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { icon: Vote, label: 'Página de votación', id: 'pagina-votacion', route: '/app/pagina-votacion', color: 'rgb(75, 85, 99)' },
     { icon: QrCode, label: 'Página QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
     { icon: Star, label: 'Reseñas', id: 'resenas', route: '/app/resenas', color: 'rgb(75, 85, 99)' },
-    { icon: Settings, label: 'Configuración', id: 'configuracion', route: '/app/configuracion', color: 'rgb(75, 85, 99)' },
   ];
 
   const handleLogout = async () => {
