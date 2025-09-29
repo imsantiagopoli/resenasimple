@@ -237,40 +237,40 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
                 checked={config.design.showFrame}
                 onChange={(e) => updateDesign({ showFrame: e.target.checked })}
                 className="w-4 h-4"
-                  id="showCallToAction"
-                  checked={config.content.showCallToAction}
-                  onChange={(e) => updateContent({ showCallToAction: e.target.checked })}
+                style={{ accentColor: '#075E54' }}
+              />
+              <label htmlFor="showFrame" className="text-sm font-medium" style={{ color: '#161616' }}>
                 Agregar marco alrededor del QR
               </label>
             </div>
-                <label htmlFor="showCallToAction" className="text-sm font-medium" style={{ color: '#161616' }}>
+            
             {config.design.showFrame && (
               <div className="ml-6 space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              {config.content.showCallToAction && (
+                    Grosor: {config.design.frameThickness}px
                   </label>
                   <input
                     type="range"
                     min="1"
-                    value={config.content.callToAction}
-                    onChange={(e) => updateContent({ callToAction: e.target.value })}
+                    max="10"
+                    value={config.design.frameThickness}
                     onChange={(e) => updateDesign({ frameThickness: parseInt(e.target.value) })}
                     className="w-full"
                     style={{ accentColor: '#075E54' }}
                   />
                 </div>
                 
-                        onClick={() => updatePrint({ orientation: orientation.value as 'portrait' | 'landscape' })}
+                <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                          config.print.format === size
-                        config.print.format === size
+                    Color del marco
+                  </label>
                   <div className="flex items-center space-x-2">
                     <input
                       type="color"
-                          backgroundColor: config.print.format === size ? '#075E54' : 'transparent',
-                          color: config.print.format === size ? 'white' : '#161616'
-                        color: config.print.format === size ? 'white' : '#161616'
+                      value={config.design.frameColor}
+                      onChange={(e) => updateDesign({ frameColor: e.target.value })}
+                      className="w-8 h-8 rounded border"
                     />
                     <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                       {config.design.frameColor}
@@ -376,18 +376,18 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({ activeTab, config, onConfigUp
             <div className="flex items-center space-x-3">
               <input
                 type="checkbox"
-                id="showCTA"
-                checked={config.content.showCTA}
-                onChange={(e) => updateContent({ showCTA: e.target.checked })}
+                id="showCallToAction"
+                checked={config.content.showCallToAction}
+                onChange={(e) => updateContent({ showCallToAction: e.target.checked })}
                 className="w-4 h-4"
                 style={{ accentColor: '#075E54' }}
               />
-              <label htmlFor="showCTA" className="text-sm font-medium" style={{ color: '#161616' }}>
+              <label htmlFor="showCallToAction" className="text-sm font-medium" style={{ color: '#161616' }}>
                 Mostrar llamada a la acción
               </label>
             </div>
             
-            {config.content.showCTA && (
+            {config.content.showCallToAction && (
               <div className="ml-7">
                 <input
                   type="text"
