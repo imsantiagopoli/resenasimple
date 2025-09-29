@@ -396,67 +396,52 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Current Plan */}
-        <div 
-          className="p-4 rounded-lg border mb-6"
-          style={{ 
-            backgroundColor: '#075E54' + '08',
-            borderColor: '#075E54' + '30'
-          }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-lg" style={{ color: '#075E54' }}>
-                Plan {subscriptionData.plan}
-              </h3>
-              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                ${subscriptionData.amount}/mes • Estado: {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
-              </p>
-            </div>
-            <div 
-              className="px-3 py-1 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: subscriptionData.status === 'active' ? '#10b981' : '#ef4444',
-                color: 'white'
-              }}
-            >
-              {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
-              Incluye:
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {subscriptionData.features.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Check size={14} style={{ color: '#10b981' }} />
-                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Billing Info */}
+        {/* Plan and Billing Info - Two Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Current Plan Card */}
           <div 
-            className="p-4 rounded-lg border"
+            className="p-6 rounded-lg border"
+            style={{ 
+              backgroundColor: '#075E54' + '08',
+              borderColor: '#075E54' + '30'
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-semibold text-lg" style={{ color: '#075E54' }}>
+                  Plan {subscriptionData.plan}
+                </h3>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  ${subscriptionData.amount}/mes
+                </p>
+              </div>
+              <div 
+                className="px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: subscriptionData.status === 'active' ? '#10b981' : '#ef4444',
+                  color: 'white'
+                }}
+              >
+                {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
+              </div>
+            </div>
+          </div>
+
+          {/* Next Billing Card */}
+          <div 
+            className="p-6 rounded-lg border"
             style={{ 
               backgroundColor: 'rgb(249, 250, 251)',
               borderColor: 'rgb(229, 231, 235)'
             }}
           >
-            <div className="flex items-center space-x-3 mb-2">
-              <Calendar size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
+            <div className="flex items-center space-x-3 mb-4">
+              <Calendar size={20} style={{ color: 'rgb(107, 114, 128)' }} />
+              <h4 className="font-medium text-lg" style={{ color: '#161616' }}>
                 Próxima Facturación
               </h4>
             </div>
-            <p className="text-lg font-semibold" style={{ color: '#161616' }}>
+            <p className="text-2xl font-semibold mb-2" style={{ color: '#161616' }}>
               {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
                 day: 'numeric',
                 month: 'long',
