@@ -188,13 +188,13 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-3 pb-8">
+      <div className="space-y-2">
         <h1 className="text-2xl font-bold" style={{ color: '#161616' }}>
           Configuración
         </h1>
-        <p className="text-base" style={{ color: 'rgb(107, 114, 128)' }}>
+        <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
           Gestiona tu perfil, suscripción y preferencias de cuenta
         </p>
       </div>
@@ -219,337 +219,283 @@ const SettingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
-        <div className="space-y-8">
-          {/* Profile Section */}
-          <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: '#075E54' + '20' }}
-                >
-                  <User size={20} style={{ color: '#075E54' }} />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-                    Información Personal
-                  </h2>
-                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Actualiza tu nombre y información de contacto
-                  </p>
-                </div>
-              </div>
-              
-              {!isEditingProfile ? (
-                <button
-                  onClick={handleEditProfile}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#161616',
-                    border: '1px solid rgb(209, 213, 219)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }}
-                >
-                  <SettingsIcon size={16} />
-                  <span>Editar</span>
-                </button>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleSaveProfile}
-                    disabled={isSaving}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      backgroundColor: '#075E54',
-                      color: 'white',
-                      border: '1px solid #075E54'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSaving) {
-                        e.currentTarget.style.backgroundColor = '#064e45';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSaving) {
-                        e.currentTarget.style.backgroundColor = '#075E54';
-                      }
-                    }}
-                  >
-                    {isSaving ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Save size={16} />
-                    )}
-                    <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
-                  </button>
-                  
-                  <button
-                    onClick={handleCancelEdit}
-                    disabled={isSaving}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none disabled:opacity-50"
-                    style={{
-                      backgroundColor: 'white',
-                      color: '#161616',
-                      border: '1px solid rgb(209, 213, 219)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSaving) {
-                        e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSaving) {
-                        e.currentTarget.style.backgroundColor = 'white';
-                      }
-                    }}
-                  >
-                    <X size={16} />
-                    <span>Cancelar</span>
-                  </button>
-                </div>
-              )}
+      {/* Profile Section */}
+      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: '#075E54' + '20' }}
+            >
+              <User size={20} style={{ color: '#075E54' }} />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  value={isEditingProfile ? tempProfileData.firstName : profileData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  disabled={!isEditingProfile}
-                  className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-                  style={{
-                    borderColor: 'rgb(209, 213, 219)',
-                    color: '#161616',
-                    backgroundColor: isEditingProfile ? 'white' : 'rgb(249, 250, 251)'
-                  }}
-                  placeholder="Tu nombre"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                  Apellido
-                </label>
-                <input
-                  type="text"
-                  value={isEditingProfile ? tempProfileData.lastName : profileData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  disabled={!isEditingProfile}
-                  className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
-                  style={{
-                    borderColor: 'rgb(209, 213, 219)',
-                    color: '#161616',
-                    backgroundColor: isEditingProfile ? 'white' : 'rgb(249, 250, 251)'
-                  }}
-                  placeholder="Tu apellido"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={isEditingProfile ? tempProfileData.email : profileData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  disabled={true} // Email changes require special verification
-                  className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 bg-gray-50 cursor-not-allowed"
-                  style={{
-                    borderColor: 'rgb(209, 213, 219)',
-                    color: 'rgb(107, 114, 128)',
-                    backgroundColor: 'rgb(249, 250, 251)'
-                  }}
-                />
-                <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Para cambiar tu email, contacta al soporte
-                </p>
-              </div>
+            <div>
+              <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+                Información Personal
+              </h2>
+              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                Actualiza tu nombre y información de contacto
+              </p>
             </div>
           </div>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-8">
-          {/* Subscription Section */}
-          <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div className="flex items-center space-x-3 mb-6">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: '#f59e0b' + '20' }}
-              >
-                <Crown size={20} style={{ color: '#f59e0b' }} />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-                  Suscripción
-                </h2>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Gestiona tu plan y facturación
-                </p>
-              </div>
-            </div>
-
-            {/* Current Plan */}
-            <div 
-              className="p-4 rounded-lg border mb-6"
-              style={{ 
-                backgroundColor: '#075E54' + '08',
-                borderColor: '#075E54' + '30'
+          
+          {!isEditingProfile ? (
+            <button
+              onClick={handleEditProfile}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none"
+              style={{
+                backgroundColor: 'white',
+                color: '#161616',
+                border: '1px solid rgb(209, 213, 219)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
               }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg" style={{ color: '#075E54' }}>
-                    Plan {subscriptionData.plan}
-                  </h3>
-                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    ${subscriptionData.amount}/mes • Estado: {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
-                  </p>
-                </div>
-                <div 
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{
-                    backgroundColor: subscriptionData.status === 'active' ? '#10b981' : '#ef4444',
-                    color: 'white'
-                  }}
-                >
-                  {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
-                  Incluye:
-                </h4>
-                <div className="grid grid-cols-1 gap-2">
-                  {subscriptionData.features.map((feature, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Check size={14} style={{ color: '#10b981' }} />
-                      <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Billing Info */}
-            <div 
-              className="p-4 rounded-lg border mb-6"
-              style={{ 
-                backgroundColor: 'rgb(249, 250, 251)',
-                borderColor: 'rgb(229, 231, 235)'
-              }}
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <Calendar size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-                <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                  Próxima Facturación
-                </h4>
-              </div>
-              <p className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </p>
-              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Se cobrará ${subscriptionData.amount}
-              </p>
-            </div>
-
-            {/* Subscription Management */}
-            <div className="flex justify-center">
-              <a
-                href="https://resenasimple.lemonsqueezy.com/billing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200"
+              <SettingsIcon size={16} />
+              <span>Editar</span>
+            </button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: '#075E54',
                   color: 'white',
                   border: '1px solid #075E54'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#064e45';
+                  if (!isSaving) {
+                    e.currentTarget.style.backgroundColor = '#064e45';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#075E54';
+                  if (!isSaving) {
+                    e.currentTarget.style.backgroundColor = '#075E54';
+                  }
                 }}
               >
-                <CreditCard size={16} />
-                <span>Gestionar Suscripción</span>
-                <ExternalLink size={14} />
-              </a>
+                {isSaving ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save size={16} />
+                )}
+                <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
+              </button>
+              
+              <button
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none disabled:opacity-50"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#161616',
+                  border: '1px solid rgb(209, 213, 219)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSaving) {
+                    e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSaving) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                <X size={16} />
+                <span>Cancelar</span>
+              </button>
             </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Nombre
+            </label>
+            <input
+              type="text"
+              value={isEditingProfile ? tempProfileData.firstName : profileData.firstName}
+              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              disabled={!isEditingProfile}
+              className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: isEditingProfile ? 'white' : 'rgb(249, 250, 251)'
+              }}
+              placeholder="Tu nombre"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Apellido
+            </label>
+            <input
+              type="text"
+              value={isEditingProfile ? tempProfileData.lastName : profileData.lastName}
+              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              disabled={!isEditingProfile}
+              className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: isEditingProfile ? 'white' : 'rgb(249, 250, 251)'
+              }}
+              placeholder="Tu apellido"
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={isEditingProfile ? tempProfileData.email : profileData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              disabled={true} // Email changes require special verification
+              className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 bg-gray-50 cursor-not-allowed"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: 'rgb(107, 114, 128)',
+                backgroundColor: 'rgb(249, 250, 251)'
+              }}
+            />
+            <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+              Para cambiar tu email, contacta al soporte
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom Section - Full Width */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Help Section */}
-        <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center space-x-3 mb-4">
-            <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#3b82f6' + '20' }}
-            >
-              <Mail size={20} style={{ color: '#3b82f6' }} />
-            </div>
+      {/* Subscription Section */}
+      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="flex items-center space-x-3 mb-6">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: '#f59e0b' + '20' }}
+          >
+            <Crown size={20} style={{ color: '#f59e0b' }} />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Suscripción
+            </h2>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Gestiona tu plan y facturación
+            </p>
+          </div>
+        </div>
+
+        {/* Current Plan */}
+        <div 
+          className="p-4 rounded-lg border mb-6"
+          style={{ 
+            backgroundColor: '#075E54' + '08',
+            borderColor: '#075E54' + '30'
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-                Soporte
-              </h2>
+              <h3 className="font-semibold text-lg" style={{ color: '#075E54' }}>
+                Plan {subscriptionData.plan}
+              </h3>
               <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                ¿Necesitas ayuda? Estamos aquí para ti
+                ${subscriptionData.amount}/mes • Estado: {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
               </p>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            <a
-              href="mailto:hola@resenasimple.com"
-              className="flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm"
-              style={{ borderColor: 'rgb(229, 231, 235)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
+            <div 
+              className="px-3 py-1 rounded-full text-xs font-medium"
+              style={{
+                backgroundColor: subscriptionData.status === 'active' ? '#10b981' : '#ef4444',
+                color: 'white'
               }}
             >
-              <Mail size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-              <div>
-                <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
-                  Contactar Soporte
-                </h4>
-                <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                  hola@resenasimple.com
-                </p>
-              </div>
-            </a>
+              {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
+            </div>
           </div>
+
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium" style={{ color: '#161616' }}>
+              Incluye:
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {subscriptionData.features.map((feature, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Check size={14} style={{ color: '#10b981' }} />
+                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    {feature}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Billing Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div 
+            className="p-4 rounded-lg border"
+            style={{ 
+              backgroundColor: 'rgb(249, 250, 251)',
+              borderColor: 'rgb(229, 231, 235)'
+            }}
+          >
+            <div className="flex items-center space-x-3 mb-2">
+              <Calendar size={16} style={{ color: 'rgb(107, 114, 128)' }} />
+              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
+                Próxima Facturación
+              </h4>
+            </div>
+            <p className="text-lg font-semibold" style={{ color: '#161616' }}>
+              {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </p>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Se cobrará ${subscriptionData.amount}
+            </p>
+          </div>
+        </div>
+
+        {/* Subscription Management */}
+        <div className="flex justify-center">
+          <a
+            href="https://resenasimple.lemonsqueezy.com/billing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200"
+            style={{
+              backgroundColor: '#075E54',
+              color: 'white',
+              border: '1px solid #075E54'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#064e45';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#075E54';
+            }}
+          >
+            <CreditCard size={16} />
+            <span>Gestionar Suscripción</span>
+            <ExternalLink size={14} />
+          </a>
         </div>
       </div>
 
-      {/* Danger Zone - Full Width */}
+      {/* Danger Zone */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#ef4444' }}>
         <div className="flex items-center space-x-3 mb-6">
           <div 
@@ -568,7 +514,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="max-w-2xl">
+        <div className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-lg border" style={{ borderColor: '#fed7d7' }}>
             <div>
               <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
@@ -600,6 +546,49 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Help Section */}
+      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="flex items-center space-x-3 mb-4">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: '#3b82f6' + '20' }}
+          >
+            <Mail size={20} style={{ color: '#3b82f6' }} />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Soporte
+            </h2>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              ¿Necesitas ayuda? Estamos aquí para ti
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <a
+            href="mailto:hola@resenasimple.com"
+            className="flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm"
+            style={{ borderColor: 'rgb(229, 231, 235)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
+            }}
+          >
+            <Mail size={16} style={{ color: 'rgb(107, 114, 128)' }} />
+            <div>
+              <h4 className="font-medium text-sm" style={{ color: '#161616' }}>
+                Contactar Soporte
+              </h4>
+              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                hola@resenasimple.com
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
