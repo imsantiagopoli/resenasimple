@@ -522,6 +522,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [businessProfile, businessBranches, sessionsLoaded]);
 
+  useEffect(() => {
+    if (businessProfile?.id && !configLoaded) {
+      fetchVotingConfig();
+    }
+  }, [businessProfile?.id, configLoaded]);
   // Reset state when user changes
   useEffect(() => {
     if (!user) {
@@ -535,6 +540,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setSessionsLoading(true);
       setSessionsError(null);
       setSessionsLoaded(false);
+      
+      setVotingConfiguration(null);
+      setOriginalVotingConfiguration(null);
+      setConfigLoading(true);
+      setConfigError(null);
+      setConfigLoaded(false);
+      setConfigHasChanges(false);
+      setConfigIsSaving(false);
     }
   }, [user]);
 
@@ -552,6 +565,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     sessionsError,
     sessionsLoaded,
     
+    // Voting configuration data
+    votingConfiguration,
+    originalVotingConfiguration,
+    configLoading,
+    configError,
+    configLoaded,
+    configHasChanges,
+    configIsSaving,
+    
     // Actions
     updateBusinessProfile,
     upsertBranch,
@@ -559,6 +581,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     refetchBusinessData: fetchBusinessData,
     refetchSessionsData: fetchVotingSessions,
     generateSlug,
+    
+    // Voting config actions
+    updateVotingConfig,
+    saveVotingConfig,
+    createDefaultVotingConfig,
+    getOrCreateVotingConfig,
+    resetVotingConfigChanges,
+    refetchVotingConfig: fetchVotingConfig,
     
     // Statistics
     getStatistics,
