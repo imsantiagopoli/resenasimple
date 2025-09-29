@@ -87,16 +87,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
                   color: location.pathname === item.route ? 'rgb(255, 255, 255)' : item.color
                 }}
               />
-              {isOpen && (
-                <span 
-                  className="ml-3 font-medium text-sm"
-                  style={{
-                    color: location.pathname === item.route ? 'rgb(255, 255, 255)' : '#161616'
-                  }}
-                >
-                  {item.label}
-                </span>
-              )}
+              <span 
+                className="ml-3 font-medium text-sm"
+                style={{
+                  color: location.pathname === item.route ? 'rgb(255, 255, 255)' : '#161616'
+                }}
+              >
+                {item.label}
+              </span>
             </button>
           ))}
 
