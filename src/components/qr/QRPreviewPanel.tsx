@@ -19,12 +19,27 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
   const handleDownload = () => {
     const qrURL = generateQRURL(selectedBranch.slug, config);
+    
+    // Create a temporary link to download the QR image
     const link = document.createElement('a');
-    link.href = qrURL;
-    link.download = `qr-${selectedBranch.slug}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    // Fetch the image and create a blob URL
+    fetch(qrURL)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `qr-${selectedBranch.slug}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error downloading QR:', error);
+        // Fallback: open QR in new tab
+        window.open(qrURL, '_blank');
+      });
   };
 
   const handlePrint = () => {

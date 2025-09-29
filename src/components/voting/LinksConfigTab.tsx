@@ -22,7 +22,7 @@ const LinksConfigTab: React.FC<LinksConfigTabProps> = ({ config, onConfigUpdate 
   }));
 
   const generateVotingLink = (slug: string) => {
-    return `https://reseñasimple.com/v/${slug}`;
+    return `https://resenasimple.com/v/${slug}`;
   };
 
   const copyToClipboard = (text: string) => {

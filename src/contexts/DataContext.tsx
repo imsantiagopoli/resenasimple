@@ -687,7 +687,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // Generate QR URL
   const generateQRURL = (branchSlug: string, qrConfig?: QRConfiguration): string => {
     const config = qrConfig || qrConfiguration;
-    const baseURL = window.location.origin;
+    const baseURL = 'https://resenasimple.com';
     const votingURL = `${baseURL}/v/${branchSlug}`;
     
     if (!config) {

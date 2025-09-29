@@ -8,8 +8,6 @@ interface QRConfigTabProps {
   onConfigUpdate: (updates: Partial<QRConfiguration>) => void;
   onDownload?: () => void;
   onPrint?: () => void;
-  onDownload?: () => void;
-  onPrint?: () => void;
 }
 
 const QRConfigTab: React.FC<QRConfigTabProps> = ({ 
