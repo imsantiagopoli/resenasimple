@@ -1088,7 +1088,67 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   };
 
   // Generate slug from name
-  const generateSlug = (name: string): string => {
+  const generateSlug = async (name: string): Promise<string> => {
+    const baseSlug = name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    // Check if base slug is available
+    const { data: existingBranch, error } = await supabase
+      .from('business_branches')
+      .select('slug')
+      .eq('slug', baseSlug)
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking slug uniqueness:', error);
+      // Fallback to base slug if there's an error
+      return baseSlug;
+    }
+
+    // If slug doesn't exist, use it
+    if (!existingBranch) {
+      return baseSlug;
+    }
+
+    // If slug exists, find the next available number
+    let counter = 2;
+    let newSlug = `${baseSlug}-${counter}`;
+    
+    while (true) {
+      const { data: existingSlug, error: slugError } = await supabase
+        .from('business_branches')
+        .select('slug')
+        .eq('slug', newSlug)
+        .maybeSingle();
+
+      if (slugError && slugError.code !== 'PGRST116') {
+        console.error('Error checking slug uniqueness:', slugError);
+        break;
+      }
+
+      if (!existingSlug) {
+        break; // Found available slug
+      }
+
+      counter++;
+      newSlug = `${baseSlug}-${counter}`;
+      
+      // Safety check to prevent infinite loop
+      if (counter > 100) {
+        console.warn('Reached maximum slug attempts, using timestamp suffix');
+        newSlug = `${baseSlug}-${Date.now()}`;
+        break;
+      }
+    }
+
+    return newSlug;
+  };
+
+  // Synchronous version for backwards compatibility (deprecated)
+  const generateSlugSync = (name: string): string => {
     return name
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
@@ -1236,6 +1296,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     refetchBusinessData: fetchBusinessData,
     refetchSessionsData: fetchVotingSessions,
     generateSlug,
+    generateSlugSync,
     
     // Voting config actions
     updateVotingConfig,

@@ -27,6 +27,7 @@ export const useBusiness = () => {
     upsertBranch,
     deleteBranch,
     refetch,
-    generateSlug
+    generateSlug,
+    generateSlugSync
   };
 };
