@@ -15,12 +15,13 @@ const PricingSection: React.FC = () => {
     {
       name: 'Básico',
       icon: Star,
-      price: 19,
+      price: 14,
       period: 'mes',
-      description: 'Perfecto para restaurantes pequeños',
+      description: 'Perfecto para negocios pequeños',
       popular: false,
       features: [
-        'Hasta 500 votaciones por mes',
+        '1 ubicación',
+        'Hasta 100 reseñas',
         'Códigos QR ilimitados',
         'Personalización básica',
         'Dashboard de análisis',
@@ -32,39 +33,39 @@ const PricingSection: React.FC = () => {
     {
       name: 'Profesional',
       icon: Crown,
-      price: 39,
+      price: 19,
       period: 'mes',
-      description: 'El más popular para restaurantes en crecimiento',
+      description: 'El más popular para negocios en crecimiento',
       popular: true,
       features: [
-        'Hasta 2,000 votaciones por mes',
+        '1 ubicación',
+        'Reseñas ilimitadas',
         'Códigos QR ilimitados',
         'Personalización avanzada',
         'Logo y colores de marca',
         'Mensajes de ofertas',
         'Analytics avanzados',
         'Soporte prioritario',
-        'Múltiples ubicaciones',
         'Exportar reportes'
       ]
     },
     {
-      name: 'Cadena',
+      name: 'Empresarial',
       icon: Building2,
-      price: null,
-      period: 'personalizado',
-      description: 'Para cadenas de restaurantes',
+      price: 29,
+      period: 'mes',
+      description: 'Para negocios con múltiples ubicaciones',
       popular: false,
       features: [
-        'Votaciones ilimitadas',
+        'Múltiples ubicaciones',
+        'Reseñas ilimitadas',
         'Códigos QR ilimitados',
         'Panel administrativo central',
         'Gestión de múltiples locales',
         'Branding personalizado',
-        'API personalizada',
-        'Integración con sistemas',
-        'Soporte 24/7',
-        'Gerente de cuenta dedicado',
+        'Analytics avanzados',
+        'Soporte prioritario',
+        'Exportar reportes',
         'Reportes personalizados'
       ]
     }
@@ -242,76 +243,45 @@ const PricingSection: React.FC = () => {
 
                 {/* CTA Button */}
                 <div className="mt-auto">
-                  {plan.name === 'Cadena' ? (
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }} 
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <button
-                        className="w-full flex items-center justify-center py-3 px-6 rounded-lg text-sm font-medium border transition-all duration-300 hover:shadow-lg focus:outline-none group"
-                        style={{
-                          backgroundColor: 'white',
-                          color: '#161616',
-                          borderColor: 'rgb(209, 213, 219)'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link
+                      to="/auth"
+                      className="group w-full flex items-center justify-center py-3 px-6 rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg focus:outline-none"
+                      style={{
+                        backgroundColor: plan.popular ? '#075E54' : 'white',
+                        color: plan.popular ? 'white' : '#161616',
+                        border: plan.popular ? '1px solid #075E54' : '1px solid rgb(209, 213, 219)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (plan.popular) {
+                          e.currentTarget.style.backgroundColor = '#064e45';
+                          e.currentTarget.style.borderColor = '#064e45';
+                        } else {
+                          e.currentTarget.style.backgroundColor = '#075E54';
                           e.currentTarget.style.borderColor = '#075E54';
-                          e.currentTarget.style.color = '#075E54';
-                        }}
-                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'white';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (plan.popular) {
+                          e.currentTarget.style.backgroundColor = '#075E54';
+                          e.currentTarget.style.borderColor = '#075E54';
+                        } else {
                           e.currentTarget.style.backgroundColor = 'white';
                           e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
                           e.currentTarget.style.color = '#161616';
-                        }}
-                      >
-                        <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                          Contactar Ventas
-                        </span>
-                        <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                      </button>
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }} 
-                      whileTap={{ scale: 0.95 }}
+                        }
+                      }}
                     >
-                      <Link
-                        to="/auth"
-                        className="group w-full flex items-center justify-center py-3 px-6 rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg focus:outline-none"
-                        style={{
-                          backgroundColor: plan.popular ? '#075E54' : 'white',
-                          color: plan.popular ? 'white' : '#161616',
-                          border: plan.popular ? '1px solid #075E54' : '1px solid rgb(209, 213, 219)'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (plan.popular) {
-                            e.currentTarget.style.backgroundColor = '#064e45';
-                            e.currentTarget.style.borderColor = '#064e45';
-                          } else {
-                            e.currentTarget.style.backgroundColor = '#075E54';
-                            e.currentTarget.style.borderColor = '#075E54';
-                            e.currentTarget.style.color = 'white';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (plan.popular) {
-                            e.currentTarget.style.backgroundColor = '#075E54';
-                            e.currentTarget.style.borderColor = '#075E54';
-                          } else {
-                            e.currentTarget.style.backgroundColor = 'white';
-                            e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                            e.currentTarget.style.color = '#161616';
-                          }
-                        }}
-                      >
-                        <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                          Prueba Gratuita
-                        </span>
-                        <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    </motion.div>
-                  )}
+                      <span className="inline-block transition-transform group-hover:scale-105 mr-2">
+                        Prueba Gratuita
+                      </span>
+                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </motion.div>
                 </div>
               </motion.div>
             </motion.div>
