@@ -26,8 +26,7 @@ const PricingSection: React.FC = () => {
         'Personalización básica',
         'Dashboard de análisis',
         'Soporte por email',
-        'Filtro de reseñas',
-        'Integración con Google'
+        'Filtro de reseñas'
       ]
     },
     {
