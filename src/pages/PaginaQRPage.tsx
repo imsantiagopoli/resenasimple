@@ -205,8 +205,8 @@ const PaginaQRPage: React.FC = () => {
       <div className="flex h-screen">
         {/* Columna izquierda - Configuración QR (más estrecha) */}
         <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <QRConfigPanel 
-            config={config} 
+          <QRConfigPanel
+            config={config}
             onConfigUpdate={handleConfigUpdate}
             hasChanges={hasChanges}
             onSave={handleSaveConfig}
@@ -214,6 +214,7 @@ const PaginaQRPage: React.FC = () => {
             isSaving={isSaving}
             onDownload={handleDownload}
             onPrint={handlePrint}
+            currentBranchSlug={selectedBranch.slug}
           />
         </div>
         

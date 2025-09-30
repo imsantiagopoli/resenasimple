@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download } from 'lucide-react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Wand2 } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
+import QRTemplatesTab from './QRTemplatesTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 
 interface QRConfigPanelProps {
@@ -12,22 +13,29 @@ interface QRConfigPanelProps {
   isSaving: boolean;
   onDownload?: () => void;
   onPrint?: () => void;
+  currentBranchSlug: string;
 }
 
-const QRConfigPanel: React.FC<QRConfigPanelProps> = ({ 
-  config, 
-  onConfigUpdate, 
+const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
+  config,
+  onConfigUpdate,
   hasChanges,
   onSave,
   onReset,
   isSaving,
   onDownload,
-  onPrint
+  onPrint,
+  currentBranchSlug
 }) => {
-  const [activeTab, setActiveTab] = useState<'design' | 'typography' | 'content' | 'print'>('design');
+  const [activeTab, setActiveTab] = useState<'templates' | 'design' | 'typography' | 'content' | 'print'>('templates');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const tabs = [
+    {
+      id: 'templates' as const,
+      label: 'Templates',
+      icon: Wand2
+    },
     {
       id: 'design' as const,
       label: 'Diseño',
@@ -115,33 +123,53 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Preview Notice for Design Tab */}
-        {(activeTab === 'design' || activeTab === 'typography') && (
-          <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div 
-              className="p-3 rounded-lg text-sm"
-              style={{ 
-                backgroundColor: '#075E54' + '08',
-                border: '1px solid #075E54' + '30'
-              }}
-            >
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span style={{ color: '#075E54' }}>
-                  <strong>Vista previa en tiempo real:</strong> Los cambios se reflejan inmediatamente
-                </span>
+        {activeTab === 'templates' ? (
+          <QRTemplatesTab
+            onApplyTemplate={(template) => {
+              onConfigUpdate(template);
+              setSaveMessage({ type: 'success', text: 'Template aplicado. Recuerda guardar los cambios.' });
+              setTimeout(() => setSaveMessage(null), 3000);
+            }}
+            onDownload={(templateConfig) => {
+              const tempConfig = { ...config, ...templateConfig };
+              onConfigUpdate(templateConfig);
+              setTimeout(() => {
+                if (onDownload) onDownload();
+              }, 100);
+            }}
+            currentBranchSlug={currentBranchSlug}
+          />
+        ) : (
+          <>
+            {/* Preview Notice for Design Tab */}
+            {(activeTab === 'design' || activeTab === 'typography') && (
+              <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+                <div
+                  className="p-3 rounded-lg text-sm"
+                  style={{
+                    backgroundColor: '#075E54' + '08',
+                    border: '1px solid #075E54' + '30'
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span style={{ color: '#075E54' }}>
+                      <strong>Vista previa en tiempo real:</strong> Los cambios se reflejan inmediatamente
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+
+            <QRConfigTab
+              activeTab={activeTab}
+              config={config}
+              onConfigUpdate={onConfigUpdate}
+              onDownload={onDownload}
+              onPrint={onPrint}
+            />
+          </>
         )}
-        
-        <QRConfigTab 
-          activeTab={activeTab} 
-          config={config} 
-          onConfigUpdate={onConfigUpdate}
-          onDownload={onDownload}
-          onPrint={onPrint}
-        />
       </div>
       
       {/* Save Button Section */}
