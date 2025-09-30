@@ -27,15 +27,10 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   onPrint,
   currentBranchSlug
 }) => {
-  const [activeTab, setActiveTab] = useState<'templates' | 'design' | 'typography' | 'content' | 'print'>('templates');
+  const [activeTab, setActiveTab] = useState<'templates' | 'design' | 'typography' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const tabs = [
-    {
-      id: 'templates' as const,
-      label: 'Templates',
-      icon: Wand2
-    },
     {
       id: 'design' as const,
       label: 'Diseño',
@@ -55,6 +50,11 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'print' as const,
       label: 'Impresión',
       icon: Printer
+    },
+    {
+      id: 'templates' as const,
+      label: 'Templates',
+      icon: Wand2
     }
   ];
 
@@ -90,12 +90,12 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
     <div className="h-full flex flex-col">
       {/* Tabs Header */}
       <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="flex">
+        <div className="flex overflow-x-auto" style={{ scrollbarWidth: 'thin' }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-4 py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id ? '' : 'border-transparent'
               }`}
               style={{
