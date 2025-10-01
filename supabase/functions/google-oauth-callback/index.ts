@@ -96,13 +96,20 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Get existing token to preserve refresh_token if not provided
+    const { data: existingToken } = await supabase
+      .from("google_oauth_tokens")
+      .select("refresh_token")
+      .eq("business_id", businessData.id)
+      .maybeSingle();
+
     const { error: upsertError } = await supabase
       .from("google_oauth_tokens")
       .upsert({
         user_id: userId,
         business_id: businessData.id,
         access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
+        refresh_token: tokens.refresh_token || existingToken?.refresh_token || null,
         token_expiry: expiresAt.toISOString(),
         scope: tokens.scope,
         updated_at: new Date().toISOString()
