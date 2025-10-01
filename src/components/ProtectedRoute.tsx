@@ -26,8 +26,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/auth" replace />
   }
 
-  // If on onboarding page, allow access
+  // If on onboarding page
   if (location.pathname === '/onboarding') {
+    // If user already has a business, redirect to dashboard
+    if (businessProfile) {
+      return <Navigate to="/app/inicio" replace />
+    }
+    // Otherwise, allow access to onboarding
     return <>{children}</>
   }
 
