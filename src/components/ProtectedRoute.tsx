@@ -47,7 +47,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       }
     }
 
-    setCheckingBusiness(true)
     checkBusinessProfile()
   }, [user, location.pathname])
 
