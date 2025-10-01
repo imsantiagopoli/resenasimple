@@ -16,6 +16,8 @@ import ResenasPage from './pages/ResenasPage';
 import RespuestasPage from './pages/RespuestasPage';
 import VotingPage from './pages/VotingPage';
 import SettingsPage from './pages/SettingsPage';
+import PoliticasPrivacidadPage from './pages/PoliticasPrivacidadPage';
+import TerminosCondicionesPage from './pages/TerminosCondicionesPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -31,6 +33,8 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/v/:slug" element={<VotingPage />} />
+        <Route path="/politicas-de-privacidad" element={<PoliticasPrivacidadPage />} />
+        <Route path="/terminos-y-condiciones" element={<TerminosCondicionesPage />} />
         <Route 
           path="/app/inicio" 
           element={

@@ -36,10 +36,10 @@ const Footer: React.FC = () => {
       { name: 'Case Studies', href: '#' }
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#' },
-      { name: 'Terms of Service', href: '#' },
-      { name: 'Security', href: '#' },
-      { name: 'Cookie Policy', href: '#' },
+      { name: 'Políticas de Privacidad', href: '/politicas-de-privacidad' },
+      { name: 'Términos y Condiciones', href: '/terminos-y-condiciones' },
+      { name: 'Seguridad', href: '#' },
+      { name: 'Cookies', href: '#' },
       { name: 'GDPR', href: '#' }
     ]
   };
@@ -229,7 +229,7 @@ const Footer: React.FC = () => {
 
               {/* Legal */}
               <div>
-                <h4 
+                <h4
                   className="font-semibold mb-4"
                   style={{ color: '#161616' }}
                 >
@@ -246,7 +246,9 @@ const Footer: React.FC = () => {
                         onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
                       >
                         {link.name}
-                        <ExternalLink size={12} className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {link.href.startsWith('#') && (
+                          <ExternalLink size={12} className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
                       </a>
                     </li>
                   ))}
