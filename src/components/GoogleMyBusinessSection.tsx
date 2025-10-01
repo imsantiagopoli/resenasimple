@@ -24,6 +24,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
   const [syncing, setSyncing] = useState(false);
   const [locations, setLocations] = useState<GoogleLocation[]>([]);
   const [tokenExpiry, setTokenExpiry] = useState<string | null>(null);
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
 
   useEffect(() => {
     checkConnection();
@@ -51,6 +52,10 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
 
     try {
       setLoading(true);
+
+      // Check if user signed up with Google OAuth
+      const isGoogleAuth = user.app_metadata?.provider === 'google';
+      setIsGoogleUser(isGoogleAuth);
 
       const { data: businessData } = await supabase
         .from('business_profiles')
@@ -258,7 +263,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
               <span>Desconectar</span>
             </button>
           </div>
-        ) : (
+        ) : !isGoogleUser ? (
           <button
             onClick={handleConnect}
             disabled={connecting}
@@ -271,7 +276,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
             <Link2 size={16} />
             <span>{connecting ? 'Conectando...' : 'Conectar Cuenta'}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
       {isConnected && (
@@ -372,27 +377,40 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
           <div className="flex items-start space-x-3">
             <AlertCircle size={20} style={{ color: '#075E54' }} />
             <div className="space-y-2">
-              <p className="text-sm font-medium" style={{ color: '#161616' }}>
-                Conecta tu cuenta de Google My Business para:
-              </p>
-              <ul className="text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle size={14} style={{ color: '#10b981' }} />
-                  <span>Ver todas tus reseñas de Google en un solo lugar</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle size={14} style={{ color: '#10b981' }} />
-                  <span>Responder a reseñas directamente desde la plataforma</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle size={14} style={{ color: '#10b981' }} />
-                  <span>Gestionar múltiples ubicaciones fácilmente</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle size={14} style={{ color: '#10b981' }} />
-                  <span>Sincronización automática de nuevas reseñas</span>
-                </li>
-              </ul>
+              {isGoogleUser ? (
+                <>
+                  <p className="text-sm font-medium" style={{ color: '#161616' }}>
+                    Ya autorizaste los permisos de Google My Business
+                  </p>
+                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Los tokens de acceso se guardaron automáticamente cuando te registraste con Google. Haz clic en "Sincronizar" arriba para cargar tus ubicaciones y reseñas.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium" style={{ color: '#161616' }}>
+                    Conecta tu cuenta de Google My Business para:
+                  </p>
+                  <ul className="text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle size={14} style={{ color: '#10b981' }} />
+                      <span>Ver todas tus reseñas de Google en un solo lugar</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle size={14} style={{ color: '#10b981' }} />
+                      <span>Responder a reseñas directamente desde la plataforma</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle size={14} style={{ color: '#10b981' }} />
+                      <span>Gestionar múltiples ubicaciones fácilmente</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckCircle size={14} style={{ color: '#10b981' }} />
+                      <span>Sincronización automática de nuevas reseñas</span>
+                    </li>
+                  </ul>
+                </>
+              )}
             </div>
           </div>
         </div>
