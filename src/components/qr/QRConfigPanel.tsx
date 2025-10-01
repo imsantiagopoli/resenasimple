@@ -215,14 +215,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
                   frameColor: template.frame_color,
                   frameThickness: template.frame_thickness || 2
                 },
-                content: {
-                  showTitle: template.show_title,
-                  title: template.title,
-                  showSubtitle: template.show_subtitle,
-                  subtitle: template.subtitle,
-                  showCallToAction: template.show_call_to_action,
-                  callToAction: template.call_to_action
-                },
+                content: config.content,
                 typography: config.typography,
                 print: {
                   format: template.print_format,
@@ -236,45 +229,6 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
               onConfigUpdate(templateAsConfig);
               setSaveMessage({ type: 'success', text: 'Template aplicado. Recuerda guardar los cambios.' });
               setTimeout(() => setSaveMessage(null), 3000);
-            }}
-            onDownload={(templateConfig) => {
-              const templateAsConfig = {
-                id: config.id,
-                business_id: config.business_id,
-                qr: {
-                  size: templateConfig.qr_size,
-                  foregroundColor: templateConfig.qr_foreground_color,
-                  backgroundColor: templateConfig.qr_background_color,
-                  errorCorrectionLevel: templateConfig.qr_error_correction_level,
-                  margin: templateConfig.qr_margin
-                },
-                design: {
-                  showFrame: templateConfig.show_frame,
-                  frameColor: templateConfig.frame_color,
-                  frameThickness: templateConfig.frame_thickness || 2
-                },
-                content: {
-                  showTitle: templateConfig.show_title,
-                  title: templateConfig.title,
-                  showSubtitle: templateConfig.show_subtitle,
-                  subtitle: templateConfig.subtitle,
-                  showCallToAction: templateConfig.show_call_to_action,
-                  callToAction: templateConfig.call_to_action
-                },
-                typography: config.typography,
-                print: {
-                  format: templateConfig.print_format,
-                  orientation: templateConfig.print_orientation,
-                  qrsPerPage: templateConfig.qrs_per_page,
-                  includeInstructions: templateConfig.include_instructions
-                },
-                created_at: config.created_at,
-                updated_at: config.updated_at
-              };
-              onConfigUpdate(templateAsConfig);
-              setTimeout(() => {
-                if (onDownload) onDownload();
-              }, 100);
             }}
             currentBranchSlug={currentBranchSlug}
           />

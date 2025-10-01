@@ -465,57 +465,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
           </div>
         </div>
 
-        {/* Separador */}
-        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
-        {/* Vista Previa de Tipografía */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Vista Previa
-          </h3>
-          
-          <div 
-            className="p-6 rounded-lg border text-center"
-            style={{ 
-              backgroundColor: 'rgb(249, 250, 251)',
-              borderColor: 'rgb(229, 231, 235)'
-            }}
-          >
-            <h1 
-              className="text-2xl font-bold mb-3"
-              style={{ 
-                fontFamily: config.typography.primaryFont,
-                color: config.typography.primaryColor
-              }}
-            >
-              {config.content.title}
-            </h1>
-            
-            {config.content.showSubtitle && (
-              <p 
-                className="text-lg mb-4"
-                style={{ 
-                  fontFamily: config.typography.secondaryFont,
-                  color: config.typography.secondaryColor
-                }}
-              >
-                {config.content.subtitle}
-              </p>
-            )}
-            
-            {config.content.showCallToAction && (
-              <p 
-                className="text-lg font-semibold"
-                style={{ 
-                  fontFamily: config.typography.primaryFont,
-                  color: config.typography.primaryColor
-                }}
-              >
-                {config.content.callToAction}
-              </p>
-            )}
-          </div>
-        </div>
       </div>
     );
   }

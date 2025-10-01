@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase';
 
 interface QRTemplatesTabProps {
   onApplyTemplate: (template: QRTemplateRecord) => void;
-  onDownload: (templateConfig: QRTemplateRecord) => void;
   currentBranchSlug: string;
 }
 
@@ -37,7 +36,6 @@ interface QRTemplateRecord {
 
 const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
   onApplyTemplate,
-  onDownload,
   currentBranchSlug
 }) => {
   const [templates, setTemplates] = useState<QRTemplateRecord[]>([]);
@@ -96,7 +94,7 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
           </h3>
         </div>
         <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-          Elige un diseño preconfigurado y personalízalo a tu gusto. Al guardar, tu configuración actual será reemplazada.
+          Elige un diseño preconfigurado. Los templates solo modifican colores y diseño, tus textos permanecerán intactos.
         </p>
       </div>
 
@@ -138,43 +136,23 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => onApplyTemplate(template)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                    style={{
-                      backgroundColor: '#075E54',
-                      color: 'white'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#064e45';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#075E54';
-                    }}
-                  >
-                    <Check size={14} />
-                    <span>Aplicar</span>
-                  </button>
-
-                  <button
-                    onClick={() => onDownload(template)}
-                    className="px-3 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
-                    style={{
-                      backgroundColor: 'white',
-                      borderColor: 'rgb(209, 213, 219)',
-                      color: '#161616'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                    }}
-                  >
-                    Descargar
-                  </button>
-                </div>
+                <button
+                  onClick={() => onApplyTemplate(template)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  style={{
+                    backgroundColor: '#075E54',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#064e45';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#075E54';
+                  }}
+                >
+                  <Check size={14} />
+                  <span>Aplicar</span>
+                </button>
               </div>
             </div>
           </div>
