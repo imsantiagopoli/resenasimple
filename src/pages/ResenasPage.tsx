@@ -591,27 +591,27 @@ const ResenasPage: React.FC = () => {
           </div>
         )}
 
-        {reviews.length === 0 && (
+        {reviews.length === 0 && !syncing && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              Aún no hay reseñas sincronizadas
+              No hay reseñas disponibles
             </h3>
-            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
-              Haz clic en "Sincronizar Reseñas" para cargar tus ubicaciones y reseñas desde Google My Business.
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Parece que tu cuenta de Google My Business aún no tiene reseñas, o están configuradas como privadas.
             </p>
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="inline-flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50"
-              style={{
-                backgroundColor: '#075E54',
-                color: 'white'
-              }}
-            >
-              <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-              <span>{syncing ? 'Sincronizando...' : 'Sincronizar Ahora'}</span>
-            </button>
+          </div>
+        )}
+
+        {reviews.length === 0 && syncing && (
+          <div className="text-center py-12">
+            <RefreshCw size={48} className="mx-auto mb-4 animate-spin" style={{ color: '#075E54' }} />
+            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+              Sincronizando tus reseñas...
+            </h3>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Estamos cargando tus ubicaciones y reseñas desde Google My Business.
+            </p>
           </div>
         )}
       </div>
