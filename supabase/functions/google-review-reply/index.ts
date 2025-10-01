@@ -129,8 +129,7 @@ Deno.serve(async (req: Request) => {
 
     const accessToken = await refreshTokenIfNeeded(supabase, userId, businessId);
 
-    const accountName = `accounts/${googleLocationId.split("/")[0]}`;
-    const replyUrl = `https://mybusiness.googleapis.com/v4/${accountName}/locations/${googleLocationId}/reviews/${reviewData.google_review_id}/reply`;
+    const replyUrl = `https://mybusiness.googleapis.com/v4/${googleLocationId}/reviews/${reviewData.google_review_id}/reply`;
 
     const replyResponse = await fetch(replyUrl, {
       method: "PUT",

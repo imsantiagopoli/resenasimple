@@ -12,7 +12,8 @@ import {
   CheckCircle,
   RefreshCw,
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
 import { useBusiness } from '../hooks/useBusiness';
 import { useGoogleReviews } from '../hooks/useGoogleReviews';
@@ -25,6 +26,7 @@ const ResenasPage: React.FC = () => {
     error,
     syncReviews,
     replyToReview,
+    deleteReply,
     syncing,
     statistics
   } = useGoogleReviews();
@@ -86,6 +88,14 @@ const ResenasPage: React.FC = () => {
     await replyToReview(reviewId, replyText);
     setReplyingToId(null);
     setReplyText('');
+  };
+
+  const handleDeleteReply = async (reviewId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta respuesta? Esta acción también la eliminará de Google.')) {
+      return;
+    }
+
+    await deleteReply(reviewId);
   };
 
   if (loading) {
@@ -456,24 +466,39 @@ const ResenasPage: React.FC = () => {
 
                   {review.review_reply && (
                     <div
-                      className="pl-4 border-l-2 space-y-1"
+                      className="pl-4 border-l-2 space-y-2"
                       style={{ borderColor: '#075E54' }}
                     >
-                      <p className="text-xs font-medium" style={{ color: '#075E54' }}>
-                        Respuesta del negocio
-                      </p>
-                      <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                        {review.review_reply}
-                      </p>
-                      {review.review_reply_updated_at && (
-                        <p className="text-xs" style={{ color: 'rgb(156, 163, 175)' }}>
-                          {new Date(review.review_reply_updated_at).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      )}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 space-y-1">
+                          <p className="text-xs font-medium" style={{ color: '#075E54' }}>
+                            Respuesta del negocio
+                          </p>
+                          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                            {review.review_reply}
+                          </p>
+                          {review.review_reply_updated_at && (
+                            <p className="text-xs" style={{ color: 'rgb(156, 163, 175)' }}>
+                              {new Date(review.review_reply_updated_at).toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteReply(review.id)}
+                          className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-all duration-200"
+                          style={{
+                            backgroundColor: 'rgb(254, 242, 242)',
+                            color: 'rgb(185, 28, 28)'
+                          }}
+                        >
+                          <Trash2 size={12} />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 

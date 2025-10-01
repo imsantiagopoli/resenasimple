@@ -73,11 +73,22 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { user_id } = await req.json();
-
-    if (!user_id) {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "user_id is required" }),
+        JSON.stringify({ error: "Authorization header required" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { review_id } = await req.json();
+
+    if (!review_id) {
+      return new Response(
+        JSON.stringify({ error: "review_id is required" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -89,15 +100,22 @@ Deno.serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: businessData } = await supabase
-      .from("business_profiles")
-      .select("id")
-      .eq("user_id", user_id)
+    const { data: reviewData } = await supabase
+      .from("google_reviews")
+      .select(`
+        *,
+        google_locations!inner(
+          google_location_id,
+          user_id,
+          business_id
+        )
+      `)
+      .eq("id", review_id)
       .single();
 
-    if (!businessData) {
+    if (!reviewData) {
       return new Response(
-        JSON.stringify({ error: "Business profile not found" }),
+        JSON.stringify({ error: "Review not found" }),
         {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -105,83 +123,46 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const accessToken = await refreshTokenIfNeeded(supabase, user_id, businessData.id);
+    const userId = reviewData.google_locations.user_id;
+    const businessId = reviewData.google_locations.business_id;
+    const googleLocationId = reviewData.google_locations.google_location_id;
 
-    const { data: locations } = await supabase
-      .from("google_locations")
-      .select("*")
-      .eq("user_id", user_id)
-      .eq("is_active", true);
+    const accessToken = await refreshTokenIfNeeded(supabase, userId, businessId);
 
-    if (!locations || locations.length === 0) {
+    const deleteUrl = `https://mybusiness.googleapis.com/v4/${googleLocationId}/reviews/${reviewData.google_review_id}/reply`;
+
+    const deleteResponse = await fetch(deleteUrl, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!deleteResponse.ok) {
+      const error = await deleteResponse.text();
+      console.error("Delete reply API error:", error);
       return new Response(
-        JSON.stringify({ error: "No active Google locations found" }),
+        JSON.stringify({ error: "Failed to delete reply from Google" }),
         {
-          status: 404,
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
-    }
-
-    let totalReviewsSynced = 0;
-
-    for (const location of locations) {
-      const reviewsUrl = `https://mybusiness.googleapis.com/v4/${location.google_location_id}/reviews`;
-
-      const reviewsResponse = await fetch(reviewsUrl, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (reviewsResponse.ok) {
-        const reviewsData = await reviewsResponse.json();
-        const reviews = reviewsData.reviews || [];
-
-        for (const review of reviews) {
-          const reviewId = review.reviewId || review.name?.split("/").pop();
-
-          await supabase
-            .from("google_reviews")
-            .upsert({
-              user_id,
-              google_location_id: location.id,
-              google_review_id: reviewId,
-              reviewer_name: review.reviewer?.displayName || "Usuario de Google",
-              reviewer_profile_photo_url: review.reviewer?.profilePhotoUrl || null,
-              rating: review.starRating === "FIVE" ? 5 :
-                      review.starRating === "FOUR" ? 4 :
-                      review.starRating === "THREE" ? 3 :
-                      review.starRating === "TWO" ? 2 : 1,
-              comment: review.comment || null,
-              review_reply: review.reviewReply?.comment || null,
-              review_reply_updated_at: review.reviewReply?.updateTime || null,
-              review_created_at: review.createTime,
-              last_synced_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: "google_review_id"
-            });
-
-          totalReviewsSynced++;
-        }
-      }
     }
 
     await supabase
-      .from("google_sync_log")
-      .insert({
-        user_id,
-        sync_type: "reviews",
-        status: "success",
-        reviews_synced: totalReviewsSynced,
-        created_at: new Date().toISOString()
-      });
+      .from("google_reviews")
+      .update({
+        review_reply: null,
+        review_reply_updated_at: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", review_id);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
-        reviews_synced: totalReviewsSynced
+        message: "Reply deleted successfully"
       }),
       {
         status: 200,
@@ -189,7 +170,7 @@ Deno.serve(async (req: Request) => {
       }
     );
   } catch (error) {
-    console.error("Error in google-reviews-sync:", error);
+    console.error("Error in google-review-delete-reply:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Internal server error" }),
       {

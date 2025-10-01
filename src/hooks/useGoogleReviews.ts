@@ -158,6 +158,41 @@ export const useGoogleReviews = () => {
     }
   };
 
+  const deleteReply = async (reviewId: string) => {
+    if (!user) return;
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/google-review-delete-reply`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey
+        },
+        body: JSON.stringify({
+          review_id: reviewId
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al eliminar la respuesta');
+      }
+
+      await fetchReviews();
+    } catch (err: any) {
+      console.error('Error deleting reply:', err);
+      setError(err.message || 'Error al eliminar la respuesta');
+      throw err;
+    }
+  };
+
   const getStatistics = (): GoogleReviewsStatistics => {
     const totalReviews = reviews.length;
     const averageRating = totalReviews > 0
@@ -187,6 +222,7 @@ export const useGoogleReviews = () => {
     syncing,
     syncReviews,
     replyToReview,
+    deleteReply,
     statistics,
     refetch: fetchReviews
   };
