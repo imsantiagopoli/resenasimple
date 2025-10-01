@@ -24,10 +24,8 @@ const ResenasPage: React.FC = () => {
     reviews,
     loading,
     error,
-    syncReviews,
     replyToReview,
     deleteReply,
-    syncing,
     statistics
   } = useGoogleReviews();
 
@@ -78,9 +76,6 @@ const ResenasPage: React.FC = () => {
     return matchesStars && matchesBranches && matchesReply && matchesSearch;
   });
 
-  const handleSync = async () => {
-    await syncReviews();
-  };
 
   const handleReply = async (reviewId: string) => {
     if (!replyText.trim()) return;
@@ -375,18 +370,6 @@ const ResenasPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50"
-            style={{
-              backgroundColor: '#075E54',
-              color: 'white'
-            }}
-          >
-            <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-            <span>{syncing ? 'Sincronizando ubicaciones y reseñas...' : 'Sincronizar Reseñas'}</span>
-          </button>
         </div>
 
         <div className="mb-4">
@@ -598,32 +581,20 @@ const ResenasPage: React.FC = () => {
               No hay reseñas sincronizadas
             </h3>
             <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
-              Conecta tu cuenta de Google My Business en "Mi Negocio" y luego haz clic en "Sincronizar Reseñas" arriba.
+              Conecta tu cuenta de Google My Business en "Mi Negocio" para ver tus reseñas aquí automáticamente.
             </p>
           </div>
         )}
 
-        {reviews.length === 0 && syncing && (
-          <div className="text-center py-12">
-            <RefreshCw size={48} className="mx-auto mb-4 animate-spin" style={{ color: '#075E54' }} />
-            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              Sincronizando tus reseñas...
-            </h3>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Estamos cargando tus ubicaciones y reseñas desde Google My Business.
-            </p>
-          </div>
-        )}
-
-        {reviews.length === 0 && error && !syncing && (
+        {reviews.length === 0 && error && (
           <div className="text-center py-12">
             <AlertCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(239, 68, 68)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              {error.includes('No Google OAuth token found') ? 'Conecta tu cuenta primero' : 'Error al sincronizar'}
+              {error.includes('No Google OAuth token found') ? 'Conecta tu cuenta primero' : 'Error al cargar reseñas'}
             </h3>
             <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
               {error.includes('No Google OAuth token found')
-                ? 'Necesitas conectar tu cuenta de Google My Business antes de sincronizar reseñas.'
+                ? 'Necesitas conectar tu cuenta de Google My Business para ver tus reseñas.'
                 : error}
             </p>
             <button
