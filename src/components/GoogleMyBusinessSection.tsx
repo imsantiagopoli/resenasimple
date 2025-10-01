@@ -23,7 +23,6 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [locations, setLocations] = useState<GoogleLocation[]>([]);
-  const [tokenExpiry, setTokenExpiry] = useState<string | null>(null);
   const [isGoogleUser, setIsGoogleUser] = useState(false);
 
   useEffect(() => {
@@ -76,7 +75,6 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
 
       if (tokenData) {
         setIsConnected(true);
-        setTokenExpiry(tokenData.token_expiry);
 
         const { data: locationsData } = await supabase
           .from('google_locations')
@@ -281,21 +279,6 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
 
       {isConnected && (
         <div className="space-y-4">
-          {tokenExpiry && (
-            <div className="flex items-center space-x-2 text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-              <AlertCircle size={14} />
-              <span>
-                Token válido hasta: {new Date(tokenExpiry).toLocaleDateString('es-ES', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
-            </div>
-          )}
-
           {locations.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-medium" style={{ color: '#161616' }}>
