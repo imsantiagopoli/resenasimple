@@ -26,6 +26,10 @@ interface QRTemplateRecord {
   subtitle: string;
   show_call_to_action: boolean;
   call_to_action: string;
+  tipografia_principal: string;
+  color_tipografia_principal: string;
+  tipografia_secundaria: string;
+  color_tipografia_secundaria: string;
   print_format: 'A4' | 'Letter' | 'Custom';
   print_orientation: 'portrait' | 'landscape';
   qrs_per_page: number;

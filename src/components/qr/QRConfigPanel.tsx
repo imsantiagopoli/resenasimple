@@ -211,7 +211,12 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
                   frameThickness: template.frame_thickness || 2
                 },
                 content: config.content,
-                typography: config.typography,
+                typography: {
+                  primaryFont: template.tipografia_principal,
+                  primaryColor: template.color_tipografia_principal,
+                  secondaryFont: template.tipografia_secundaria,
+                  secondaryColor: template.color_tipografia_secundaria
+                },
                 print: {
                   format: template.print_format,
                   orientation: template.print_orientation,
