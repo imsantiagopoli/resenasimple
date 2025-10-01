@@ -403,6 +403,45 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
         {/* Separador */}
         <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
+        {/* Instrucciones */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Instrucciones
+          </h3>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="includeInstructions"
+                checked={config.print.includeInstructions}
+                onChange={(e) => updatePrint({ includeInstructions: e.target.checked })}
+                className="w-4 h-4"
+                style={{ accentColor: '#075E54' }}
+              />
+              <label htmlFor="includeInstructions" className="text-sm font-medium" style={{ color: '#161616' }}>
+                Incluir instrucciones al imprimir
+              </label>
+            </div>
+
+            {config.print.includeInstructions && (
+              <div className="ml-7 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  Se mostrarán instrucciones básicas como:
+                </p>
+                <ul className="mt-2 text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
+                  <li>• Abre la cámara de tu teléfono</li>
+                  <li>• Apunta al código QR</li>
+                  <li>• Toca el enlace que aparece</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
         {/* Marco/Borde */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
@@ -652,44 +691,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             </div>
           </div>
 
-          {/* Separador */}
-          <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
-          {/* Instrucciones */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-              Instrucciones
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="includeInstructions"
-                  checked={config.print.includeInstructions}
-                  onChange={(e) => updatePrint({ includeInstructions: e.target.checked })}
-                  className="w-4 h-4"
-                  style={{ accentColor: '#075E54' }}
-                />
-                <label htmlFor="includeInstructions" className="text-sm font-medium" style={{ color: '#161616' }}>
-                  Incluir instrucciones al imprimir
-                </label>
-              </div>
-              
-              {config.print.includeInstructions && (
-                <div className="ml-7 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
-                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Se mostrarán instrucciones básicas como:
-                  </p>
-                  <ul className="mt-2 text-sm space-y-1" style={{ color: 'rgb(107, 114, 128)' }}>
-                    <li>• Abre la cámara de tu teléfono</li>
-                    <li>• Apunta al código QR</li>
-                    <li>• Toca el enlace que aparece</li>
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     );
