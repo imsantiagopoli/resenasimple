@@ -60,31 +60,45 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       const qrURL = generateQRURL(selectedBranch.slug, config);
+
+      // Calculate dynamic height based on content
+      let contentHeight = 0;
+      contentHeight += config.content.showTitle ? 100 : 0; // Title height + margin
+      contentHeight += config.content.showSubtitle ? 80 : 0; // Subtitle height + margin
+      contentHeight += config.qr.size + 32; // QR size + padding
+      contentHeight += config.content.showCallToAction ? 60 : 0; // CTA height
+      contentHeight += config.print.includeInstructions ? 140 : 0; // Instructions height
+      contentHeight += 96; // Total vertical padding (3rem top + 3rem bottom)
+
       const content = `
         <html>
           <head>
             <title>Código QR - ${selectedBranch.name}</title>
             <style>
               @page {
+                size: 448px ${contentHeight}px;
                 margin: 0;
-                size: auto;
               }
               * {
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
               }
+              html, body {
+                width: 448px;
+                height: ${contentHeight}px;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+              }
               body {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                min-height: 100vh;
-                margin: 0;
-                padding: 0;
               }
               .print-container {
                 text-align: center;
-                max-width: 28rem;
+                width: 100%;
                 padding: 3rem 2rem;
               }
               .title {
@@ -130,6 +144,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 font-size: 0.75rem;
                 text-align: left;
                 color: rgb(107, 114, 128);
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
               }
               .instructions strong {
                 color: #161616;
@@ -175,7 +192,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       printWindow.document.close();
 
       printWindow.onload = () => {
-        printWindow.print();
+        setTimeout(() => {
+          printWindow.print();
+        }, 100);
       };
     }
   };

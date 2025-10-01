@@ -639,50 +639,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             </p>
           </div>
         </div>
-
-        {/* Separador */}
-        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
-        {/* Acciones Rápidas */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Acciones Rápidas
-          </h3>
-          <div className="space-y-3">
-            <button
-              onClick={onPrint}
-              className="w-full px-4 py-3 rounded-lg font-medium text-white transition-all duration-200 flex items-center justify-center space-x-2"
-              style={{ backgroundColor: '#075E54' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#064e46';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#075E54';
-              }}
-            >
-              <Printer size={18} />
-              <span>Imprimir QR</span>
-            </button>
-            <button
-              onClick={onDownload}
-              className="w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 border-2"
-              style={{
-                borderColor: '#075E54',
-                color: '#075E54',
-                backgroundColor: 'white'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#075E54' + '10';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-              <FileText size={18} />
-              <span>Descargar como Imagen</span>
-            </button>
-          </div>
-        </div>
       </div>
     );
   }
