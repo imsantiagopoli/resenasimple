@@ -20,7 +20,7 @@ const PaginaQRPage: React.FC = () => {
     generateQRURL
   } = useQRConfig();
   
-  const { branches } = useBusiness();
+  const { branches, businessProfile } = useBusiness();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
 
   // Initialize config if it doesn't exist
@@ -196,6 +196,7 @@ const PaginaQRPage: React.FC = () => {
     config,
     selectedBranch,
     branches,
+    businessProfile,
     onBranchChange: setSelectedBranchId,
     generateQRURL
   };

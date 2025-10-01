@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Building2, ChevronDown, Download, Printer, RefreshCw } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { BusinessBranch } from '../../hooks/useBusiness';
+import { BusinessProfile } from '../../contexts/DataContext';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -10,13 +11,14 @@ interface QRPreviewPanelProps {
     config: QRConfiguration;
     selectedBranch: BusinessBranch;
     branches: BusinessBranch[];
+    businessProfile: BusinessProfile | null;
     onBranchChange: (branchId: string) => void;
     generateQRURL: (branchSlug: string, qrConfig?: QRConfiguration) => string;
   };
 }
 
 const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
-  const { config, selectedBranch, branches, onBranchChange, generateQRURL } = qrData;
+  const { config, selectedBranch, branches, businessProfile, onBranchChange, generateQRURL } = qrData;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isLoadingQR, setIsLoadingQR] = useState(false);
@@ -72,6 +74,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     // Build the HTML content
     tempContainer.innerHTML = `
       <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
+        ${config.design.showLogo && businessProfile?.logo_url ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${businessProfile.logo_url}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
@@ -232,6 +235,22 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       <div className="flex-1 overflow-y-auto">
         <div className="min-h-full flex items-center justify-center py-12 px-8">
           <div className="text-center max-w-md">
+            {/* Logo */}
+            {config.design.showLogo && businessProfile?.logo_url && (
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={businessProfile.logo_url}
+                  alt="Logo"
+                  className="object-cover"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: config.design.logoShape === 'circular' ? '50%' : '8px'
+                  }}
+                />
+              </div>
+            )}
+
             {/* Título */}
             {config.content.showTitle && (
               <h1

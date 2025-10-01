@@ -109,6 +109,8 @@ export interface QRConfigurationRecord {
   show_frame: boolean
   frame_color: string
   frame_thickness: number
+  show_logo: boolean
+  logo_shape: 'circular' | 'square'
   show_title: boolean
   title: string
   show_subtitle: boolean
@@ -143,6 +145,8 @@ export interface QRConfiguration {
     showFrame: boolean
     frameColor: string
     frameThickness: number
+    showLogo: boolean
+    logoShape: 'circular' | 'square'
   }
   content: {
     showTitle: boolean
@@ -447,7 +451,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       design: {
         showFrame: record.show_frame,
         frameColor: record.frame_color,
-        frameThickness: record.frame_thickness
+        frameThickness: record.frame_thickness,
+        showLogo: record.show_logo,
+        logoShape: record.logo_shape
       },
       content: {
         showTitle: record.show_title,
@@ -488,6 +494,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       show_frame: config.design.showFrame,
       frame_color: config.design.frameColor,
       frame_thickness: config.design.frameThickness,
+      show_logo: config.design.showLogo,
+      logo_shape: config.design.logoShape,
       show_title: config.content.showTitle,
       title: config.content.title,
       show_subtitle: config.content.showSubtitle,

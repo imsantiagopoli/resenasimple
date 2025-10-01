@@ -320,6 +320,68 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
         {/* Separador */}
         <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
+        {/* Logo */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Logo del Negocio
+          </h3>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="showLogo"
+                checked={config.design.showLogo}
+                onChange={(e) => updateDesign({ showLogo: e.target.checked })}
+                className="w-4 h-4"
+                style={{ accentColor: '#075E54' }}
+              />
+              <label htmlFor="showLogo" className="text-sm font-medium" style={{ color: '#161616' }}>
+                Mostrar logo al principio
+              </label>
+            </div>
+
+            {config.design.showLogo && (
+              <div className="ml-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Forma del logo
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => updateDesign({ logoShape: 'circular' })}
+                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                        config.design.logoShape === 'circular' ? 'border-[#075E54]' : 'border-gray-300'
+                      }`}
+                      style={{
+                        backgroundColor: config.design.logoShape === 'circular' ? '#075E54' + '10' : 'white',
+                        color: config.design.logoShape === 'circular' ? '#075E54' : '#161616'
+                      }}
+                    >
+                      Circular (bordes suaves)
+                    </button>
+                    <button
+                      onClick={() => updateDesign({ logoShape: 'square' })}
+                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                        config.design.logoShape === 'square' ? 'border-[#075E54]' : 'border-gray-300'
+                      }`}
+                      style={{
+                        backgroundColor: config.design.logoShape === 'square' ? '#075E54' + '10' : 'white',
+                        color: config.design.logoShape === 'square' ? '#075E54' : '#161616'
+                      }}
+                    >
+                      Cuadrado
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
         {/* Marco/Borde */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
