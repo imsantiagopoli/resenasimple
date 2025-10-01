@@ -574,28 +574,14 @@ const ResenasPage: React.FC = () => {
           </div>
         )}
 
-        {reviews.length === 0 && !syncing && !error && (
+        {reviews.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              No hay reseñas sincronizadas
+              No hay reseñas disponibles
             </h3>
             <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
               Conecta tu cuenta de Google My Business en "Mi Negocio" para ver tus reseñas aquí automáticamente.
-            </p>
-          </div>
-        )}
-
-        {reviews.length === 0 && error && (
-          <div className="text-center py-12">
-            <AlertCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(239, 68, 68)' }} />
-            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              {error.includes('No Google OAuth token found') ? 'Conecta tu cuenta primero' : 'Error al cargar reseñas'}
-            </h3>
-            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
-              {error.includes('No Google OAuth token found')
-                ? 'Necesitas conectar tu cuenta de Google My Business para ver tus reseñas.'
-                : error}
             </p>
             <button
               onClick={() => window.location.href = '/app/mi-negocio'}

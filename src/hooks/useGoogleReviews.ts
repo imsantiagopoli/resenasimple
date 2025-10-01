@@ -65,6 +65,10 @@ export const useGoogleReviews = () => {
 
       const data = await response.json();
       setReviews(data.reviews || []);
+
+      if (data.message && data.reviews.length === 0) {
+        setError(null);
+      }
     } catch (err: any) {
       console.error('Error fetching Google reviews:', err);
       setError(err.message || 'Error al cargar las reseñas de Google');

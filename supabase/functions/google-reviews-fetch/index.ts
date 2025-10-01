@@ -105,7 +105,24 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const accessToken = await refreshTokenIfNeeded(supabase, user_id, businessData.id);
+    let accessToken;
+    try {
+      accessToken = await refreshTokenIfNeeded(supabase, user_id, businessData.id);
+    } catch (error) {
+      console.log("No OAuth token found:", error.message);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          reviews: [],
+          count: 0,
+          message: "No Google My Business connection found"
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const accountsResponse = await fetch(
       "https://mybusinessaccountmanagement.googleapis.com/v1/accounts",
@@ -120,9 +137,14 @@ Deno.serve(async (req: Request) => {
       const error = await accountsResponse.text();
       console.error("Accounts API error:", error);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch Google accounts" }),
+        JSON.stringify({
+          success: true,
+          reviews: [],
+          count: 0,
+          message: "No Google My Business accounts found"
+        }),
         {
-          status: 500,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
@@ -130,6 +152,21 @@ Deno.serve(async (req: Request) => {
 
     const accountsData = await accountsResponse.json();
     const accounts = accountsData.accounts || [];
+
+    if (accounts.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          reviews: [],
+          count: 0,
+          message: "No Google My Business accounts found"
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const allReviews: any[] = [];
 
