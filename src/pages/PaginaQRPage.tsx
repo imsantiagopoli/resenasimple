@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import QRConfigPanel from '../components/qr/QRConfigPanel';
 import QRPreviewPanel from '../components/qr/QRPreviewPanel';
+import Toast from '../components/Toast';
 import { useQRConfig } from '../hooks/useQRConfig';
 import { useBusiness } from '../hooks/useBusiness';
 import jsPDF from 'jspdf';
@@ -22,6 +23,7 @@ const PaginaQRPage: React.FC = () => {
   
   const { branches, businessProfile } = useBusiness();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // Initialize config if it doesn't exist
   React.useEffect(() => {
@@ -100,6 +102,8 @@ const PaginaQRPage: React.FC = () => {
 
   const handlePrint = async () => {
     if (!selectedBranch || !config) return;
+
+    setShowToast(true);
 
     const qrURL = generateQRURL(selectedBranch.slug, config);
 
@@ -225,30 +229,41 @@ const PaginaQRPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-white">
-      <div className="flex h-screen">
-        {/* Columna izquierda - Configuración QR (más estrecha) */}
-        <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <QRConfigPanel
-            config={config}
-            onConfigUpdate={handleConfigUpdate}
-            hasChanges={hasChanges}
-            onSave={handleSaveConfig}
-            onReset={resetChanges}
-            onResetToDefaults={resetToDefaults}
-            isSaving={isSaving}
-            onDownload={handleDownload}
-            onPrint={handlePrint}
-            currentBranchSlug={selectedBranch.slug}
-          />
-        </div>
-        
-        {/* Columna derecha - Vista previa QR (más ancha) */}
-        <div className="w-3/5 h-screen overflow-hidden">
-          <QRPreviewPanel qrData={qrData} />
+    <>
+      <div className="h-screen bg-white">
+        <div className="flex h-screen">
+          {/* Columna izquierda - Configuración QR (más estrecha) */}
+          <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <QRConfigPanel
+              config={config}
+              onConfigUpdate={handleConfigUpdate}
+              hasChanges={hasChanges}
+              onSave={handleSaveConfig}
+              onReset={resetChanges}
+              onResetToDefaults={resetToDefaults}
+              isSaving={isSaving}
+              onDownload={handleDownload}
+              onPrint={handlePrint}
+              currentBranchSlug={selectedBranch.slug}
+            />
+          </div>
+
+          {/* Columna derecha - Vista previa QR (más ancha) */}
+          <div className="w-3/5 h-screen overflow-hidden">
+            <QRPreviewPanel qrData={qrData} />
+          </div>
         </div>
       </div>
-    </div>
+
+      {showToast && (
+        <Toast
+          message="Descargando..."
+          onClose={() => setShowToast(false)}
+          duration={5000}
+          type="success"
+        />
+      )}
+    </>
   );
 };
 
