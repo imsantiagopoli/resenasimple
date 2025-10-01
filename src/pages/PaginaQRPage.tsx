@@ -82,10 +82,33 @@ const PaginaQRPage: React.FC = () => {
       });
   };
 
+  // Helper function to convert image URL to base64
+  const getImageAsBase64 = async (url: string): Promise<string> => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      return '';
+    }
+  };
+
   const handlePrint = async () => {
     if (!selectedBranch || !config) return;
 
     const qrURL = generateQRURL(selectedBranch.slug, config);
+
+    // Convert logo to base64 if needed
+    let logoBase64 = '';
+    if (config.design.showLogo && businessProfile?.logo_url) {
+      logoBase64 = await getImageAsBase64(businessProfile.logo_url);
+    }
 
     // Create temporary container
     const tempContainer = document.createElement('div');
@@ -95,9 +118,10 @@ const PaginaQRPage: React.FC = () => {
     tempContainer.style.width = '448px';
     tempContainer.style.background = 'white';
 
-    // Build the HTML content
+    // Build the HTML content with logo
     tempContainer.innerHTML = `
       <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
+        ${logoBase64 ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
@@ -128,19 +152,27 @@ const PaginaQRPage: React.FC = () => {
       await Promise.all(
         Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             img.onload = resolve;
-            img.onerror = reject;
+            img.onerror = () => {
+              console.warn('Image failed to load:', img.src);
+              resolve();
+            };
+            setTimeout(resolve, 3000);
           });
         })
       );
 
-      // Generate canvas from HTML
+      // Small delay to ensure images are fully rendered
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Generate canvas from HTML (base64 images don't need CORS)
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         backgroundColor: '#ffffff',
         logging: false,
-        useCORS: true
+        useCORS: false,
+        allowTaint: true
       });
 
       // Calculate PDF dimensions
