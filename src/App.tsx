@@ -8,7 +8,6 @@ import { useUpload } from './components/UploadContext';
 import DashboardLayout from './components/DashboardLayout';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
-import OnboardingPage from './pages/OnboardingPage';
 import InicioPage from './pages/InicioPage';
 import MiNegocioPage from './pages/MiNegocioPage';
 import PaginaVotacionPage from './pages/PaginaVotacionPage';
@@ -38,23 +37,15 @@ const AppContent: React.FC = () => {
         <Route path="/v/:slug" element={<VotingPage />} />
         <Route path="/politicas-de-privacidad" element={<PoliticasPrivacidadPage />} />
         <Route path="/terminos-y-condiciones" element={<TerminosCondicionesPage />} />
-        <Route
-          path="/onboarding"
-          element={
-            <ProtectedRoute>
-              <OnboardingPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/app/inicio"
+        <Route 
+          path="/app/inicio" 
           element={
             <ProtectedRoute>
               <DashboardLayout activePage="inicio">
                 <InicioPage />
               </DashboardLayout>
             </ProtectedRoute>
-          }
+          } 
         />
         <Route 
           path="/app/mi-negocio" 

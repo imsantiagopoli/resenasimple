@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, MapPin } from 'lucide-react';
+import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import { BusinessBranch } from '../hooks/useBusiness';
+import { supabase } from '../lib/supabase';
 
 interface BranchesSectionProps {
   branches: BusinessBranch[];
@@ -26,6 +27,15 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     branchId?: string;
     branchName?: string;
   } | null>(null);
+  const [slugAvailability, setSlugAvailability] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({
+    checking: false,
+    available: null,
+    message: ''
+  });
 
   // Initialize branches data
   useEffect(() => {
@@ -104,10 +114,19 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     const branch = branchesData[index];
     setEditingBranchId(branch.id || `new-${index}`);
     setTempBranchData({ ...branch });
+
+    if (branch.slug) {
+      checkSlugAvailability(branch.slug, branch.id);
+    }
   };
 
   const handleSaveBranch = async (index: number) => {
     if (!tempBranchData) return;
+
+    if (slugAvailability.available === false) {
+      showMessage('error', 'No puedes guardar con un slug que no está disponible');
+      return;
+    }
 
     try {
       const branchToSave = {
@@ -119,7 +138,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
         google_maps_link: tempBranchData.googleMapsLink,
         slug: tempBranchData.slug || await generateSlug(tempBranchData.name)
       };
-      
+
       const { error } = await upsertBranch(branchToSave);
       if (error) {
         throw new Error(error);
@@ -129,9 +148,14 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       const updatedBranches = [...branchesData];
       updatedBranches[index] = tempBranchData;
       setBranchesData(updatedBranches);
-      
+
       setEditingBranchId(null);
       setTempBranchData(null);
+      setSlugAvailability({
+        checking: false,
+        available: null,
+        message: ''
+      });
       showMessage('success', 'Sucursal guardada correctamente');
     } catch (err: any) {
       console.error('Error saving branch:', err);
@@ -142,24 +166,108 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   const handleCancelEditBranch = () => {
     setEditingBranchId(null);
     setTempBranchData(null);
+    setSlugAvailability({
+      checking: false,
+      available: null,
+      message: ''
+    });
+  };
+
+  const checkSlugAvailability = async (slug: string, currentBranchId: string | null) => {
+    if (!slug || slug.length < 3) {
+      setSlugAvailability({
+        checking: false,
+        available: false,
+        message: 'El slug debe tener al menos 3 caracteres'
+      });
+      return;
+    }
+
+    setSlugAvailability({
+      checking: true,
+      available: null,
+      message: 'Verificando disponibilidad...'
+    });
+
+    try {
+      let query = supabase
+        .from('business_branches')
+        .select('id')
+        .eq('slug', slug);
+
+      if (currentBranchId) {
+        query = query.neq('id', currentBranchId);
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (error) {
+        console.error('Error checking slug:', error);
+        setSlugAvailability({
+          checking: false,
+          available: false,
+          message: 'Error al verificar disponibilidad'
+        });
+        return;
+      }
+
+      if (data) {
+        setSlugAvailability({
+          checking: false,
+          available: false,
+          message: 'Este slug ya está en uso'
+        });
+      } else {
+        setSlugAvailability({
+          checking: false,
+          available: true,
+          message: 'Slug disponible'
+        });
+      }
+    } catch (err) {
+      console.error('Error checking slug availability:', err);
+      setSlugAvailability({
+        checking: false,
+        available: false,
+        message: 'Error al verificar disponibilidad'
+      });
+    }
   };
 
   const updateBranch = (index: number, field: string, value: string | boolean) => {
     if (tempBranchData) {
       const updated = { ...tempBranchData, [field]: value };
-      
-      // Auto-generate slug when name changes
-      if (field === 'name' && typeof value === 'string') {
+
+      // Auto-generate slug when name changes, but only if slug is empty
+      if (field === 'name' && typeof value === 'string' && !tempBranchData.slug) {
         updated.slug = value
           .toLowerCase()
           .replace(/[^\w\s-]/g, '')
           .replace(/[\s_-]+/g, '-')
           .replace(/^-+|-+$/g, '');
       }
-      
+
       setTempBranchData(updated);
+
+      // Check slug availability when it changes
+      if (field === 'slug' && typeof value === 'string') {
+        const timeoutId = setTimeout(() => {
+          checkSlugAvailability(value, tempBranchData.id);
+        }, 500);
+        return () => clearTimeout(timeoutId);
+      }
     }
   };
+
+  // Check slug availability with debounce
+  useEffect(() => {
+    if (tempBranchData && tempBranchData.slug && editingBranchId) {
+      const timeoutId = setTimeout(() => {
+        checkSlugAvailability(tempBranchData.slug, tempBranchData.id);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [tempBranchData?.slug, editingBranchId]);
 
   return (
     <>
@@ -320,6 +428,52 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                         backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
                       }}
                     />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Slug {branchesData.length > 1 && <span className="text-xs opacity-75">(URL de la página de votación de esta sucursal)</span>}
+                    </label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                          {window.location.origin}/v/
+                        </span>
+                        <input
+                          type="text"
+                          value={currentData.slug}
+                          onChange={(e) => updateBranch(index, 'slug', e.target.value)}
+                          disabled={!isEditing}
+                          placeholder="mi-negocio-123456"
+                          className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          style={{
+                            borderColor: isEditing && slugAvailability.available === false ? 'rgb(239, 68, 68)' : 'rgb(209, 213, 219)',
+                            color: '#161616',
+                            backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
+                          }}
+                        />
+                      </div>
+                      {isEditing && currentData.slug && (
+                        <div className="flex items-center space-x-2 text-xs">
+                          {slugAvailability.checking ? (
+                            <>
+                              <Loader2 size={14} className="animate-spin" style={{ color: 'rgb(107, 114, 128)' }} />
+                              <span style={{ color: 'rgb(107, 114, 128)' }}>{slugAvailability.message}</span>
+                            </>
+                          ) : slugAvailability.available === true ? (
+                            <>
+                              <CheckCircle size={14} style={{ color: '#10b981' }} />
+                              <span style={{ color: '#10b981' }}>{slugAvailability.message}</span>
+                            </>
+                          ) : slugAvailability.available === false ? (
+                            <>
+                              <AlertCircle size={14} style={{ color: 'rgb(239, 68, 68)' }} />
+                              <span style={{ color: 'rgb(239, 68, 68)' }}>{slugAvailability.message}</span>
+                            </>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
