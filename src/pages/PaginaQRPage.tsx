@@ -108,12 +108,12 @@ const PaginaQRPage: React.FC = () => {
         ${config.print.includeInstructions ? `
           <div style="margin-top: 1.5rem; padding: 1rem; background: rgb(249, 250, 251); border: 1px solid rgb(229, 231, 235); border-radius: 0.5rem; font-size: 0.75rem; text-align: left; color: rgb(107, 114, 128); max-width: 400px; margin-left: auto; margin-right: auto;">
             <strong style="color: #161616;">Instrucciones:</strong>
-            <ol style="margin-top: 0.5rem; padding-left: 1rem; list-style-type: decimal;">
-              <li style="margin-top: 0.25rem;">Abre la cámara de tu teléfono</li>
-              <li style="margin-top: 0.25rem;">Apunta hacia el código QR</li>
-              <li style="margin-top: 0.25rem;">Toca la notificación que aparece</li>
-              <li style="margin-top: 0.25rem;">Comparte tu experiencia</li>
-            </ol>
+            <div style="margin-top: 0.5rem;">
+              <div style="margin-top: 0.25rem;">1. Abre la cámara de tu teléfono</div>
+              <div style="margin-top: 0.25rem;">2. Apunta hacia el código QR</div>
+              <div style="margin-top: 0.25rem;">3. Toca la notificación que aparece</div>
+              <div style="margin-top: 0.25rem;">4. Comparte tu experiencia</div>
+            </div>
           </div>
         ` : ''}
       </div>

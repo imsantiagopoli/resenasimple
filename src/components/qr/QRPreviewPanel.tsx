@@ -309,12 +309,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 color: 'rgb(107, 114, 128)'
               }}>
                 <strong style={{ color: '#161616' }}>Instrucciones:</strong>
-                <ol className="mt-2 space-y-1" style={{ paddingLeft: '1rem' }}>
-                  <li>1. Abre la cámara de tu teléfono</li>
-                  <li>2. Apunta hacia el código QR</li>
-                  <li>3. Toca la notificación que aparece</li>
-                  <li>4. Comparte tu experiencia</li>
-                </ol>
+                <div className="mt-2 space-y-1">
+                  <div>1. Abre la cámara de tu teléfono</div>
+                  <div>2. Apunta hacia el código QR</div>
+                  <div>3. Toca la notificación que aparece</div>
+                  <div>4. Comparte tu experiencia</div>
+                </div>
               </div>
             )}
           </div>
