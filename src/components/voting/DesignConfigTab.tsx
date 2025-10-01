@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
-import { Instagram, Music, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
+import { Instagram, Music, Linkedin, Twitter, Youtube, Globe, RotateCcw } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 import { useFonts } from '../../hooks/useFonts';
 
 interface DesignConfigTabProps {
   config: VotingConfiguration;
   onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
+  hasChanges: boolean;
+  onResetToDefaults: () => void;
 }
 
-const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate }) => {
+const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate, hasChanges, onResetToDefaults }) => {
   const { fonts, loadMultipleFonts } = useFonts();
 
   useEffect(() => {
@@ -487,6 +489,33 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
           ))}
         </div>
       </div>
+
+      {/* Reset to Defaults Button */}
+      {!hasChanges && (
+        <>
+          <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+          <div className="space-y-4">
+            <button
+              onClick={onResetToDefaults}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Restablecer a Valores por Defecto</span>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

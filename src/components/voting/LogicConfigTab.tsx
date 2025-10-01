@@ -1,12 +1,15 @@
 import React from 'react';
+import { RotateCcw } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
 interface LogicConfigTabProps {
   config: VotingConfiguration;
   onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
+  hasChanges: boolean;
+  onResetToDefaults: () => void;
 }
 
-const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate }) => {
+const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate, hasChanges, onResetToDefaults }) => {
   const updateLogic = (updates: Partial<VotingConfiguration['logic']>) => {
     onConfigUpdate({
       logic: {
@@ -371,6 +374,33 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate 
           </div>
         </div>
       </div>
+
+      {/* Reset to Defaults Button */}
+      {!hasChanges && (
+        <>
+          <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+          <div className="space-y-4">
+            <button
+              onClick={onResetToDefaults}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Restablecer a Valores por Defecto</span>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

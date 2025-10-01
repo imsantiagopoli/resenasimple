@@ -33,6 +33,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
@@ -106,6 +107,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   };
 
   const handleResetToDefaults = async () => {
+    setShowResetModal(false);
     const result = await onResetToDefaults();
     if (result.error) {
       setSaveMessage({ type: 'error', text: result.error });
@@ -251,6 +253,8 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             onConfigUpdate={onConfigUpdate}
             onDownload={onDownload}
             onPrint={onPrint}
+            hasChanges={hasChanges}
+            onResetToDefaults={() => setShowResetModal(true)}
           />
         )}
       </div>
@@ -327,48 +331,6 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
         </div>
       )}
 
-      {/* Reset to Defaults Button - Only show when no changes and not in print tab */}
-      {!hasChanges && activeTab !== 'print' && (
-        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          {/* Save Message */}
-          {saveMessage && (
-            <div
-              className={`mb-3 p-2 rounded-lg text-xs ${
-                saveMessage.type === 'success'
-                  ? 'bg-green-50 border-green-200 text-green-800'
-                  : 'bg-red-50 border-red-200 text-red-800'
-              }`}
-            >
-              {saveMessage.text}
-            </div>
-          )}
-
-          <button
-            onClick={handleResetToDefaults}
-            disabled={isSaving}
-            className="group w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: 'white',
-              borderColor: 'rgb(209, 213, 219)',
-              color: '#161616'
-            }}
-            onMouseEnter={(e) => {
-              if (!isSaving) {
-                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isSaving) {
-                e.currentTarget.style.backgroundColor = 'white';
-              }
-            }}
-          >
-            <RotateCcw size={16} />
-            <span>Restablecer a Valores por Defecto</span>
-          </button>
-        </div>
-      )}
-
       {/* Print Actions Section - Only show in print tab */}
       {activeTab === 'print' && (
         <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
@@ -410,6 +372,55 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
               <Printer size={16} />
               <span>Imprimir QR</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-3" style={{ color: '#161616' }}>
+              Confirmar Restablecimiento
+            </h3>
+            <p className="mb-6" style={{ color: 'rgb(107, 114, 128)' }}>
+              ¿Estás seguro de que deseas restablecer toda la configuración a los valores por defecto? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
+                style={{
+                  backgroundColor: 'white',
+                  borderColor: 'rgb(209, 213, 219)',
+                  color: '#161616'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleResetToDefaults}
+                className="flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#b91c1c';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#dc2626';
+                }}
+              >
+                Restablecer
+              </button>
+            </div>
           </div>
         </div>
       )}

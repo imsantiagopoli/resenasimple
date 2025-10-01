@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { QrCode, FileText, Printer } from 'lucide-react';
+import { QrCode, FileText, Printer, RotateCcw } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { useFonts } from '../../hooks/useFonts';
 
@@ -9,6 +9,8 @@ interface QRConfigTabProps {
   onConfigUpdate: (updates: Partial<QRConfiguration>) => void;
   onDownload?: () => void;
   onPrint?: () => void;
+  hasChanges: boolean;
+  onResetToDefaults: () => void;
 }
 
 const QRConfigTab: React.FC<QRConfigTabProps> = ({
@@ -16,7 +18,9 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   config,
   onConfigUpdate,
   onDownload,
-  onPrint
+  onPrint,
+  hasChanges,
+  onResetToDefaults
 }) => {
   const { fonts, loadMultipleFonts } = useFonts();
 
@@ -374,6 +378,31 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             )}
           </div>
         </div>
+
+        {/* Reset to Defaults Button */}
+        {!hasChanges && (
+          <>
+            <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+            <button
+              onClick={onResetToDefaults}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Restablecer a Valores por Defecto</span>
+            </button>
+          </>
+        )}
       </div>
     );
   }
@@ -677,6 +706,31 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Reset to Defaults Button */}
+        {!hasChanges && (
+          <>
+            <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+            <button
+              onClick={onResetToDefaults}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
+              style={{
+                backgroundColor: 'white',
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <RotateCcw size={16} />
+              <span>Restablecer a Valores por Defecto</span>
+            </button>
+          </>
+        )}
       </div>
     );
   }
