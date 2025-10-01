@@ -32,9 +32,15 @@ export const useGoogleReviews = () => {
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const fetchReviews = async () => {
     if (!user) return;
+
+    if (hasLoadedOnce) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -66,9 +72,18 @@ export const useGoogleReviews = () => {
       const data = await response.json();
       setReviews(data.reviews || []);
 
-      if (data.message && data.reviews.length === 0) {
+      if (data.message) {
+        if (data.message.includes('No Google My Business connection found')) {
+          setIsConnected(false);
+        } else if (data.message.includes('No Google My Business accounts found')) {
+          setIsConnected(true);
+        }
         setError(null);
+      } else {
+        setIsConnected(true);
       }
+
+      setHasLoadedOnce(true);
     } catch (err: any) {
       console.error('Error fetching Google reviews:', err);
       setError(err.message || 'Error al cargar las reseñas de Google');
@@ -176,9 +191,13 @@ export const useGoogleReviews = () => {
     reviews,
     loading,
     error,
+    isConnected,
     replyToReview,
     deleteReply,
     statistics,
-    refetch: fetchReviews
+    refetch: () => {
+      setHasLoadedOnce(false);
+      fetchReviews();
+    }
   };
 };

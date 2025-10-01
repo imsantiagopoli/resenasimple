@@ -24,6 +24,7 @@ const ResenasPage: React.FC = () => {
     reviews,
     loading,
     error,
+    isConnected,
     replyToReview,
     deleteReply,
     statistics
@@ -574,11 +575,11 @@ const ResenasPage: React.FC = () => {
           </div>
         )}
 
-        {reviews.length === 0 && !loading && !error && (
+        {reviews.length === 0 && !loading && !error && isConnected === false && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              No hay reseñas disponibles
+              Cuenta de Google no conectada
             </h3>
             <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
               Conecta tu cuenta de Google My Business en "Mi Negocio" para ver tus reseñas aquí automáticamente.
@@ -593,6 +594,34 @@ const ResenasPage: React.FC = () => {
             >
               <span>Ir a Mi Negocio</span>
             </button>
+          </div>
+        )}
+
+        {reviews.length === 0 && !loading && !error && isConnected === true && (
+          <div className="text-center py-12">
+            <AlertCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(249, 115, 22)' }} />
+            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+              No se encontraron ubicaciones
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
+              Tu cuenta de Google está conectada, pero no tiene perfiles de Google My Business configurados.
+            </p>
+            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
+              Para ver reseñas aquí, primero debes crear un perfil de negocio en Google.
+            </p>
+            <a
+              href="https://www.google.com/business/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white'
+              }}
+            >
+              <ExternalLink size={16} />
+              <span>Crear Perfil de Negocio en Google</span>
+            </a>
           </div>
         )}
       </div>
