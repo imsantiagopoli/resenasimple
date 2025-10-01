@@ -108,6 +108,8 @@ const PaginaQRPage: React.FC = () => {
       logoBase64 = await getImageAsBase64(businessProfile.logo_url);
     }
 
+    const qrBase64 = await getImageAsBase64(qrURL);
+
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
@@ -122,7 +124,7 @@ const PaginaQRPage: React.FC = () => {
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${qrURL}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img src="${qrBase64}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.callToAction}</p>` : ''}
@@ -165,7 +167,7 @@ const PaginaQRPage: React.FC = () => {
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: false,
-        allowTaint: true
+        allowTaint: false
       });
 
       const imgWidth = 448;
