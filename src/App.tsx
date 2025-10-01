@@ -19,8 +19,6 @@ import SettingsPage from './pages/SettingsPage';
 import PoliticasPrivacidadPage from './pages/PoliticasPrivacidadPage';
 import TerminosCondicionesPage from './pages/TerminosCondicionesPage';
 import GoogleCallbackPage from './pages/GoogleCallbackPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
-import OnboardingPage from './pages/OnboardingPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -35,9 +33,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/v/:slug" element={<VotingPage />} />
         <Route path="/politicas-de-privacidad" element={<PoliticasPrivacidadPage />} />
         <Route path="/terminos-y-condiciones" element={<TerminosCondicionesPage />} />
