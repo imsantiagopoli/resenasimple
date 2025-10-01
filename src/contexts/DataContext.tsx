@@ -1037,9 +1037,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         .from('business_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError) {
         throw profileError;
       }
 
