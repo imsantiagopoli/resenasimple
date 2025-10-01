@@ -30,6 +30,9 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
   const [selectedStars, setSelectedStars] = useState(0);
   const [hoveredStars, setHoveredStars] = useState(0);
 
+  console.log('VotingPagePreview - businessProfile:', businessProfile);
+  console.log('VotingPagePreview - logo_url:', businessProfile?.logo_url);
+
   const socialIcons = {
     instagram: Instagram,
     tiktok: Music,

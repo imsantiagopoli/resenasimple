@@ -19,6 +19,7 @@ export const useBusiness = () => {
 
   return {
     profile,
+    businessProfile: profile,
     branches,
     loading,
     error,
