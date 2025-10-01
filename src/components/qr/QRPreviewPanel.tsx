@@ -234,11 +234,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           <div className="text-center max-w-md">
             {/* Título */}
             {config.content.showTitle && (
-              <h1 
-                className="text-2xl font-bold mb-4" 
-                style={{ 
+              <h1
+                className="font-bold mb-4"
+                style={{
                   color: config.typography.primaryColor,
-                  fontFamily: config.typography.primaryFont
+                  fontFamily: config.typography.primaryFont,
+                  fontSize: `${config.typography.primaryFontSize}px`
                 }}
               >
                 {config.content.title}
@@ -247,11 +248,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             
             {/* Subtítulo */}
             {config.content.showSubtitle && (
-              <p 
-                className="text-lg mb-8" 
-                style={{ 
+              <p
+                className="mb-8"
+                style={{
                   color: config.typography.secondaryColor,
-                  fontFamily: config.typography.secondaryFont
+                  fontFamily: config.typography.secondaryFont,
+                  fontSize: `${config.typography.secondaryFontSize}px`
                 }}
               >
                 {config.content.subtitle}
@@ -290,11 +292,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             
             {/* Call to Action */}
             {config.content.showCallToAction && (
-              <p 
-                className="text-lg font-semibold" 
-                style={{ 
+              <p
+                className="font-semibold"
+                style={{
                   color: config.typography.primaryColor,
-                  fontFamily: config.typography.primaryFont
+                  fontFamily: config.typography.primaryFont,
+                  fontSize: `${config.typography.primaryFontSize}px`
                 }}
               >
                 {config.content.callToAction}
