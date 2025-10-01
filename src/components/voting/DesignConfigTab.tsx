@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Instagram, Music, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
+import { useFonts } from '../../hooks/useFonts';
 
 interface DesignConfigTabProps {
   config: VotingConfiguration;
@@ -8,6 +9,13 @@ interface DesignConfigTabProps {
 }
 
 const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate }) => {
+  const { fonts, loadMultipleFonts } = useFonts();
+
+  useEffect(() => {
+    if (config.typography) {
+      loadMultipleFonts([config.typography.primaryFont, config.typography.secondaryFont]);
+    }
+  }, [config.typography?.primaryFont, config.typography?.secondaryFont]);
   // Helper function to update design properties
   const updateDesign = (updates: Partial<VotingConfiguration['design']>) => {
     onConfigUpdate({
@@ -218,14 +226,11 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                 backgroundColor: 'white'
               }}
             >
-              <option value="Cabinet Grotesk">Cabinet Grotesk (Actual)</option>
-              <option value="Arial">Arial</option>
-              <option value="Helvetica">Helvetica</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Verdana">Verdana</option>
-              <option value="Trebuchet MS">Trebuchet MS</option>
-              <option value="Impact">Impact</option>
+              {fonts.map((font) => (
+                <option key={font.id} value={font.value} style={{ fontFamily: font.value }}>
+                  {font.name}
+                </option>
+              ))}
             </select>
           </div>
           
@@ -243,14 +248,11 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                 backgroundColor: 'white'
               }}
             >
-              <option value="Cabinet Grotesk">Cabinet Grotesk (Actual)</option>
-              <option value="Arial">Arial</option>
-              <option value="Helvetica">Helvetica</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Verdana">Verdana</option>
-              <option value="Trebuchet MS">Trebuchet MS</option>
-              <option value="Tahoma">Tahoma</option>
+              {fonts.map((font) => (
+                <option key={font.id} value={font.value} style={{ fontFamily: font.value }}>
+                  {font.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

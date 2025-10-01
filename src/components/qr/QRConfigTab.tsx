@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { QrCode, FileText, Printer } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
+import { useFonts } from '../../hooks/useFonts';
 
 interface QRConfigTabProps {
   activeTab: 'design' | 'content' | 'print';
@@ -10,13 +11,20 @@ interface QRConfigTabProps {
   onPrint?: () => void;
 }
 
-const QRConfigTab: React.FC<QRConfigTabProps> = ({ 
-  activeTab, 
-  config, 
+const QRConfigTab: React.FC<QRConfigTabProps> = ({
+  activeTab,
+  config,
   onConfigUpdate,
   onDownload,
   onPrint
 }) => {
+  const { fonts, loadMultipleFonts } = useFonts();
+
+  useEffect(() => {
+    if (config.typography) {
+      loadMultipleFonts([config.typography.primaryFont, config.typography.secondaryFont]);
+    }
+  }, [config.typography?.primaryFont, config.typography?.secondaryFont]);
   const updateQR = (updates: Partial<QRConfiguration['qr']>) => {
     onConfigUpdate({
       qr: {
@@ -295,14 +303,11 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     backgroundColor: 'white'
                   }}
                 >
-                  <option value="Cabinet Grotesk">Cabinet Grotesk (Actual)</option>
-                  <option value="Arial">Arial</option>
-                  <option value="Helvetica">Helvetica</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Verdana">Verdana</option>
-                  <option value="Trebuchet MS">Trebuchet MS</option>
-                  <option value="Impact">Impact</option>
+                  {fonts.map((font) => (
+                    <option key={font.id} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -359,14 +364,11 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     backgroundColor: 'white'
                   }}
                 >
-                  <option value="Cabinet Grotesk">Cabinet Grotesk (Actual)</option>
-                  <option value="Arial">Arial</option>
-                  <option value="Helvetica">Helvetica</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Verdana">Verdana</option>
-                  <option value="Trebuchet MS">Trebuchet MS</option>
-                  <option value="Tahoma">Tahoma</option>
+                  {fonts.map((font) => (
+                    <option key={font.id} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
