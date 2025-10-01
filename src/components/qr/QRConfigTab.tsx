@@ -358,7 +358,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                         color: config.design.logoShape === 'circular' ? '#075E54' : '#161616'
                       }}
                     >
-                      Circular (bordes suaves)
+                      Circular
                     </button>
                     <button
                       onClick={() => updateDesign({ logoShape: 'square' })}

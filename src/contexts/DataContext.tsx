@@ -452,8 +452,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showFrame: record.show_frame,
         frameColor: record.frame_color,
         frameThickness: record.frame_thickness,
-        showLogo: record.show_logo,
-        logoShape: record.logo_shape
+        showLogo: record.show_logo ?? false,
+        logoShape: record.logo_shape ?? 'circular'
       },
       content: {
         showTitle: record.show_title,
