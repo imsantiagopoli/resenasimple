@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Wand2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Wand2, ChevronLeft, ChevronRight } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
 import QRTemplatesTab from './QRTemplatesTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
@@ -27,14 +27,22 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   onPrint,
   currentBranchSlug
 }) => {
-  const [activeTab, setActiveTab] = useState<'templates' | 'design' | 'typography' | 'content' | 'print'>('design');
+  const [activeTab, setActiveTab] = useState<'design' | 'templates' | 'typography' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     {
       id: 'design' as const,
       label: 'Diseño',
       icon: QrCode
+    },
+    {
+      id: 'templates' as const,
+      label: 'Templates',
+      icon: Wand2
     },
     {
       id: 'typography' as const,
@@ -50,13 +58,33 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'print' as const,
       label: 'Impresión',
       icon: Printer
-    },
-    {
-      id: 'templates' as const,
-      label: 'Templates',
-      icon: Wand2
     }
   ];
+
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollPosition();
+    const handleResize = () => checkScrollPosition();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -89,8 +117,34 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   return (
     <div className="h-full flex flex-col">
       {/* Tabs Header */}
-      <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="flex overflow-x-auto" style={{ scrollbarWidth: 'thin' }}>
+      <div className="border-b relative" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        {/* Left Arrow */}
+        {showLeftArrow && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-0 bottom-0 z-10 px-2 flex items-center justify-center transition-all duration-200"
+            style={{
+              background: 'linear-gradient(to right, white 50%, transparent)',
+              color: '#075E54'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#064e45';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#075E54';
+            }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+
+        {/* Tabs Container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto scrollbar-hide"
+          onScroll={checkScrollPosition}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -119,6 +173,26 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             </button>
           ))}
         </div>
+
+        {/* Right Arrow */}
+        {showRightArrow && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-0 bottom-0 z-10 px-2 flex items-center justify-center transition-all duration-200"
+            style={{
+              background: 'linear-gradient(to left, white 50%, transparent)',
+              color: '#075E54'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#064e45';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#075E54';
+            }}
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
