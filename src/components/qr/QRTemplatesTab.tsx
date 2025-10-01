@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Wand2, Check } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
+import { supabase } from '../../lib/supabase';
 
 interface QRTemplatesTabProps {
   onApplyTemplate: (template: Partial<QRConfiguration>) => void;
@@ -13,7 +14,7 @@ interface QRTemplate {
   name: string;
   description: string;
   config: Partial<QRConfiguration>;
-  preview: {
+  preview_colors: {
     bgColor: string;
     qrColor: string;
     accentColor: string;
@@ -25,266 +26,51 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
   onDownload,
   currentBranchSlug
 }) => {
-  const templates: QRTemplate[] = [
-    {
-      id: 'classic',
-      name: 'Clásico',
-      description: 'Diseño tradicional en blanco y negro, ideal para cualquier ocasión',
-      config: {
-        qr: {
-          size: 300,
-          foregroundColor: '#000000',
-          backgroundColor: '#FFFFFF',
-          margin: 4,
-          errorCorrectionLevel: 'M'
-        },
-        typography: {
-          primaryFont: 'Arial',
-          primaryColor: '#000000',
-          secondaryFont: 'Arial',
-          secondaryColor: '#666666'
-        },
-        design: {
-          showFrame: true,
-          frameColor: '#000000',
-          frameThickness: 2
-        },
-        content: {
-          title: '¡Déjanos tu opinión!',
-          subtitle: 'Escanea el código QR',
-          callToAction: 'Tu opinión es importante',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: true
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: true
-        }
-      },
-      preview: {
-        bgColor: '#FFFFFF',
-        qrColor: '#000000',
-        accentColor: '#000000'
+  const [templates, setTemplates] = useState<QRTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('qr_templates')
+          .select('*')
+          .eq('is_system', true)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        setTemplates(data || []);
+      } catch (err) {
+        console.error('Error fetching templates:', err);
+        setError('No se pudieron cargar los templates');
+      } finally {
+        setLoading(false);
       }
-    },
-    {
-      id: 'modern',
-      name: 'Moderno',
-      description: 'Estilo contemporáneo con verde WhatsApp y tipografía elegante',
-      config: {
-        qr: {
-          size: 350,
-          foregroundColor: '#075E54',
-          backgroundColor: '#FFFFFF',
-          margin: 6,
-          errorCorrectionLevel: 'H'
-        },
-        typography: {
-          primaryFont: 'Cabinet Grotesk',
-          primaryColor: '#075E54',
-          secondaryFont: 'Cabinet Grotesk',
-          secondaryColor: '#6b7280'
-        },
-        design: {
-          showFrame: true,
-          frameColor: '#075E54',
-          frameThickness: 3
-        },
-        content: {
-          title: 'Comparte tu experiencia',
-          subtitle: 'Nos encantaría conocer tu opinión',
-          callToAction: '¡Ayúdanos a mejorar!',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: true
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: true
-        }
-      },
-      preview: {
-        bgColor: '#FFFFFF',
-        qrColor: '#075E54',
-        accentColor: '#075E54'
-      }
-    },
-    {
-      id: 'elegant',
-      name: 'Elegante',
-      description: 'Diseño sofisticado con tipografía serif y marco delicado',
-      config: {
-        qr: {
-          size: 320,
-          foregroundColor: '#1a1a1a',
-          backgroundColor: '#FFFFFF',
-          margin: 8,
-          errorCorrectionLevel: 'Q'
-        },
-        typography: {
-          primaryFont: 'Georgia',
-          primaryColor: '#1a1a1a',
-          secondaryFont: 'Georgia',
-          secondaryColor: '#4a4a4a'
-        },
-        design: {
-          showFrame: true,
-          frameColor: '#1a1a1a',
-          frameThickness: 1
-        },
-        content: {
-          title: 'Tu opinión nos importa',
-          subtitle: 'Escanea para compartir tu experiencia',
-          callToAction: 'Comparte tu valoración',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: true
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: true
-        }
-      },
-      preview: {
-        bgColor: '#FFFFFF',
-        qrColor: '#1a1a1a',
-        accentColor: '#1a1a1a'
-      }
-    },
-    {
-      id: 'minimal',
-      name: 'Minimalista',
-      description: 'Diseño limpio y simple sin distracciones',
-      config: {
-        qr: {
-          size: 300,
-          foregroundColor: '#000000',
-          backgroundColor: '#FFFFFF',
-          margin: 10,
-          errorCorrectionLevel: 'M'
-        },
-        typography: {
-          primaryFont: 'Helvetica',
-          primaryColor: '#000000',
-          secondaryFont: 'Helvetica',
-          secondaryColor: '#666666'
-        },
-        design: {
-          showFrame: false,
-          frameColor: '#000000',
-          frameThickness: 0
-        },
-        content: {
-          title: 'Déjanos tu opinión',
-          subtitle: 'Escanea el código',
-          callToAction: '',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: false
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: false
-        }
-      },
-      preview: {
-        bgColor: '#FFFFFF',
-        qrColor: '#000000',
-        accentColor: '#000000'
-      }
-    },
-    {
-      id: 'bold',
-      name: 'Llamativo',
-      description: 'Diseño audaz con colores contrastantes y marco grueso',
-      config: {
-        qr: {
-          size: 380,
-          foregroundColor: '#000000',
-          backgroundColor: '#FFEB3B',
-          margin: 4,
-          errorCorrectionLevel: 'H'
-        },
-        typography: {
-          primaryFont: 'Impact',
-          primaryColor: '#000000',
-          secondaryFont: 'Arial',
-          secondaryColor: '#333333'
-        },
-        design: {
-          showFrame: true,
-          frameColor: '#000000',
-          frameThickness: 5
-        },
-        content: {
-          title: '¡VALÓRANOS!',
-          subtitle: 'Tu opinión cuenta',
-          callToAction: '¡ESCANEA AHORA!',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: true
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: true
-        }
-      },
-      preview: {
-        bgColor: '#FFEB3B',
-        qrColor: '#000000',
-        accentColor: '#000000'
-      }
-    },
-    {
-      id: 'restaurant',
-      name: 'Restaurante',
-      description: 'Perfecto para mesas de restaurantes con colores cálidos',
-      config: {
-        qr: {
-          size: 340,
-          foregroundColor: '#8B4513',
-          backgroundColor: '#FFF8DC',
-          margin: 6,
-          errorCorrectionLevel: 'Q'
-        },
-        typography: {
-          primaryFont: 'Georgia',
-          primaryColor: '#8B4513',
-          secondaryFont: 'Georgia',
-          secondaryColor: '#A0522D'
-        },
-        design: {
-          showFrame: true,
-          frameColor: '#8B4513',
-          frameThickness: 3
-        },
-        content: {
-          title: '¿Cómo estuvo tu comida?',
-          subtitle: 'Nos encantaría conocer tu opinión',
-          callToAction: 'Comparte tu experiencia',
-          showTitle: true,
-          showSubtitle: true,
-          showCallToAction: true
-        },
-        print: {
-          format: 'A4',
-          orientation: 'portrait',
-          includeInstructions: true
-        }
-      },
-      preview: {
-        bgColor: '#FFF8DC',
-        qrColor: '#8B4513',
-        accentColor: '#8B4513'
-      }
-    }
-  ];
+    };
+
+    fetchTemplates();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -321,14 +107,14 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
                     <div
                       className="w-6 h-6 rounded border"
                       style={{
-                        backgroundColor: template.preview.bgColor,
+                        backgroundColor: template.preview_colors.bgColor,
                         borderColor: 'rgb(209, 213, 219)'
                       }}
                     />
                     <div
                       className="w-6 h-6 rounded border"
                       style={{
-                        backgroundColor: template.preview.qrColor,
+                        backgroundColor: template.preview_colors.qrColor,
                         borderColor: 'rgb(209, 213, 219)'
                       }}
                     />

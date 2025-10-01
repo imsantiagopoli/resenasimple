@@ -214,35 +214,13 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             currentBranchSlug={currentBranchSlug}
           />
         ) : (
-          <>
-            {/* Preview Notice for Design Tab */}
-            {(activeTab === 'design' || activeTab === 'typography') && (
-              <div className="p-4 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-                <div
-                  className="p-3 rounded-lg text-sm"
-                  style={{
-                    backgroundColor: '#075E54' + '08',
-                    border: '1px solid #075E54' + '30'
-                  }}
-                >
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span style={{ color: '#075E54' }}>
-                      <strong>Vista previa en tiempo real:</strong> Los cambios se reflejan inmediatamente
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <QRConfigTab
-              activeTab={activeTab}
-              config={config}
-              onConfigUpdate={onConfigUpdate}
-              onDownload={onDownload}
-              onPrint={onPrint}
-            />
-          </>
+          <QRConfigTab
+            activeTab={activeTab}
+            config={config}
+            onConfigUpdate={onConfigUpdate}
+            onDownload={onDownload}
+            onPrint={onPrint}
+          />
         )}
       </div>
       
