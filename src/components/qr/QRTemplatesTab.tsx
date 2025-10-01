@@ -1,24 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { Wand2, Check } from 'lucide-react';
-import { QRConfiguration } from '../../hooks/useQRConfig';
 import { supabase } from '../../lib/supabase';
 
 interface QRTemplatesTabProps {
-  onApplyTemplate: (template: Partial<QRConfiguration>) => void;
-  onDownload: (templateConfig: Partial<QRConfiguration>) => void;
+  onApplyTemplate: (template: QRTemplateRecord) => void;
+  onDownload: (templateConfig: QRTemplateRecord) => void;
   currentBranchSlug: string;
 }
 
-interface QRTemplate {
+interface QRTemplateRecord {
   id: string;
   name: string;
   description: string;
-  config: Partial<QRConfiguration>;
-  preview_colors: {
-    bgColor: string;
-    qrColor: string;
-    accentColor: string;
-  };
+  is_system: boolean;
+  qr_size: number;
+  qr_foreground_color: string;
+  qr_background_color: string;
+  qr_error_correction_level: 'L' | 'M' | 'Q' | 'H';
+  qr_margin: number;
+  show_frame: boolean;
+  frame_color: string;
+  frame_thickness: number | null;
+  show_title: boolean;
+  title: string;
+  show_subtitle: boolean;
+  subtitle: string;
+  show_call_to_action: boolean;
+  call_to_action: string;
+  print_format: 'A4' | 'Letter' | 'Custom';
+  print_orientation: 'portrait' | 'landscape';
+  qrs_per_page: number;
+  include_instructions: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
@@ -26,7 +40,7 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
   onDownload,
   currentBranchSlug
 }) => {
-  const [templates, setTemplates] = useState<QRTemplate[]>([]);
+  const [templates, setTemplates] = useState<QRTemplateRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,7 +96,7 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
           </h3>
         </div>
         <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-          Elige un diseño preconfigurado y personalízalo a tu gusto
+          Elige un diseño preconfigurado y personalízalo a tu gusto. Al guardar, tu configuración actual será reemplazada.
         </p>
       </div>
 
@@ -107,26 +121,26 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
                     <div
                       className="w-6 h-6 rounded border"
                       style={{
-                        backgroundColor: template.preview_colors.bgColor,
+                        backgroundColor: template.qr_background_color,
                         borderColor: 'rgb(209, 213, 219)'
                       }}
                     />
                     <div
                       className="w-6 h-6 rounded border"
                       style={{
-                        backgroundColor: template.preview_colors.qrColor,
+                        backgroundColor: template.qr_foreground_color,
                         borderColor: 'rgb(209, 213, 219)'
                       }}
                     />
                   </div>
                   <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Colores
+                    Colores del QR
                   </span>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => onApplyTemplate(template.config)}
+                    onClick={() => onApplyTemplate(template)}
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
                     style={{
                       backgroundColor: '#075E54',
@@ -144,7 +158,7 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
                   </button>
 
                   <button
-                    onClick={() => onDownload(template.config)}
+                    onClick={() => onDownload(template)}
                     className="px-3 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
                     style={{
                       backgroundColor: 'white',
