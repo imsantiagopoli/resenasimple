@@ -3,6 +3,8 @@ import QRConfigPanel from '../components/qr/QRConfigPanel';
 import QRPreviewPanel from '../components/qr/QRPreviewPanel';
 import { useQRConfig } from '../hooks/useQRConfig';
 import { useBusiness } from '../hooks/useBusiness';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const PaginaQRPage: React.FC = () => {
   const { 
@@ -79,91 +81,88 @@ const PaginaQRPage: React.FC = () => {
       });
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!selectedBranch || !config) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const qrURL = generateQRURL(selectedBranch.slug, config);
-      const content = `
-        <html>
-          <head>
-            <title>Código QR - ${selectedBranch.name}</title>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-              @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@100,200,300,400,500,700,800,900&display=swap');
-              
-              body {
-                font-family: '${config.typography.secondaryFont}', Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                margin: 0;
-                padding: 20px;
-                text-align: center;
-              }
-              .qr-container {
-                border: ${config.design.showFrame ? `${config.design.frameThickness}px solid ${config.design.frameColor}` : 'none'};
-                padding: 20px;
-                border-radius: 8px;
-                background: ${config.qr.backgroundColor};
-              }
-              h1 { 
-                color: ${config.typography.primaryColor}; 
-                font-family: '${config.typography.primaryFont}', Arial, sans-serif;
-                margin-bottom: 10px; 
-              }
-              h2 { 
-                color: ${config.typography.secondaryColor}; 
-                font-family: '${config.typography.secondaryFont}', Arial, sans-serif;
-                margin-bottom: 20px; font-weight: normal; 
-              }
-              .cta { 
-                color: ${config.typography.primaryColor}; 
-                font-family: '${config.typography.primaryFont}', Arial, sans-serif;
-                margin-top: 20px; 
-                font-weight: bold; 
-              }
-              .instructions {
-                margin-top: 30px;
-                padding: 15px;
-                background: #f9fafb;
-                border-radius: 8px;
-                color: rgb(107, 114, 128);
-                font-size: 14px;
-                max-width: 400px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="qr-container">
-              ${config.content.showTitle ? `<h1>${config.content.title}</h1>` : ''}
-              ${config.content.showSubtitle ? `<h2>${config.content.subtitle}</h2>` : ''}
-              <img src="${qrURL}" alt="Código QR" style="width: ${config.qr.size}px; height: ${config.qr.size}px;" />
-              ${config.content.showCallToAction ? `<div class="cta">${config.content.callToAction}</div>` : ''}
-            </div>
-            ${config.print.includeInstructions ? `
-              <div class="instructions">
-                <strong>Instrucciones:</strong><br/>
-                1. Abre la cámara de tu teléfono<br/>
-                2. Apunta al código QR<br/>
-                3. Toca el enlace que aparece<br/>
-                4. Comparte tu experiencia
-              </div>
-            ` : ''}
-          </body>
-        </html>
-      `;
-      
-      printWindow.document.open();
-      printWindow.document.write(content);
-      printWindow.document.close();
-      
-      printWindow.onload = () => {
-        printWindow.print();
-      };
+
+    const qrURL = generateQRURL(selectedBranch.slug, config);
+
+    // Create temporary container
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
+    tempContainer.style.width = '448px';
+    tempContainer.style.background = 'white';
+
+    // Build the HTML content
+    tempContainer.innerHTML = `
+      <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
+        ${config.content.showTitle ? `<h1 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
+        ${config.content.showSubtitle ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
+        <div style="display: inline-block; margin-bottom: 1.5rem;">
+          <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
+            <img src="${qrURL}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+          </div>
+        </div>
+        ${config.content.showCallToAction ? `<p style="font-size: 1.125rem; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.callToAction}</p>` : ''}
+        ${config.print.includeInstructions ? `
+          <div style="margin-top: 1.5rem; padding: 1rem; background: rgb(249, 250, 251); border: 1px solid rgb(229, 231, 235); border-radius: 0.5rem; font-size: 0.75rem; text-align: left; color: rgb(107, 114, 128); max-width: 400px; margin-left: auto; margin-right: auto;">
+            <strong style="color: #161616;">Instrucciones:</strong>
+            <ol style="margin-top: 0.5rem; padding-left: 1rem; list-style-type: decimal;">
+              <li style="margin-top: 0.25rem;">Abre la cámara de tu teléfono</li>
+              <li style="margin-top: 0.25rem;">Apunta hacia el código QR</li>
+              <li style="margin-top: 0.25rem;">Toca la notificación que aparece</li>
+              <li style="margin-top: 0.25rem;">Comparte tu experiencia</li>
+            </ol>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    document.body.appendChild(tempContainer);
+
+    try {
+      // Wait for images to load
+      const images = tempContainer.getElementsByTagName('img');
+      await Promise.all(
+        Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+        })
+      );
+
+      // Generate canvas from HTML
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+
+      // Calculate PDF dimensions
+      const imgWidth = 448;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [imgWidth, imgHeight]
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      // Download PDF
+      pdf.save(`qr-${selectedBranch.slug}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      // Remove temporary container
+      document.body.removeChild(tempContainer);
     }
   };
 
