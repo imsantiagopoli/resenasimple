@@ -27,7 +27,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   onPrint,
   currentBranchSlug
 }) => {
-  const [activeTab, setActiveTab] = useState<'design' | 'templates' | 'typography' | 'content' | 'print'>('design');
+  const [activeTab, setActiveTab] = useState<'design' | 'templates' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -43,11 +43,6 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       id: 'templates' as const,
       label: 'Templates',
       icon: Wand2
-    },
-    {
-      id: 'typography' as const,
-      label: 'Tipografía',
-      icon: Palette
     },
     {
       id: 'content' as const,
