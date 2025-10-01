@@ -33,7 +33,7 @@ export const useAuth = () => {
     loading: true
   })
 
-  const ensureBusinessProfile = async (user: AuthUser) => {
+  const ensureBusinessProfile = async (user: AuthUser): Promise<boolean> => {
     try {
       const { data: existingBusiness } = await supabase
         .from('business_profiles')
@@ -42,6 +42,7 @@ export const useAuth = () => {
         .maybeSingle()
 
       if (!existingBusiness) {
+        console.log('Creating new business profile for user:', user.id);
         const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Mi Negocio'
         const restaurantName = `${userName}`
 
@@ -134,9 +135,18 @@ export const useAuth = () => {
         if (configError) {
           console.error('Error creating voting config:', configError)
         }
+
+        console.log('Business profile created successfully')
+
+        window.dispatchEvent(new CustomEvent('businessProfileCreated'))
+
+        return true
       }
+
+      return false
     } catch (error) {
       console.error('Error ensuring business profile:', error)
+      return false
     }
   }
 
@@ -144,7 +154,10 @@ export const useAuth = () => {
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        await ensureBusinessProfile(session.user)
+        const wasCreated = await ensureBusinessProfile(session.user)
+        if (wasCreated) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
       }
       setAuthState({
         user: session?.user || null,
@@ -158,7 +171,10 @@ export const useAuth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user && event === 'SIGNED_IN') {
-        await ensureBusinessProfile(session.user)
+        const wasCreated = await ensureBusinessProfile(session.user)
+        if (wasCreated) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
       }
       setAuthState({
         user: session?.user || null,
