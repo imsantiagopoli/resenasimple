@@ -82,12 +82,32 @@ const PaginaQRPage: React.FC = () => {
       });
   };
 
+  const getImageAsBase64 = async (url: string): Promise<string> => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      return '';
+    }
+  };
+
   const handlePrint = async () => {
     if (!selectedBranch || !config) return;
 
     const qrURL = generateQRURL(selectedBranch.slug, config);
 
-    // Create temporary container
+    let logoBase64 = '';
+    if (config.design.showLogo && businessProfile?.logo_url) {
+      logoBase64 = await getImageAsBase64(businessProfile.logo_url);
+    }
+
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
@@ -95,9 +115,9 @@ const PaginaQRPage: React.FC = () => {
     tempContainer.style.width = '448px';
     tempContainer.style.background = 'white';
 
-    // Build the HTML content
     tempContainer.innerHTML = `
       <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
+        ${logoBase64 ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
@@ -109,12 +129,12 @@ const PaginaQRPage: React.FC = () => {
         ${config.print.includeInstructions ? `
           <div style="margin-top: 1.5rem; padding: 1rem; background: rgb(249, 250, 251); border: 1px solid rgb(229, 231, 235); border-radius: 0.5rem; font-size: 0.75rem; text-align: left; color: rgb(107, 114, 128); max-width: 400px; margin-left: auto; margin-right: auto;">
             <strong style="color: #161616;">Instrucciones:</strong>
-            <div style="margin-top: 0.5rem;">
-              <div style="margin-top: 0.25rem;">1. Abre la cámara de tu teléfono</div>
-              <div style="margin-top: 0.25rem;">2. Apunta hacia el código QR</div>
-              <div style="margin-top: 0.25rem;">3. Toca la notificación que aparece</div>
-              <div style="margin-top: 0.25rem;">4. Comparte tu experiencia</div>
-            </div>
+            <ol style="margin-top: 0.5rem; padding-left: 1rem; list-style-type: decimal;">
+              <li style="margin-top: 0.25rem;">Abre la cámara de tu teléfono</li>
+              <li style="margin-top: 0.25rem;">Apunta hacia el código QR</li>
+              <li style="margin-top: 0.25rem;">Toca la notificación que aparece</li>
+              <li style="margin-top: 0.25rem;">Comparte tu experiencia</li>
+            </ol>
           </div>
         ` : ''}
       </div>
@@ -123,31 +143,34 @@ const PaginaQRPage: React.FC = () => {
     document.body.appendChild(tempContainer);
 
     try {
-      // Wait for images to load
       const images = tempContainer.getElementsByTagName('img');
       await Promise.all(
         Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             img.onload = resolve;
-            img.onerror = reject;
+            img.onerror = () => {
+              console.warn('Image failed to load:', img.src);
+              resolve();
+            };
+            setTimeout(resolve, 3000);
           });
         })
       );
 
-      // Generate canvas from HTML
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         backgroundColor: '#ffffff',
         logging: false,
-        useCORS: true
+        useCORS: false,
+        allowTaint: true
       });
 
-      // Calculate PDF dimensions
       const imgWidth = 448;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Create PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'px',
@@ -157,12 +180,10 @@ const PaginaQRPage: React.FC = () => {
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
 
-      // Download PDF
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
-      // Remove temporary container
       document.body.removeChild(tempContainer);
     }
   };
