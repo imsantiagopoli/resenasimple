@@ -13,6 +13,7 @@ import MiNegocioPage from './pages/MiNegocioPage';
 import PaginaVotacionPage from './pages/PaginaVotacionPage';
 import PaginaQRPage from './pages/PaginaQRPage';
 import ResenasPage from './pages/ResenasPage';
+import RespuestasPage from './pages/RespuestasPage';
 import VotingPage from './pages/VotingPage';
 import SettingsPage from './pages/SettingsPage';
 
@@ -70,15 +71,25 @@ const AppContent: React.FC = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/app/resenas" 
+        <Route
+          path="/app/resenas"
           element={
             <ProtectedRoute>
               <DashboardLayout activePage="resenas">
                 <ResenasPage />
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
+        />
+        <Route
+          path="/app/respuestas"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout activePage="respuestas">
+                <RespuestasPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
         />
         <Route 
           path="/app/configuracion" 

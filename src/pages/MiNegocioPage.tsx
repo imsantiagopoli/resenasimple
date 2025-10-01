@@ -6,6 +6,7 @@ import BranchesSection from '../components/BranchesSection';
 import LogoSection from '../components/LogoSection';
 import BusinessInfoSection from '../components/BusinessInfoSection';
 import SocialMediaSection from '../components/SocialMediaSection';
+import GoogleMyBusinessSection from '../components/GoogleMyBusinessSection';
 
 const MiNegocioPage: React.FC = () => {
   const { 
@@ -141,14 +142,19 @@ const MiNegocioPage: React.FC = () => {
       />
 
       {/* Social Media */}
-      <SocialMediaSection 
+      <SocialMediaSection
         profile={profile}
         onSocialUpdate={handleSocialUpdate}
         showMessage={showMessage}
       />
 
+      {/* Google My Business */}
+      <GoogleMyBusinessSection
+        showMessage={showMessage}
+      />
+
       {/* Branches Section */}
-      <BranchesSection 
+      <BranchesSection
         branches={branches}
         upsertBranch={upsertBranch}
         deleteBranch={deleteBranch}
