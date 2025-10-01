@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { createBusinessAndBranch } from '../lib/businessSetup';
+import { supabase } from '../lib/supabase';
 import {
   ArrowRight,
   Building2,
@@ -12,12 +13,47 @@ const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     restaurantName: '',
     businessType: '',
     logo: null as File | null
   });
+
+  useEffect(() => {
+    const checkExistingBusiness = async () => {
+      if (!user) {
+        setIsChecking(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('business_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking business:', error);
+          setIsChecking(false);
+          return;
+        }
+
+        if (data) {
+          navigate('/app/inicio', { replace: true });
+        } else {
+          setIsChecking(false);
+        }
+      } catch (error) {
+        console.error('Error in checkExistingBusiness:', error);
+        setIsChecking(false);
+      }
+    };
+
+    checkExistingBusiness();
+  }, [user, navigate]);
 
   const businessTypes = [
     'Restaurante',
@@ -66,13 +102,20 @@ const OnboardingPage: React.FC = () => {
         formData.businessType
       );
 
-      navigate('/app/inicio');
+      window.location.href = '/app/inicio';
     } catch (err: any) {
       console.error('Error creating business:', err);
       setError(err.message || 'Error al configurar tu negocio. Por favor intenta de nuevo.');
-    } finally {
       setIsSubmitting(false);
     }
+  };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
   };
 
   return (
