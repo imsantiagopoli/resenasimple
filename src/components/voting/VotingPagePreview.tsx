@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, Building2, Instagram, Music, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
+import { BusinessProfile } from '../../contexts/DataContext';
 
 // Function to calculate if text should be white or black based on background color
 const getContrastColor = (hexColor: string): string => {
@@ -22,9 +23,10 @@ const getContrastColor = (hexColor: string): string => {
 interface VotingPagePreviewProps {
   config: VotingConfiguration;
   viewType: 'voting' | 'private-feedback' | 'public-review' | 'private-thanks';
+  businessProfile: BusinessProfile | null;
 }
 
-const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType }) => {
+const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType, businessProfile }) => {
   const [selectedStars, setSelectedStars] = useState(0);
   const [hoveredStars, setHoveredStars] = useState(0);
 
@@ -54,6 +56,34 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
     if (config.design.logoDisplayPages === 'all') return true;
     if (config.design.logoDisplayPages === 'voting-only' && viewType === 'voting') return true;
     return false;
+  };
+
+  const renderLogo = () => {
+    if (businessProfile?.logo_url) {
+      return (
+        <img
+          src={businessProfile.logo_url}
+          alt="Logo"
+          className="object-cover"
+          style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: config.design.logoShape === 'circular' ? '50%' : '8px'
+          }}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={`w-20 h-20 flex items-center justify-center ${
+          config.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
+        }`}
+        style={{ backgroundColor: '#075E54' + '20' }}
+      >
+        <Building2 size={32} style={{ color: '#075E54' }} />
+      </div>
+    );
   };
 
   const renderSocialIcons = () => {
@@ -88,14 +118,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
         {/* Logo */}
         {shouldShowLogo('voting') && (
           <div className="flex justify-center mb-8">
-            <div 
-              className={`w-20 h-20 flex items-center justify-center ${
-                config.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
-              }`}
-              style={{ backgroundColor: '#075E54' + '20' }}
-            >
-              <Building2 size={32} style={{ color: '#075E54' }} />
-            </div>
+            {renderLogo()}
           </div>
         )}
 
@@ -199,14 +222,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
         {/* Logo */}
         {shouldShowLogo('private-feedback') && (
           <div className="flex justify-center mb-8">
-            <div 
-              className={`w-20 h-20 flex items-center justify-center ${
-                config.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
-              }`}
-              style={{ backgroundColor: '#075E54' + '20' }}
-            >
-              <Building2 size={32} style={{ color: '#075E54' }} />
-            </div>
+            {renderLogo()}
           </div>
         )}
         
@@ -321,14 +337,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
         {/* Logo */}
         {shouldShowLogo('public-review') && (
           <div className="flex justify-center mb-8">
-            <div 
-              className={`w-20 h-20 flex items-center justify-center ${
-                config.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
-              }`}
-              style={{ backgroundColor: '#075E54' + '20' }}
-            >
-              <Building2 size={32} style={{ color: '#075E54' }} />
-            </div>
+            {renderLogo()}
           </div>
         )}
         
@@ -385,14 +394,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType 
         {/* Logo */}
         {shouldShowLogo('private-thanks') && (
           <div className="flex justify-center mb-8">
-            <div 
-              className={`w-20 h-20 flex items-center justify-center ${
-                config.design.logoShape === 'circular' ? 'rounded-full' : 'rounded-lg'
-              }`}
-              style={{ backgroundColor: '#075E54' + '20' }}
-            >
-              <Building2 size={32} style={{ color: '#075E54' }} />
-            </div>
+            {renderLogo()}
           </div>
         )}
         

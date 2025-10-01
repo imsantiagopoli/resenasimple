@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import VotingPagePreview from './VotingPagePreview';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
+import { BusinessProfile } from '../../contexts/DataContext';
 
 interface VotingPreviewPanelProps {
   config: VotingConfiguration;
+  businessProfile: BusinessProfile | null;
 }
 
 type PreviewType = 'voting' | 'private-feedback' | 'public-review' | 'private-thanks';
 
-const VotingPreviewPanel: React.FC<VotingPreviewPanelProps> = ({ config }) => {
+const VotingPreviewPanel: React.FC<VotingPreviewPanelProps> = ({ config, businessProfile }) => {
   const [selectedView, setSelectedView] = useState<PreviewType>('voting');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -98,7 +100,7 @@ const VotingPreviewPanel: React.FC<VotingPreviewPanelProps> = ({ config }) => {
 
       {/* Preview Content */}
       <div className="flex-1 overflow-hidden">
-        <VotingPagePreview config={config} viewType={selectedView} />
+        <VotingPagePreview config={config} viewType={selectedView} businessProfile={businessProfile} />
       </div>
     </div>
   );

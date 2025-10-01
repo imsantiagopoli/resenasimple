@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useVotingConfig } from '../hooks/useVotingConfig';
+import { useBusiness } from '../hooks/useBusiness';
 import VotingConfigPanel from '../components/voting/VotingConfigPanel';
 import VotingPreviewPanel from '../components/voting/VotingPreviewPanel';
 
@@ -15,6 +16,8 @@ const PaginaVotacionPage: React.FC = () => {
     hasChanges,
     isSaving
   } = useVotingConfig();
+
+  const { businessProfile } = useBusiness();
 
   // Initialize config if it doesn't exist
   React.useEffect(() => {
@@ -70,7 +73,7 @@ const PaginaVotacionPage: React.FC = () => {
         
         {/* Columna derecha - Vista previa (más ancha) */}
         <div className="w-3/5 h-screen overflow-hidden">
-          <VotingPreviewPanel config={config} />
+          <VotingPreviewPanel config={config} businessProfile={businessProfile} />
         </div>
       </div>
     </div>
