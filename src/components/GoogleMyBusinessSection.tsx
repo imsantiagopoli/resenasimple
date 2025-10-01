@@ -96,7 +96,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
     try {
       setConnecting(true);
 
-      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const redirectUri = `${window.location.origin}/google/callback`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
