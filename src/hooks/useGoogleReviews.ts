@@ -114,6 +114,12 @@ export const useGoogleReviews = () => {
         throw new Error(errorData.error || 'Error al sincronizar ubicaciones');
       }
 
+      const locationsData = await locationsResponse.json();
+      if (locationsData.count === 0) {
+        setError(locationsData.message || 'No se encontraron ubicaciones de Google My Business');
+        return;
+      }
+
       const reviewsResponse = await fetch(`${supabaseUrl}/functions/v1/google-reviews-sync`, {
         method: 'POST',
         headers: {

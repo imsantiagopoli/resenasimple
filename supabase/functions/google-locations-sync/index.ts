@@ -186,8 +186,23 @@ Deno.serve(async (req: Request) => {
         created_at: new Date().toISOString()
       });
 
+    if (allLocations.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          locations: [],
+          count: 0,
+          message: "No se encontraron ubicaciones de Google My Business asociadas a esta cuenta. Asegúrate de tener un perfil de negocio configurado en Google."
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         locations: allLocations,
         count: allLocations.length
