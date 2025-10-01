@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, MapPin } from 'lucide-react';
+import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, MapPin, Check, AlertCircle } from 'lucide-react';
 import { BusinessBranch } from '../hooks/useBusiness';
+import { checkSlugAvailability } from '../lib/supabase';
 
 interface BranchesSectionProps {
   branches: BusinessBranch[];
@@ -26,6 +27,11 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     branchId?: string;
     branchName?: string;
   } | null>(null);
+  const [slugAvailability, setSlugAvailability] = useState<{
+    checking: boolean;
+    available: boolean | null;
+  }>({ checking: false, available: null });
+  const [slugCheckTimeout, setSlugCheckTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Initialize branches data
   useEffect(() => {
@@ -104,10 +110,21 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     const branch = branchesData[index];
     setEditingBranchId(branch.id || `new-${index}`);
     setTempBranchData({ ...branch });
+
+    // Check current slug availability
+    if (branch.slug) {
+      checkSlug(branch.slug, branch.id);
+    }
   };
 
   const handleSaveBranch = async (index: number) => {
     if (!tempBranchData) return;
+
+    // Validate slug availability before saving
+    if (slugAvailability.available === false) {
+      showMessage('error', 'El slug no está disponible. Por favor elige otro.');
+      return;
+    }
 
     try {
       const branchToSave = {
@@ -119,7 +136,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
         google_maps_link: tempBranchData.googleMapsLink,
         slug: tempBranchData.slug || await generateSlug(tempBranchData.name)
       };
-      
+
       const { error } = await upsertBranch(branchToSave);
       if (error) {
         throw new Error(error);
@@ -129,9 +146,10 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       const updatedBranches = [...branchesData];
       updatedBranches[index] = tempBranchData;
       setBranchesData(updatedBranches);
-      
+
       setEditingBranchId(null);
       setTempBranchData(null);
+      setSlugAvailability({ checking: false, available: null });
       showMessage('success', 'Sucursal guardada correctamente');
     } catch (err: any) {
       console.error('Error saving branch:', err);
@@ -142,21 +160,51 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   const handleCancelEditBranch = () => {
     setEditingBranchId(null);
     setTempBranchData(null);
+    setSlugAvailability({ checking: false, available: null });
+  };
+
+  const checkSlug = async (slug: string, branchId: string | null) => {
+    if (!slug || slug.trim() === '') {
+      setSlugAvailability({ checking: false, available: null });
+      return;
+    }
+
+    setSlugAvailability({ checking: true, available: null });
+
+    const isAvailable = await checkSlugAvailability(slug, branchId || undefined);
+    setSlugAvailability({ checking: false, available: isAvailable });
   };
 
   const updateBranch = (index: number, field: string, value: string | boolean) => {
     if (tempBranchData) {
       const updated = { ...tempBranchData, [field]: value };
-      
+
       // Auto-generate slug when name changes
       if (field === 'name' && typeof value === 'string') {
-        updated.slug = value
+        const generatedSlug = value
           .toLowerCase()
           .replace(/[^\w\s-]/g, '')
           .replace(/[\s_-]+/g, '-')
           .replace(/^-+|-+$/g, '');
+        updated.slug = generatedSlug;
+
+        // Check slug availability with debounce
+        if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
+        const timeout = setTimeout(() => {
+          checkSlug(generatedSlug, updated.id);
+        }, 500);
+        setSlugCheckTimeout(timeout);
       }
-      
+
+      // Check slug availability when manually editing slug
+      if (field === 'slug' && typeof value === 'string') {
+        if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
+        const timeout = setTimeout(() => {
+          checkSlug(value, updated.id);
+        }, 500);
+        setSlugCheckTimeout(timeout);
+      }
+
       setTempBranchData(updated);
     }
   };
@@ -342,6 +390,68 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
 
                   <div className="md:col-span-2 space-y-2">
                     <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Slug / URL
+                    </label>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            value={currentData.slug}
+                            onChange={(e) => updateBranch(index, 'slug', e.target.value)}
+                            disabled={!isEditing}
+                            placeholder="sucursal-ejemplo"
+                            className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-8"
+                            style={{
+                              borderColor: isEditing && slugAvailability.available === false
+                                ? 'rgb(239, 68, 68)'
+                                : isEditing && slugAvailability.available === true
+                                ? '#075E54'
+                                : 'rgb(209, 213, 219)',
+                              color: '#161616',
+                              backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
+                            }}
+                          />
+                          {isEditing && currentData.slug && (
+                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                              {slugAvailability.checking ? (
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                              ) : slugAvailability.available === true ? (
+                                <Check size={16} style={{ color: '#075E54' }} />
+                              ) : slugAvailability.available === false ? (
+                                <AlertCircle size={16} style={{ color: 'rgb(239, 68, 68)' }} />
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {isEditing && currentData.slug && (
+                        <div className="flex items-center space-x-1">
+                          {slugAvailability.checking ? (
+                            <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                              Verificando disponibilidad...
+                            </p>
+                          ) : slugAvailability.available === true ? (
+                            <p className="text-xs" style={{ color: '#075E54' }}>
+                              ✓ Disponible
+                            </p>
+                          ) : slugAvailability.available === false ? (
+                            <p className="text-xs" style={{ color: 'rgb(239, 68, 68)' }}>
+                              ✗ No disponible
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
+                      {!isEditing && currentData.slug && (
+                        <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                          {window.location.origin}/v/{currentData.slug}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
                       Link de Google Maps
                     </label>
                     <div className="flex items-center space-x-2">
@@ -358,11 +468,11 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                           backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
                         }}
                       />
-                      
+
                       {!isEditing && currentData.googleMapsLink && (
-                        <a 
-                          href={currentData.googleMapsLink} 
-                          target="_blank" 
+                        <a
+                          href={currentData.googleMapsLink}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="p-2 rounded-lg transition-colors duration-200"
                           style={{ color: 'rgb(107, 114, 128)' }}

@@ -24,3 +24,29 @@ export type AuthSession = {
   refresh_token: string
   user: AuthUser
 }
+
+// Branch slug validation
+export const checkSlugAvailability = async (slug: string, excludeBranchId?: string): Promise<boolean> => {
+  try {
+    let query = supabase
+      .from('business_branches')
+      .select('id')
+      .eq('slug', slug);
+
+    if (excludeBranchId) {
+      query = query.neq('id', excludeBranchId);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      console.error('Error checking slug availability:', error);
+      return false;
+    }
+
+    return !data;
+  } catch (error) {
+    console.error('Error checking slug availability:', error);
+    return false;
+  }
+}
