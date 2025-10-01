@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { icon: Home, label: 'Inicio', id: 'inicio', route: '/app/inicio', color: 'rgb(75, 85, 99)' },
     { icon: Building2, label: 'Mi negocio', id: 'mi-negocio', route: '/app/mi-negocio', color: 'rgb(75, 85, 99)' },
     { icon: Vote, label: 'Página de votación', id: 'pagina-votacion', route: '/app/pagina-votacion', color: 'rgb(75, 85, 99)' },
-    { icon: QrCode, label: 'Página QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
+    { icon: QrCode, label: 'QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
     { icon: Star, label: 'Reseñas', id: 'resenas', route: '/app/resenas', color: 'rgb(75, 85, 99)' },
   ];
 
