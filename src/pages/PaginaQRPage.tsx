@@ -7,13 +7,14 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const PaginaQRPage: React.FC = () => {
-  const { 
-    config, 
-    loading: configLoading, 
-    updateConfig, 
+  const {
+    config,
+    loading: configLoading,
+    updateConfig,
     saveConfig,
     resetChanges,
-    getOrCreateConfig, 
+    resetToDefaults,
+    getOrCreateConfig,
     hasChanges,
     isSaving,
     generateQRURL
@@ -210,6 +211,7 @@ const PaginaQRPage: React.FC = () => {
             hasChanges={hasChanges}
             onSave={handleSaveConfig}
             onReset={resetChanges}
+            onResetToDefaults={resetToDefaults}
             isSaving={isSaving}
             onDownload={handleDownload}
             onPrint={handlePrint}

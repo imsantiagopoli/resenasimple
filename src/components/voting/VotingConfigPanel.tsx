@@ -11,15 +11,17 @@ interface VotingConfigPanelProps {
   hasChanges: boolean;
   onSave: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   onReset: () => void;
+  onResetToDefaults: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   isSaving: boolean;
 }
 
-const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({ 
-  config, 
-  onConfigUpdate, 
+const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
+  config,
+  onConfigUpdate,
   hasChanges,
   onSave,
   onReset,
+  onResetToDefaults,
   isSaving
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'logic' | 'links'>('design');
@@ -62,6 +64,16 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
   const handleReset = () => {
     onReset();
     setSaveMessage({ type: 'success', text: 'Cambios descartados' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const handleResetToDefaults = async () => {
+    const result = await onResetToDefaults();
+    if (result.error) {
+      setSaveMessage({ type: 'error', text: result.error });
+    } else {
+      setSaveMessage({ type: 'success', text: 'Configuración restablecida a valores por defecto' });
+    }
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
@@ -182,6 +194,48 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
               <span>Descartar</span>
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Reset to Defaults Button - Only show when no changes */}
+      {!hasChanges && (
+        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+          {/* Save Message */}
+          {saveMessage && (
+            <div
+              className={`mb-3 p-2 rounded-lg text-xs ${
+                saveMessage.type === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {saveMessage.text}
+            </div>
+          )}
+
+          <button
+            onClick={handleResetToDefaults}
+            disabled={isSaving}
+            className="group w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: 'white',
+              borderColor: 'rgb(209, 213, 219)',
+              color: '#161616'
+            }}
+            onMouseEnter={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = 'white';
+              }
+            }}
+          >
+            <RotateCcw size={16} />
+            <span>Restablecer a Valores por Defecto</span>
+          </button>
         </div>
       )}
     </div>

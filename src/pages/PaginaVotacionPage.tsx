@@ -4,13 +4,14 @@ import VotingConfigPanel from '../components/voting/VotingConfigPanel';
 import VotingPreviewPanel from '../components/voting/VotingPreviewPanel';
 
 const PaginaVotacionPage: React.FC = () => {
-  const { 
-    config, 
-    loading: configLoading, 
-    updateConfig, 
+  const {
+    config,
+    loading: configLoading,
+    updateConfig,
     saveConfig,
     resetChanges,
-    getOrCreateConfig, 
+    resetToDefaults,
+    getOrCreateConfig,
     hasChanges,
     isSaving
   } = useVotingConfig();
@@ -56,12 +57,13 @@ const PaginaVotacionPage: React.FC = () => {
       <div className="flex h-screen">
         {/* Columna izquierda - Configuración (más estrecha) */}
         <div className="w-2/5 border-r overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <VotingConfigPanel 
-            config={config} 
+          <VotingConfigPanel
+            config={config}
             onConfigUpdate={handleConfigUpdate}
             hasChanges={hasChanges}
             onSave={saveConfig}
             onReset={resetChanges}
+            onResetToDefaults={resetToDefaults}
             isSaving={isSaving}
           />
         </div>

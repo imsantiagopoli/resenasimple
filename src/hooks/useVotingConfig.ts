@@ -17,6 +17,7 @@ export const useVotingConfig = () => {
     createDefaultVotingConfig: createDefaultConfig,
     getOrCreateVotingConfig: getOrCreateConfig,
     resetVotingConfigChanges: resetChanges,
+    resetVotingConfigToDefaults: resetToDefaults,
     refetchVotingConfig: refetch
   } = useData()
 
@@ -33,6 +34,7 @@ export const useVotingConfig = () => {
     createDefaultConfig,
     getOrCreateConfig,
     resetChanges,
+    resetToDefaults,
     refetch
   }
 }

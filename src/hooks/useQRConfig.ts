@@ -17,6 +17,7 @@ export const useQRConfig = () => {
     createDefaultQRConfig: createDefaultConfig,
     getOrCreateQRConfig: getOrCreateConfig,
     resetQRConfigChanges: resetChanges,
+    resetQRConfigToDefaults: resetToDefaults,
     refetchQRConfig: refetch,
     generateQRURL
   } = useData()
@@ -34,6 +35,7 @@ export const useQRConfig = () => {
     createDefaultConfig,
     getOrCreateConfig,
     resetChanges,
+    resetToDefaults,
     refetch,
     generateQRURL
   }

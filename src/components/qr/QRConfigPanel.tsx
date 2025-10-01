@@ -10,6 +10,7 @@ interface QRConfigPanelProps {
   hasChanges: boolean;
   onSave: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   onReset: () => void;
+  onResetToDefaults: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   isSaving: boolean;
   onDownload?: () => void;
   onPrint?: () => void;
@@ -22,6 +23,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   hasChanges,
   onSave,
   onReset,
+  onResetToDefaults,
   isSaving,
   onDownload,
   onPrint,
@@ -100,6 +102,16 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   const handleReset = () => {
     onReset();
     setSaveMessage({ type: 'success', text: 'Cambios descartados' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const handleResetToDefaults = async () => {
+    const result = await onResetToDefaults();
+    if (result.error) {
+      setSaveMessage({ type: 'error', text: result.error });
+    } else {
+      setSaveMessage({ type: 'success', text: 'Configuración restablecida a valores por defecto' });
+    }
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
@@ -314,7 +326,49 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
           </div>
         </div>
       )}
-      
+
+      {/* Reset to Defaults Button - Only show when no changes and not in print tab */}
+      {!hasChanges && activeTab !== 'print' && (
+        <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+          {/* Save Message */}
+          {saveMessage && (
+            <div
+              className={`mb-3 p-2 rounded-lg text-xs ${
+                saveMessage.type === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {saveMessage.text}
+            </div>
+          )}
+
+          <button
+            onClick={handleResetToDefaults}
+            disabled={isSaving}
+            className="group w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: 'white',
+              borderColor: 'rgb(209, 213, 219)',
+              color: '#161616'
+            }}
+            onMouseEnter={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSaving) {
+                e.currentTarget.style.backgroundColor = 'white';
+              }
+            }}
+          >
+            <RotateCcw size={16} />
+            <span>Restablecer a Valores por Defecto</span>
+          </button>
+        </div>
+      )}
+
       {/* Print Actions Section - Only show in print tab */}
       {activeTab === 'print' && (
         <div className="border-t p-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>

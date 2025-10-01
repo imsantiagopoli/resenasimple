@@ -284,6 +284,7 @@ interface DataContextType {
   createDefaultVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   getOrCreateVotingConfig: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   resetVotingConfigChanges: () => void;
+  resetVotingConfigToDefaults: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   refetchVotingConfig: () => Promise<VotingConfiguration | null>;
   
   // QR config actions
@@ -292,6 +293,7 @@ interface DataContextType {
   createDefaultQRConfig: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   getOrCreateQRConfig: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   resetQRConfigChanges: () => void;
+  resetQRConfigToDefaults: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   refetchQRConfig: () => Promise<QRConfiguration | null>;
   generateQRURL: (branchSlug: string, qrConfig?: QRConfiguration) => string;
   
@@ -712,6 +714,53 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
+  // Reset QR configuration to default values
+  const resetQRConfigToDefaults = async (): Promise<{ data: QRConfiguration | null; error: string | null }> => {
+    if (!businessProfile?.id || !qrConfiguration?.id) {
+      return { data: null, error: 'No hay configuración para restablecer' };
+    }
+
+    try {
+      setQRConfigIsSaving(true);
+      setQRConfigError(null);
+
+      // Delete current configuration
+      const { error: deleteError } = await supabase
+        .from('qr_configuration')
+        .delete()
+        .eq('id', qrConfiguration.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Create new default configuration
+      const { data, error } = await supabase
+        .from('qr_configuration')
+        .insert([{ business_id: businessProfile.id }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const config = mapQRRecordToConfigUI(data);
+      setQRConfiguration(config);
+      setOriginalQRConfiguration(config);
+      setQRConfigHasChanges(false);
+
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error resetting QR config to defaults:', err);
+      const errorMessage = err.message || 'Error al restablecer la configuración';
+      setQRConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setQRConfigIsSaving(false);
+    }
+  };
+
   // Generate QR URL
   const generateQRURL = (branchSlug: string, qrConfig?: QRConfiguration): string => {
     // Always prioritize the passed config to ensure real-time updates
@@ -913,6 +962,53 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (originalVotingConfiguration) {
       setVotingConfiguration(originalVotingConfiguration);
       setConfigHasChanges(false);
+    }
+  };
+
+  // Reset voting configuration to default values
+  const resetVotingConfigToDefaults = async (): Promise<{ data: VotingConfiguration | null; error: string | null }> => {
+    if (!businessProfile?.id || !votingConfiguration?.id) {
+      return { data: null, error: 'No hay configuración para restablecer' };
+    }
+
+    try {
+      setConfigLoading(true);
+      setConfigError(null);
+
+      // Delete current configuration
+      const { error: deleteError } = await supabase
+        .from('voting_configuration')
+        .delete()
+        .eq('id', votingConfiguration.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Create new default configuration
+      const { data, error } = await supabase
+        .from('voting_configuration')
+        .insert([{ business_id: businessProfile.id }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const config = mapRecordToConfigUI(data);
+      setVotingConfiguration(config);
+      setOriginalVotingConfiguration(config);
+      setConfigHasChanges(false);
+
+      return { data: config, error: null };
+    } catch (err: any) {
+      console.error('Error resetting voting config to defaults:', err);
+      const errorMessage = err.message || 'Error al restablecer la configuración';
+      setConfigError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setConfigLoading(false);
     }
   };
 
@@ -1340,6 +1436,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     createDefaultVotingConfig,
     getOrCreateVotingConfig,
     resetVotingConfigChanges,
+    resetVotingConfigToDefaults,
     refetchVotingConfig: fetchVotingConfig,
     
     // QR config actions
@@ -1348,6 +1445,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     createDefaultQRConfig,
     getOrCreateQRConfig,
     resetQRConfigChanges,
+    resetQRConfigToDefaults,
     refetchQRConfig: fetchQRConfig,
     generateQRURL,
     
