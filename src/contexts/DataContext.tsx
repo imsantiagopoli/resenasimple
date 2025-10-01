@@ -117,8 +117,10 @@ export interface QRConfigurationRecord {
   call_to_action: string
   tipografia_principal: string
   color_tipografia_principal: string
+  tamano_tipografia_principal: number
   tipografia_secundaria: string
   color_tipografia_secundaria: string
+  tamano_tipografia_secundaria: number
   print_format: 'A4' | 'Letter' | 'Custom'
   print_orientation: 'portrait' | 'landscape'
   qrs_per_page: number
@@ -153,8 +155,10 @@ export interface QRConfiguration {
   typography: {
     primaryFont: string
     primaryColor: string
+    primaryFontSize: number
     secondaryFont: string
     secondaryColor: string
+    secondaryFontSize: number
   }
   print: {
     format: 'A4' | 'Letter' | 'Custom'
@@ -454,8 +458,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       typography: {
         primaryFont: record.tipografia_principal,
         primaryColor: record.color_tipografia_principal,
+        primaryFontSize: record.tamano_tipografia_principal || 24,
         secondaryFont: record.tipografia_secundaria,
-        secondaryColor: record.color_tipografia_secundaria
+        secondaryColor: record.color_tipografia_secundaria,
+        secondaryFontSize: record.tamano_tipografia_secundaria || 16
       },
       print: {
         format: record.print_format,
@@ -488,8 +494,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       call_to_action: config.content.callToAction,
       tipografia_principal: config.typography.primaryFont,
       color_tipografia_principal: config.typography.primaryColor,
+      tamano_tipografia_principal: config.typography.primaryFontSize,
       tipografia_secundaria: config.typography.secondaryFont,
       color_tipografia_secundaria: config.typography.secondaryColor,
+      tamano_tipografia_secundaria: config.typography.secondaryFontSize,
       print_format: config.print.format,
       print_orientation: config.print.orientation,
       qrs_per_page: config.print.qrsPerPage,
