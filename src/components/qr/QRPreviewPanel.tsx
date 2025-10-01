@@ -65,61 +65,115 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           <head>
             <title>Código QR - ${selectedBranch.name}</title>
             <style>
+              @page {
+                margin: 0;
+                size: auto;
+              }
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
               body {
-                font-family: Arial, sans-serif;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 min-height: 100vh;
                 margin: 0;
-                padding: 20px;
+                padding: 0;
+              }
+              .print-container {
                 text-align: center;
+                max-width: 28rem;
+                padding: 3rem 2rem;
+              }
+              .title {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 1rem;
+                font-family: ${config.typography.primaryFont}, sans-serif;
+                color: ${config.typography.primaryColor};
+              }
+              .subtitle {
+                font-size: 1.125rem;
+                margin-bottom: 2rem;
+                font-family: ${config.typography.secondaryFont}, sans-serif;
+                color: ${config.typography.secondaryColor};
+              }
+              .qr-wrapper {
+                display: inline-block;
+                margin-bottom: 1.5rem;
               }
               .qr-container {
-                border: ${config.design.showFrame ? `${config.design.frameThickness}px solid ${config.design.frameColor}` : 'none'};
-                padding: 20px;
-                border-radius: 8px;
-                background: white;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                background-color: ${config.qr.backgroundColor};
+                ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}
               }
-              h1 { color: #161616; margin-bottom: 10px; }
-              h2 { color: rgb(107, 114, 128); margin-bottom: 20px; font-weight: normal; }
-              .cta { color: #075E54; margin-top: 20px; font-weight: bold; }
+              .qr-container img {
+                display: block;
+                width: ${config.qr.size}px;
+                height: ${config.qr.size}px;
+              }
+              .cta {
+                font-size: 1.125rem;
+                font-weight: 600;
+                font-family: ${config.typography.primaryFont}, sans-serif;
+                color: ${config.typography.primaryColor};
+              }
               .instructions {
-                margin-top: 30px;
-                padding: 15px;
-                background: #f9fafb;
-                border-radius: 8px;
+                margin-top: 1.5rem;
+                padding: 1rem;
+                background: rgb(249, 250, 251);
+                border: 1px solid rgb(229, 231, 235);
+                border-radius: 0.5rem;
+                font-size: 0.75rem;
+                text-align: left;
                 color: rgb(107, 114, 128);
-                font-size: 14px;
-                max-width: 400px;
+              }
+              .instructions strong {
+                color: #161616;
+              }
+              .instructions ol {
+                margin-top: 0.5rem;
+                padding-left: 1rem;
+                list-style-type: decimal;
+              }
+              .instructions li {
+                margin-top: 0.25rem;
               }
             </style>
           </head>
           <body>
-            <div class="qr-container">
-              ${config.content.showTitle ? `<h1>${config.content.title}</h1>` : ''}
-              ${config.content.showSubtitle ? `<h2>${config.content.subtitle}</h2>` : ''}
-              <img src="${qrURL}" alt="Código QR" />
-              ${config.content.showCallToAction ? `<div class="cta">${config.content.callToAction}</div>` : ''}
-            </div>
-            ${config.print.includeInstructions ? `
-              <div class="instructions">
-                <strong>Instrucciones:</strong><br/>
-                1. Abre la cámara de tu teléfono<br/>
-                2. Apunta hacia el código QR<br/>
-                3. Toca la notificación que aparece<br/>
-                4. Comparte tu experiencia
+            <div class="print-container">
+              ${config.content.showTitle ? `<h1 class="title">${config.content.title}</h1>` : ''}
+              ${config.content.showSubtitle ? `<p class="subtitle">${config.content.subtitle}</p>` : ''}
+              <div class="qr-wrapper">
+                <div class="qr-container">
+                  <img src="${qrURL}" alt="Código QR" />
+                </div>
               </div>
-            ` : ''}
+              ${config.content.showCallToAction ? `<p class="cta">${config.content.callToAction}</p>` : ''}
+              ${config.print.includeInstructions ? `
+                <div class="instructions">
+                  <strong>Instrucciones:</strong>
+                  <ol>
+                    <li>Abre la cámara de tu teléfono</li>
+                    <li>Apunta hacia el código QR</li>
+                    <li>Toca la notificación que aparece</li>
+                    <li>Comparte tu experiencia</li>
+                  </ol>
+                </div>
+              ` : ''}
+            </div>
           </body>
         </html>
       `;
-      
+
       printWindow.document.open();
       printWindow.document.write(content);
       printWindow.document.close();
-      
+
       printWindow.onload = () => {
         printWindow.print();
       };

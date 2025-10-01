@@ -628,69 +628,60 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   if (activeTab === 'print') {
     return (
       <div className="p-6 space-y-8">
-        {/* Formato de Impresión */}
+        {/* Información de Impresión */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Formato de Impresión
+            Impresión de QR
           </h3>
-          
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                Tamaño de papel
-              </label>
-              
-              <div className="grid grid-cols-2 gap-2">
-                {['A4', 'Letter', 'Custom'].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => updatePrint({ format: size as 'A4' | 'Letter' | 'Custom' })}
-                    className={`p-3 text-sm font-medium rounded-md border-2 transition-colors ${
-                      config.print.format === size
-                        ? 'border-transparent text-white'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    style={{
-                      backgroundColor: config.print.format === size ? '#075E54' : 'transparent',
-                      color: config.print.format === size ? 'white' : '#161616'
-                    }}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                Orientación
-              </label>
-              
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { value: 'portrait', label: 'Vertical' },
-                  { value: 'landscape', label: 'Horizontal' }
-                ].map((orientation) => (
-                  <button
-                    key={orientation.value}
-                    onClick={() => updatePrint({ orientation: orientation.value as 'portrait' | 'landscape' })}
-                    className={`p-3 text-sm font-medium rounded-md border-2 transition-colors ${
-                      config.print.orientation === orientation.value
-                        ? 'border-transparent text-white'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    style={{
-                      backgroundColor: config.print.orientation === orientation.value ? '#075E54' : 'transparent',
-                      color: config.print.orientation === orientation.value ? 'white' : '#161616'
-                    }}
-                  >
-                    {orientation.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)', borderLeft: '4px solid #075E54' }}>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              El QR se imprimirá exactamente como se ve en la vista previa, manteniendo todas las proporciones, colores y diseños configurados.
+            </p>
           </div>
+        </div>
 
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+        {/* Acciones Rápidas */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Acciones Rápidas
+          </h3>
+          <div className="space-y-3">
+            <button
+              onClick={onPrint}
+              className="w-full px-4 py-3 rounded-lg font-medium text-white transition-all duration-200 flex items-center justify-center space-x-2"
+              style={{ backgroundColor: '#075E54' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#064e46';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#075E54';
+              }}
+            >
+              <Printer size={18} />
+              <span>Imprimir QR</span>
+            </button>
+            <button
+              onClick={onDownload}
+              className="w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 border-2"
+              style={{
+                borderColor: '#075E54',
+                color: '#075E54',
+                backgroundColor: 'white'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#075E54' + '10';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <FileText size={18} />
+              <span>Descargar como Imagen</span>
+            </button>
+          </div>
         </div>
       </div>
     );
