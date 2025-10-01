@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useData } from '../contexts/DataContext';
 import { createBusinessAndBranch } from '../lib/businessSetup';
 import {
   ArrowRight,
@@ -11,6 +12,7 @@ import {
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { businessProfile, businessLoading, refetchBusinessData } = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -18,6 +20,12 @@ const OnboardingPage: React.FC = () => {
     businessType: '',
     logo: null as File | null
   });
+
+  useEffect(() => {
+    if (!businessLoading && businessProfile) {
+      navigate('/app/inicio', { replace: true });
+    }
+  }, [businessProfile, businessLoading, navigate]);
 
   const businessTypes = [
     'Restaurante',
@@ -66,6 +74,7 @@ const OnboardingPage: React.FC = () => {
         formData.businessType
       );
 
+      await refetchBusinessData();
       navigate('/app/inicio');
     } catch (err: any) {
       console.error('Error creating business:', err);
@@ -74,6 +83,14 @@ const OnboardingPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (businessLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
