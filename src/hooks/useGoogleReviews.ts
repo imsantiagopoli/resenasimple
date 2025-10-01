@@ -96,7 +96,7 @@ export const useGoogleReviews = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No hay sesión activa');
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/google-reviews-sync`, {
+      const locationsResponse = await fetch(`${supabaseUrl}/functions/v1/google-locations-sync`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -108,8 +108,25 @@ export const useGoogleReviews = () => {
         })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+      if (!locationsResponse.ok) {
+        const errorData = await locationsResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al sincronizar ubicaciones');
+      }
+
+      const reviewsResponse = await fetch(`${supabaseUrl}/functions/v1/google-reviews-sync`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey
+        },
+        body: JSON.stringify({
+          user_id: user.id
+        })
+      });
+
+      if (!reviewsResponse.ok) {
+        const errorData = await reviewsResponse.json().catch(() => ({}));
         throw new Error(errorData.error || 'Error al sincronizar reseñas');
       }
 

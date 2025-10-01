@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { createBusinessAndBranch } from '../lib/businessSetup';
-import { supabase } from '../lib/supabase';
 import {
   ArrowRight,
   Building2,
@@ -27,61 +26,6 @@ const OnboardingPage: React.FC = () => {
       navigate('/app/inicio', { replace: true });
     }
   }, [businessProfile, businessLoading, navigate]);
-
-  useEffect(() => {
-    const saveGoogleTokens = async () => {
-      if (!user) return;
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        const isGoogleUser = user.app_metadata?.provider === 'google';
-        const providerToken = session.provider_token;
-        const providerRefreshToken = session.provider_refresh_token;
-
-        if (isGoogleUser && providerToken) {
-          const { data: businessData } = await supabase
-            .from('business_profiles')
-            .select('id')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (businessData) {
-            const { data: existingTokens } = await supabase
-              .from('google_oauth_tokens')
-              .select('id')
-              .eq('business_id', businessData.id)
-              .maybeSingle();
-
-            if (!existingTokens) {
-              const expiresAt = new Date();
-              expiresAt.setHours(expiresAt.getHours() + 1);
-
-              const { error } = await supabase
-                .from('google_oauth_tokens')
-                .insert({
-                  user_id: user.id,
-                  business_id: businessData.id,
-                  access_token: providerToken,
-                  refresh_token: providerRefreshToken || null,
-                  token_expiry: expiresAt.toISOString(),
-                  scope: 'https://www.googleapis.com/auth/business.manage https://www.googleapis.com/auth/userinfo.email'
-                });
-
-              if (error) {
-                console.error('Error saving Google OAuth tokens:', error);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error in saveGoogleTokens:', error);
-      }
-    };
-
-    saveGoogleTokens();
-  }, [user]);
 
   const businessTypes = [
     'Restaurante',

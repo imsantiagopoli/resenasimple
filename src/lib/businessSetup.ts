@@ -31,6 +31,38 @@ export const createBusinessAndBranch = async (
       throw businessError;
     }
 
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (session && user && user.app_metadata?.provider === 'google') {
+      const providerToken = session.provider_token;
+      const providerRefreshToken = session.provider_refresh_token;
+
+      if (providerToken) {
+        const { data: existingTokens } = await supabase
+          .from('google_oauth_tokens')
+          .select('id')
+          .eq('business_id', businessData.id)
+          .maybeSingle();
+
+        if (!existingTokens) {
+          const expiresAt = new Date();
+          expiresAt.setHours(expiresAt.getHours() + 1);
+
+          await supabase
+            .from('google_oauth_tokens')
+            .insert({
+              user_id: userId,
+              business_id: businessData.id,
+              access_token: providerToken,
+              refresh_token: providerRefreshToken || null,
+              token_expiry: expiresAt.toISOString(),
+              scope: 'https://www.googleapis.com/auth/business.manage https://www.googleapis.com/auth/userinfo.email'
+            });
+        }
+      }
+    }
+
     const branchName = `${restaurantName}`;
     const branchSlug = generateSlug(restaurantName) + '-' + Date.now().toString().slice(-6);
 

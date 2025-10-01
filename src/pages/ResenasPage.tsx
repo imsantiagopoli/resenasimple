@@ -385,7 +385,7 @@ const ResenasPage: React.FC = () => {
             }}
           >
             <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-            <span>{syncing ? 'Sincronizando...' : 'Sincronizar'}</span>
+            <span>{syncing ? 'Sincronizando ubicaciones y reseñas...' : 'Sincronizar Reseñas'}</span>
           </button>
         </div>
 
@@ -595,11 +595,23 @@ const ResenasPage: React.FC = () => {
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              Aún no hay reseñas de Google
+              Aún no hay reseñas sincronizadas
             </h3>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Conecta tu cuenta de Google My Business para ver y gestionar tus reseñas.
+            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
+              Haz clic en "Sincronizar Reseñas" para cargar tus ubicaciones y reseñas desde Google My Business.
             </p>
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="inline-flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white'
+              }}
+            >
+              <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+              <span>{syncing ? 'Sincronizando...' : 'Sincronizar Ahora'}</span>
+            </button>
           </div>
         )}
       </div>
