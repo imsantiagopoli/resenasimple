@@ -494,7 +494,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
       {!hasChanges && (
         <>
           <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-          <div className="space-y-4">
+          <div className="space-y-2">
             <button
               onClick={onResetToDefaults}
               className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
