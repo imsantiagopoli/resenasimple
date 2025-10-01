@@ -1037,15 +1037,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         .from('business_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
 
       if (profile) {
         setBusinessProfile(profile);
-
+        
         // Fetch branches
         const { data: branches, error: branchesError } = await supabase
           .from('business_branches')
@@ -1346,16 +1346,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       fetchBusinessData();
     }
   }, [user, businessLoaded]);
-
-  useEffect(() => {
-    const handleBusinessProfileCreated = () => {
-      console.log('Business profile created event received, reloading data...')
-      setBusinessLoaded(false)
-    }
-
-    window.addEventListener('businessProfileCreated', handleBusinessProfileCreated)
-    return () => window.removeEventListener('businessProfileCreated', handleBusinessProfileCreated)
-  }, []);
 
   useEffect(() => {
     if (businessProfile && businessBranches.length > 0 && !sessionsLoaded) {

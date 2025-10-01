@@ -33,132 +33,9 @@ export const useAuth = () => {
     loading: true
   })
 
-  const ensureBusinessProfile = async (user: AuthUser): Promise<boolean> => {
-    try {
-      const { data: existingBusiness } = await supabase
-        .from('business_profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!existingBusiness) {
-        console.log('Creating new business profile for user:', user.id);
-        const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Mi Negocio'
-        const restaurantName = `${userName}`
-
-        const { data: businessData, error: businessError } = await supabase
-          .from('business_profiles')
-          .insert([
-            {
-              user_id: user.id,
-              name: restaurantName,
-              description: 'Auténtico restaurante con los mejores sabores.',
-            }
-          ])
-          .select()
-          .single()
-
-        if (businessError) {
-          console.error('Error creating business profile:', businessError)
-          return
-        }
-
-        const branchName = restaurantName
-        const branchSlug = generateSlugSync(restaurantName) + '-' + Date.now().toString().slice(-6)
-
-        const { data: branchData, error: branchError } = await supabase
-          .from('business_branches')
-          .insert([
-            {
-              business_id: businessData.id,
-              name: branchName,
-              slug: branchSlug,
-              is_main: true,
-              address: '',
-              phone: '',
-              google_maps_link: ''
-            }
-          ])
-          .select()
-          .single()
-
-        if (branchError) {
-          console.error('Error creating main branch:', branchError)
-          return
-        }
-
-        const { error: configError } = await supabase
-          .from('voting_configs')
-          .insert([
-            {
-              branch_id: branchData.id,
-              threshold: 4,
-              config_json: {
-                design: {
-                  message: {
-                    headline: 'Queremos tu opinión. Tu experiencia nos ayuda a mejorar.',
-                    body: 'Tómate un momento para compartir tu experiencia con nosotros.'
-                  },
-                  showLogo: true,
-                  starLabels: {
-                    enabled: true,
-                    labels: {
-                      1: 'Muy malo',
-                      2: 'Regular',
-                      3: 'Aceptable',
-                      4: 'Bueno',
-                      5: 'Excelente'
-                    }
-                  }
-                },
-                logic: {
-                  threshold: 4,
-                  publicWorkflow: {
-                    thankYouMessage: 'Gracias por tu tiempo. Tu opinión nos ayuda a mejorar.',
-                    buttonText: 'Califícanos en Google'
-                  },
-                  privateWorkflow: {
-                    feedbackMessage: 'Tu opinión es muy valiosa. Por favor, contanos cómo podemos mejorar.',
-                    thankYouMessage: 'Gracias por tu sinceridad. Tu aporte nos ayuda a crecer.',
-                    collectEmail: true,
-                    emailRequired: false,
-                    collectName: false,
-                    nameRequired: false,
-                    collectPhone: false,
-                    phoneRequired: false
-                  }
-                }
-              }
-            }
-          ])
-
-        if (configError) {
-          console.error('Error creating voting config:', configError)
-        }
-
-        console.log('Business profile created successfully')
-
-        window.dispatchEvent(new CustomEvent('businessProfileCreated'))
-
-        return true
-      }
-
-      return false
-    } catch (error) {
-      console.error('Error ensuring business profile:', error)
-      return false
-    }
-  }
-
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const wasCreated = await ensureBusinessProfile(session.user)
-        if (wasCreated) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthState({
         user: session?.user || null,
         session: session || null,
@@ -170,12 +47,6 @@ export const useAuth = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user && event === 'SIGNED_IN') {
-        const wasCreated = await ensureBusinessProfile(session.user)
-        if (wasCreated) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-      }
       setAuthState({
         user: session?.user || null,
         session: session || null,
