@@ -80,10 +80,24 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const handlePrint = async () => {
     const qrURL = generateQRURL(selectedBranch.slug, config);
 
+    console.log('=== HANDLE PRINT DEBUG ===');
+    console.log('config.design:', config.design);
+    console.log('config.design.showLogo:', config.design.showLogo);
+    console.log('businessProfile:', businessProfile);
+    console.log('businessProfile?.logo_url:', businessProfile?.logo_url);
+    console.log('Condition check:', config.design.showLogo && businessProfile?.logo_url);
+
     // Convert images to base64 if they exist
     let logoBase64 = '';
     if (config.design.showLogo && businessProfile?.logo_url) {
+      console.log('Converting logo to base64...');
       logoBase64 = await getImageAsBase64(businessProfile.logo_url);
+      console.log('Logo base64 length:', logoBase64.length);
+      console.log('Logo base64 preview:', logoBase64.substring(0, 50));
+    } else {
+      console.log('Logo NOT included because:');
+      console.log('  - showLogo:', config.design.showLogo);
+      console.log('  - has logo_url:', !!businessProfile?.logo_url);
     }
 
     // Create temporary container
