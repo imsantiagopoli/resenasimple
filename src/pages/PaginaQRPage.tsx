@@ -100,6 +100,7 @@ const PaginaQRPage: React.FC = () => {
   };
 
   const handlePrint = async () => {
+    const selectedBranch = branches.find(b => b.id === selectedBranchId);
     if (!selectedBranch || !config) return;
 
     const qrURL = generateQRURL(selectedBranch.slug, config);
