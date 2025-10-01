@@ -114,7 +114,7 @@ Deno.serve(async (req: Request) => {
         scope: tokens.scope,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: "business_id"
+        onConflict: "user_id,business_id"
       });
 
     if (upsertError) {
