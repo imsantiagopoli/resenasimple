@@ -29,6 +29,23 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
     checkConnection();
   }, [user]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+        checkConnection();
+        showMessage('success', 'Cuenta de Google My Business conectada exitosamente');
+        syncLocations();
+      } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
+        showMessage('error', event.data.error || 'Error al conectar con Google My Business');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const checkConnection = async () => {
     if (!user) return;
 
@@ -79,7 +96,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
     try {
       setConnecting(true);
 
-      const redirectUri = `${window.location.origin}/app/mi-negocio`;
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -104,18 +121,7 @@ const GoogleMyBusinessSection: React.FC<GoogleMyBusinessSectionProps> = ({ showM
       }
 
       const { auth_url } = await response.json();
-      window.open(auth_url, '_blank', 'width=600,height=700');
-
-      const checkInterval = setInterval(async () => {
-        const connected = await checkConnection();
-        if (connected) {
-          clearInterval(checkInterval);
-          showMessage('success', 'Cuenta de Google My Business conectada exitosamente');
-          await syncLocations();
-        }
-      }, 3000);
-
-      setTimeout(() => clearInterval(checkInterval), 300000);
+      window.open(auth_url, 'google-oauth', 'width=600,height=700');
 
     } catch (error: any) {
       console.error('Error connecting to Google:', error);
