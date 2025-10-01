@@ -591,14 +591,14 @@ const ResenasPage: React.FC = () => {
           </div>
         )}
 
-        {reviews.length === 0 && !syncing && (
+        {reviews.length === 0 && !syncing && !error && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              No hay reseñas disponibles
+              No hay reseñas sincronizadas
             </h3>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Parece que tu cuenta de Google My Business aún no tiene reseñas, o están configuradas como privadas.
+            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
+              Conecta tu cuenta de Google My Business en "Mi Negocio" y luego haz clic en "Sincronizar Reseñas" arriba.
             </p>
           </div>
         )}
@@ -612,6 +612,30 @@ const ResenasPage: React.FC = () => {
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Estamos cargando tus ubicaciones y reseñas desde Google My Business.
             </p>
+          </div>
+        )}
+
+        {reviews.length === 0 && error && !syncing && (
+          <div className="text-center py-12">
+            <AlertCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(239, 68, 68)' }} />
+            <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
+              {error.includes('No Google OAuth token found') ? 'Conecta tu cuenta primero' : 'Error al sincronizar'}
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
+              {error.includes('No Google OAuth token found')
+                ? 'Necesitas conectar tu cuenta de Google My Business antes de sincronizar reseñas.'
+                : error}
+            </p>
+            <button
+              onClick={() => window.location.href = '/app/mi-negocio'}
+              className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              style={{
+                backgroundColor: '#075E54',
+                color: 'white'
+              }}
+            >
+              <span>Ir a Mi Negocio</span>
+            </button>
           </div>
         )}
       </div>

@@ -33,7 +33,6 @@ export const useGoogleReviews = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [hasAutoSynced, setHasAutoSynced] = useState(false);
 
   const fetchReviews = async () => {
     if (!user) return;
@@ -236,27 +235,6 @@ export const useGoogleReviews = () => {
   useEffect(() => {
     fetchReviews();
   }, [user]);
-
-  useEffect(() => {
-    const autoSync = async () => {
-      if (!user || hasAutoSynced || loading || syncing || reviews.length > 0) return;
-
-      const { data: tokenData } = await supabase
-        .from('google_oauth_tokens')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (tokenData) {
-        setHasAutoSynced(true);
-        await syncReviews();
-      }
-    };
-
-    if (!loading) {
-      autoSync();
-    }
-  }, [user, loading, reviews.length, hasAutoSynced]);
 
   const statistics = getStatistics();
 
