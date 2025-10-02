@@ -310,7 +310,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
             color: getContrastColor(config.colors.buttonColor)
           }}
         >
-          Enviar Comentarios
+          {config.logic.privateWorkflow.buttonText}
         </button>
         
         {/* Prompt Preventivo */}

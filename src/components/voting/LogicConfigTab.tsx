@@ -229,6 +229,25 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
               }}
             />
           </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Texto del botón
+            </label>
+            <input
+              type="text"
+              value={config.logic.privateWorkflow.buttonText}
+              onChange={(e) => updateLogic({
+                privateWorkflow: { ...config.logic.privateWorkflow, buttonText: e.target.value }
+              })}
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            />
+          </div>
         </div>
       </div>
 

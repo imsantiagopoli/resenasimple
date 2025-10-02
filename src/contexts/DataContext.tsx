@@ -231,6 +231,7 @@ export interface VotingConfiguration {
       title: string
       feedbackMessage: string
       thankYouMessage: string
+      buttonText: string
       collectName: boolean
       nameRequired: boolean
       collectPhone: boolean
@@ -429,6 +430,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           title: record.titulo_feedback_privado || 'Tu Opinión es Valiosa',
           feedbackMessage: record.mensaje_feedback_privado,
           thankYouMessage: record.mensaje_agradecimiento_privado,
+          buttonText: record.texto_boton_privado || 'Enviar comentarios',
           collectName: record.solicitar_nombre,
           nameRequired: record.nombre_requerido,
           collectPhone: record.solicitar_telefono,
@@ -563,6 +565,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       titulo_feedback_privado: config.logic.privateWorkflow.title,
       mensaje_feedback_privado: config.logic.privateWorkflow.feedbackMessage,
       mensaje_agradecimiento_privado: config.logic.privateWorkflow.thankYouMessage,
+      texto_boton_privado: config.logic.privateWorkflow.buttonText,
       solicitar_nombre: config.logic.privateWorkflow.collectName,
       nombre_requerido: config.logic.privateWorkflow.nameRequired,
       solicitar_telefono: config.logic.privateWorkflow.collectPhone,

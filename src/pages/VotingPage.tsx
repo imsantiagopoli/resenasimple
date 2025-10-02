@@ -168,6 +168,7 @@ const VotingPage: React.FC = () => {
               title: configData.titulo_feedback_privado || 'Tu Opinión es Valiosa',
               feedbackMessage: configData.mensaje_feedback_privado,
               thankYouMessage: configData.mensaje_agradecimiento_privado,
+              buttonText: configData.texto_boton_privado || 'Enviar comentarios',
               collectName: configData.solicitar_nombre,
               nameRequired: configData.nombre_requerido,
               collectPhone: configData.solicitar_telefono,
@@ -712,7 +713,7 @@ const VotingPage: React.FC = () => {
                   color: getContrastColor(config.colors.buttonColor)
                 }}
               >
-                {isSubmitting ? 'Enviando...' : 'Enviar Comentarios'}
+                {isSubmitting ? 'Enviando...' : config.logic.privateWorkflow.buttonText}
               </button>
             </form>
           </div>
