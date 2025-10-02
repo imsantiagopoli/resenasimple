@@ -160,6 +160,7 @@ const VotingPage: React.FC = () => {
             threshold: configData.umbral_estrellas,
             smartAutoRedirect: configData.redireccion_automatica,
             publicWorkflow: {
+              title: configData.titulo_agradecimiento_publico || '¡Gracias por tu Calificación!',
               thankYouMessage: configData.mensaje_agradecimiento_publico,
               buttonText: configData.texto_boton_publico
             },
@@ -740,14 +741,14 @@ const VotingPage: React.FC = () => {
             ))}
           </div>
           
-          <h2 
-            className="text-2xl font-bold" 
-            style={{ 
+          <h2
+            className="text-2xl font-bold"
+            style={{
               color: '#161616',
               fontFamily: config.typography.primaryFont
             }}
           >
-            ¡Gracias por tu Calificación!
+            {config.logic.publicWorkflow.title}
           </h2>
           
           <p 

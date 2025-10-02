@@ -223,6 +223,7 @@ export interface VotingConfiguration {
     threshold: number
     smartAutoRedirect: boolean
     publicWorkflow: {
+      title: string
       thankYouMessage: string
       buttonText: string
     }
@@ -419,6 +420,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         threshold: record.umbral_estrellas,
         smartAutoRedirect: record.redireccion_automatica,
         publicWorkflow: {
+          title: record.titulo_agradecimiento_publico || '¡Gracias por tu Calificación!',
           thankYouMessage: record.mensaje_agradecimiento_publico,
           buttonText: record.texto_boton_publico
         },
@@ -553,6 +555,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       mostrar_website: config.design.socials.website,
       umbral_estrellas: config.logic.threshold,
       redireccion_automatica: config.logic.smartAutoRedirect,
+      titulo_agradecimiento_publico: config.logic.publicWorkflow.title,
       mensaje_agradecimiento_publico: config.logic.publicWorkflow.thankYouMessage,
       texto_boton_publico: config.logic.publicWorkflow.buttonText,
       mensaje_feedback_privado: config.logic.privateWorkflow.feedbackMessage,
