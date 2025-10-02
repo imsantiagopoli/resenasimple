@@ -94,7 +94,7 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
       {/* Flujo de Feedback Público */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-          Flujo de Feedback Público
+          Solicitud de Reseña Pública
         </h3>
         <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
           Para clientes que califican por encima del umbral
