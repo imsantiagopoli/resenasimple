@@ -230,8 +230,9 @@ export interface VotingConfiguration {
     privateWorkflow: {
       title: string
       feedbackMessage: string
-      thankYouMessage: string
       buttonText: string
+      thankYouTitle: string
+      thankYouMessage: string
       collectName: boolean
       nameRequired: boolean
       collectPhone: boolean
@@ -429,8 +430,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         privateWorkflow: {
           title: record.titulo_feedback_privado || 'Tu Opinión es Valiosa',
           feedbackMessage: record.mensaje_feedback_privado,
-          thankYouMessage: record.mensaje_agradecimiento_privado,
           buttonText: record.texto_boton_privado || 'Enviar comentarios',
+          thankYouTitle: record.titulo_agradecimiento_privado || '¡Gracias por tu Feedback!',
+          thankYouMessage: record.mensaje_agradecimiento_privado,
           collectName: record.solicitar_nombre,
           nameRequired: record.nombre_requerido,
           collectPhone: record.solicitar_telefono,
@@ -564,8 +566,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       texto_boton_publico: config.logic.publicWorkflow.buttonText,
       titulo_feedback_privado: config.logic.privateWorkflow.title,
       mensaje_feedback_privado: config.logic.privateWorkflow.feedbackMessage,
-      mensaje_agradecimiento_privado: config.logic.privateWorkflow.thankYouMessage,
       texto_boton_privado: config.logic.privateWorkflow.buttonText,
+      titulo_agradecimiento_privado: config.logic.privateWorkflow.thankYouTitle,
+      mensaje_agradecimiento_privado: config.logic.privateWorkflow.thankYouMessage,
       solicitar_nombre: config.logic.privateWorkflow.collectName,
       nombre_requerido: config.logic.privateWorkflow.nameRequired,
       solicitar_telefono: config.logic.privateWorkflow.collectPhone,

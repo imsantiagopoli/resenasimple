@@ -213,25 +213,6 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
 
           <div className="space-y-2">
             <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Mensaje de agradecimiento
-            </label>
-            <textarea
-              value={config.logic.privateWorkflow.thankYouMessage}
-              onChange={(e) => updateLogic({
-                privateWorkflow: { ...config.logic.privateWorkflow, thankYouMessage: e.target.value }
-              })}
-              rows={2}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: 'white'
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
               Texto del botón
             </label>
             <input
@@ -428,6 +409,59 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
                 </label>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Separador */}
+      <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+      {/* Mensaje de Agradecimiento Final */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+          Mensaje de Agradecimiento Final
+        </h3>
+        <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+          Mensaje mostrado después de enviar feedback privado
+        </p>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Título de agradecimiento
+            </label>
+            <input
+              type="text"
+              value={config.logic.privateWorkflow.thankYouTitle}
+              onChange={(e) => updateLogic({
+                privateWorkflow: { ...config.logic.privateWorkflow, thankYouTitle: e.target.value }
+              })}
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Mensaje de agradecimiento
+            </label>
+            <textarea
+              value={config.logic.privateWorkflow.thankYouMessage}
+              onChange={(e) => updateLogic({
+                privateWorkflow: { ...config.logic.privateWorkflow, thankYouMessage: e.target.value }
+              })}
+              rows={2}
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            />
           </div>
         </div>
       </div>

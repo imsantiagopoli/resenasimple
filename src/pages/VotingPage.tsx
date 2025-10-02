@@ -167,8 +167,9 @@ const VotingPage: React.FC = () => {
             privateWorkflow: {
               title: configData.titulo_feedback_privado || 'Tu Opinión es Valiosa',
               feedbackMessage: configData.mensaje_feedback_privado,
-              thankYouMessage: configData.mensaje_agradecimiento_privado,
               buttonText: configData.texto_boton_privado || 'Enviar comentarios',
+              thankYouTitle: configData.titulo_agradecimiento_privado || '¡Gracias por tu Feedback!',
+              thankYouMessage: configData.mensaje_agradecimiento_privado,
               collectName: configData.solicitar_nombre,
               nameRequired: configData.nombre_requerido,
               collectPhone: configData.solicitar_telefono,
@@ -786,14 +787,14 @@ const VotingPage: React.FC = () => {
         <div className="max-w-md mx-auto w-full text-center space-y-6">
           {renderLogo()}
           
-          <h2 
-            className="text-2xl font-bold" 
-            style={{ 
+          <h2
+            className="text-2xl font-bold"
+            style={{
               color: '#161616',
               fontFamily: config.typography.primaryFont
             }}
           >
-            Comentarios Recibidos
+            {config.logic.privateWorkflow.thankYouTitle}
           </h2>
           
           <p 
