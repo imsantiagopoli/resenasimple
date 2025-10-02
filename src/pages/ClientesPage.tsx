@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Search, CreditCard as Edit2, Trash2, Upload, Download, Filter, X } from 'lucide-react';
+import { Users, Plus, Search, Edit2, Trash2, Upload, Download, Filter, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import AddEditCustomerModal from '../components/customers/AddEditCustomerModal';
@@ -224,27 +224,6 @@ const ClientesPage: React.FC = () => {
             <Plus size={16} />
             <span>Agregar Cliente</span>
           </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#075E54' + '20' }}
-            >
-              <Users size={20} style={{ color: '#075E54' }} />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-              {customers.length}
-            </p>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Total de Clientes
-            </p>
-          </div>
         </div>
       </div>
 
