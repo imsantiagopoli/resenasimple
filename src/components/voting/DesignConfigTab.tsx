@@ -112,37 +112,6 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
               }}
             />
           </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Color del Texto (Cuerpo)
-            </label>
-            <div className="flex items-center space-x-3">
-              <input
-                type="color"
-                value={config.design.message.bodyTextColor}
-                onChange={(e) => updateDesign({
-                  message: { ...config.design.message, bodyTextColor: e.target.value }
-                })}
-                className="w-12 h-10 rounded-lg border cursor-pointer"
-                style={{ borderColor: 'rgb(209, 213, 219)' }}
-              />
-              <input
-                type="text"
-                value={config.design.message.bodyTextColor}
-                onChange={(e) => updateDesign({
-                  message: { ...config.design.message, bodyTextColor: e.target.value }
-                })}
-                className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
-                style={{
-                  borderColor: 'rgb(209, 213, 219)',
-                  color: '#161616',
-                  backgroundColor: 'white'
-                }}
-                placeholder="#6b7280"
-              />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -475,7 +444,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
 
             <div className="space-y-2">
               <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                Color de Marca
+                Color
               </label>
               <div className="flex items-center space-x-3">
                 <input
@@ -503,39 +472,8 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
                 />
               </div>
               <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                Color del borde y fondo con transparencia
+                Se aplica al texto, borde y fondo con transparencia
               </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                Color del Texto
-              </label>
-              <div className="flex items-center space-x-3">
-                <input
-                  type="color"
-                  value={config.design.specialOffer.textColor}
-                  onChange={(e) => updateDesign({
-                    specialOffer: { ...config.design.specialOffer, textColor: e.target.value }
-                  })}
-                  className="w-12 h-10 rounded-lg border cursor-pointer"
-                  style={{ borderColor: 'rgb(209, 213, 219)' }}
-                />
-                <input
-                  type="text"
-                  value={config.design.specialOffer.textColor}
-                  onChange={(e) => updateDesign({
-                    specialOffer: { ...config.design.specialOffer, textColor: e.target.value }
-                  })}
-                  className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
-                  style={{
-                    borderColor: 'rgb(209, 213, 219)',
-                    color: '#161616',
-                    backgroundColor: 'white'
-                  }}
-                  placeholder="#6b7280"
-                />
-              </div>
             </div>
           </div>
         )}

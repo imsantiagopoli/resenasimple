@@ -499,7 +499,7 @@ const VotingPage: React.FC = () => {
               <p
                 className="text-base leading-relaxed"
                 style={{
-                  color: config.design.message.bodyTextColor,
+                  color: 'rgb(107, 114, 128)',
                   fontFamily: config.typography.secondaryFont
                 }}
               >
@@ -564,7 +564,7 @@ const VotingPage: React.FC = () => {
                 <h3 className="font-bold mb-2" style={{ color: config.design.specialOffer.color }}>
                   {config.design.specialOffer.headline}
                 </h3>
-                <p className="text-sm" style={{ color: config.design.specialOffer.textColor }}>
+                <p className="text-sm" style={{ color: config.design.specialOffer.color }}>
                   {config.design.specialOffer.body}
                 </p>
               </div>
