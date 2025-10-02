@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  Plus,
-  Search,
-  Edit2,
-  Trash2,
-  Upload,
-  Download,
-  Filter,
-  X
-} from 'lucide-react';
+import { Users, Plus, Search, CreditCard as Edit2, Trash2, Upload, Download, Filter, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import AddEditCustomerModal from '../components/customers/AddEditCustomerModal';
