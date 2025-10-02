@@ -181,6 +181,7 @@ export interface VotingConfiguration {
     message: {
       headline: string
       body: string
+      bodyTextColor: string
     }
     showLogo: boolean
     logoShape: 'circular' | 'square'
@@ -199,6 +200,8 @@ export interface VotingConfiguration {
       enabled: boolean
       headline: string
       body: string
+      color: string
+      textColor: string
     }
     socials: {
       instagram: boolean
@@ -373,7 +376,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       design: {
         message: {
           headline: record.encabezado,
-          body: record.cuerpo
+          body: record.cuerpo,
+          bodyTextColor: record.color_texto_body || '#6b7280'
         },
         showLogo: record.mostrar_logo,
         logoShape: record.forma_logo,
@@ -391,7 +395,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         specialOffer: {
           enabled: record.oferta_especial_activa,
           headline: record.oferta_especial_titulo,
-          body: record.oferta_especial_descripcion
+          body: record.oferta_especial_descripcion,
+          color: record.oferta_especial_color || '#075E54',
+          textColor: record.color_texto_oferta || '#6b7280'
         },
         socials: {
           instagram: record.mostrar_instagram,
@@ -521,6 +527,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       business_id: config.business_id,
       encabezado: config.design.message.headline,
       cuerpo: config.design.message.body,
+      color_texto_body: config.design.message.bodyTextColor,
       mostrar_logo: config.design.showLogo,
       forma_logo: config.design.logoShape,
       mostrar_logo_en: config.design.logoDisplayPages,
@@ -536,6 +543,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       oferta_especial_activa: config.design.specialOffer.enabled,
       oferta_especial_titulo: config.design.specialOffer.headline,
       oferta_especial_descripcion: config.design.specialOffer.body,
+      oferta_especial_color: config.design.specialOffer.color,
+      color_texto_oferta: config.design.specialOffer.textColor,
       mostrar_instagram: config.design.socials.instagram,
       mostrar_tiktok: config.design.socials.tiktok,
       mostrar_linkedin: config.design.socials.linkedin,

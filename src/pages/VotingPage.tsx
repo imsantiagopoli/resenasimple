@@ -117,7 +117,8 @@ const VotingPage: React.FC = () => {
           design: {
             message: {
               headline: configData.encabezado,
-              body: configData.cuerpo
+              body: configData.cuerpo,
+              bodyTextColor: configData.color_texto_body || '#6b7280'
             },
             showLogo: configData.mostrar_logo,
             logoShape: configData.forma_logo,
@@ -135,7 +136,9 @@ const VotingPage: React.FC = () => {
             specialOffer: {
               enabled: configData.oferta_especial_activa,
               headline: configData.oferta_especial_titulo,
-              body: configData.oferta_especial_descripcion
+              body: configData.oferta_especial_descripcion,
+              color: configData.oferta_especial_color || '#075E54',
+              textColor: configData.color_texto_oferta || '#6b7280'
             },
             socials: {
               instagram: configData.mostrar_instagram,
@@ -493,10 +496,10 @@ const VotingPage: React.FC = () => {
               >
                 {config.design.message.headline}
               </h1>
-              <p 
-                className="text-base leading-relaxed" 
-                style={{ 
-                  color: 'rgb(107, 114, 128)',
+              <p
+                className="text-base leading-relaxed"
+                style={{
+                  color: config.design.message.bodyTextColor,
                   fontFamily: config.typography.secondaryFont
                 }}
               >
@@ -551,17 +554,17 @@ const VotingPage: React.FC = () => {
 
             {/* Special Offer */}
             {config.design.specialOffer.enabled && (
-              <div 
+              <div
                 className="p-6 rounded-lg border text-center mb-6"
-                style={{ 
-                  backgroundColor: '#075E54' + '08',
-                  borderColor: '#075E54' + '30'
+                style={{
+                  backgroundColor: config.design.specialOffer.color + '08',
+                  borderColor: config.design.specialOffer.color + '30'
                 }}
               >
-                <h3 className="font-bold mb-2" style={{ color: '#075E54' }}>
+                <h3 className="font-bold mb-2" style={{ color: config.design.specialOffer.color }}>
                   {config.design.specialOffer.headline}
                 </h3>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                <p className="text-sm" style={{ color: config.design.specialOffer.textColor }}>
                   {config.design.specialOffer.body}
                 </p>
               </div>
