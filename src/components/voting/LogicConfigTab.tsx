@@ -235,52 +235,6 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
       {/* Separador */}
       <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
-      {/* Prompt Preventivo */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-          Prompt Preventivo
-        </h3>
-        
-        <label className="flex items-center space-x-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={config.logic.prompt.enabled}
-            onChange={(e) => updateLogic({
-              prompt: { ...config.logic.prompt, enabled: e.target.checked }
-            })}
-            className="rounded border-gray-300 focus:ring-2"
-            style={{ accentColor: '#075E54' }}
-          />
-          <span className="text-sm font-medium" style={{ color: '#161616' }}>
-            Mostrar mensaje especial para reseñas neutrales o negativas
-          </span>
-        </label>
-
-        {config.logic.prompt.enabled && (
-          <div className="space-y-2 ml-6">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Texto del prompt
-            </label>
-            <textarea
-              value={config.logic.prompt.text}
-              onChange={(e) => updateLogic({
-                prompt: { ...config.logic.prompt, text: e.target.value }
-              })}
-              rows={3}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: 'white'
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Separador */}
-      <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
-
       {/* Campos de Feedback Privado */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
@@ -411,6 +365,52 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
             )}
           </div>
         </div>
+      </div>
+
+      {/* Separador */}
+      <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+      {/* Prompt Preventivo */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+          Prompt Preventivo
+        </h3>
+
+        <label className="flex items-center space-x-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={config.logic.prompt.enabled}
+            onChange={(e) => updateLogic({
+              prompt: { ...config.logic.prompt, enabled: e.target.checked }
+            })}
+            className="rounded border-gray-300 focus:ring-2"
+            style={{ accentColor: '#075E54' }}
+          />
+          <span className="text-sm font-medium" style={{ color: '#161616' }}>
+            Mostrar mensaje especial para reseñas neutrales o negativas
+          </span>
+        </label>
+
+        {config.logic.prompt.enabled && (
+          <div className="space-y-2 ml-6">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Texto del prompt
+            </label>
+            <textarea
+              value={config.logic.prompt.text}
+              onChange={(e) => updateLogic({
+                prompt: { ...config.logic.prompt, text: e.target.value }
+              })}
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Separador */}
