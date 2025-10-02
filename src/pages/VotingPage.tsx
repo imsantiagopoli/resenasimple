@@ -165,6 +165,7 @@ const VotingPage: React.FC = () => {
               buttonText: configData.texto_boton_publico
             },
             privateWorkflow: {
+              title: configData.titulo_feedback_privado || 'Tu Opinión es Valiosa',
               feedbackMessage: configData.mensaje_feedback_privado,
               thankYouMessage: configData.mensaje_agradecimiento_privado,
               collectName: configData.solicitar_nombre,
@@ -586,14 +587,14 @@ const VotingPage: React.FC = () => {
           {renderLogo()}
           
           <div className="text-center space-y-6">
-            <h2 
-              className="text-2xl font-bold" 
-              style={{ 
+            <h2
+              className="text-2xl font-bold"
+              style={{
                 color: '#161616',
                 fontFamily: config.typography.primaryFont
               }}
             >
-              Tu Opinión es Valiosa
+              {config.logic.privateWorkflow.title}
             </h2>
             
             <p 

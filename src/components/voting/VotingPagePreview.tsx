@@ -226,14 +226,14 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
           </div>
         )}
         
-        <h2 
-          className="text-2xl font-bold" 
-          style={{ 
+        <h2
+          className="text-2xl font-bold"
+          style={{
             color: '#161616',
             fontFamily: config.typography.primaryFont
           }}
         >
-          Tu Opinión es Valiosa
+          {config.logic.privateWorkflow.title}
         </h2>
         
         <p 

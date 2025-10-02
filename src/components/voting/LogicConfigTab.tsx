@@ -175,6 +175,25 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+              Título
+            </label>
+            <input
+              type="text"
+              value={config.logic.privateWorkflow.title}
+              onChange={(e) => updateLogic({
+                privateWorkflow: { ...config.logic.privateWorkflow, title: e.target.value }
+              })}
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
               Mensaje solicitando feedback privado
             </label>
             <textarea
@@ -191,7 +210,7 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
               }}
             />
           </div>
-          
+
           <div className="space-y-2">
             <label className="block text-sm font-medium" style={{ color: '#161616' }}>
               Mensaje de agradecimiento
