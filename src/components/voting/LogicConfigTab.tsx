@@ -419,7 +419,7 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
       {/* Mensaje de Agradecimiento Final */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-          Mensaje de Agradecimiento Final
+          Página de Agradecimiento de Feedback
         </h3>
         <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
           Mensaje mostrado después de enviar feedback privado
