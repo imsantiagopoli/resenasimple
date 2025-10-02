@@ -194,14 +194,14 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
 
         {/* Special Offer */}
         {config.design.specialOffer.enabled && (
-          <div 
+          <div
             className="mx-auto max-w-md p-6 rounded-lg border text-center mb-6"
-            style={{ 
-              backgroundColor: '#075E54' + '08',
-              borderColor: '#075E54' + '30'
+            style={{
+              backgroundColor: 'rgb(249, 250, 251)',
+              borderColor: 'rgb(229, 231, 235)'
             }}
           >
-            <h3 className="font-bold mb-2" style={{ color: '#075E54' }}>
+            <h3 className="font-bold mb-2" style={{ color: 'rgb(75, 85, 99)' }}>
               {config.design.specialOffer.headline}
             </h3>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
@@ -315,11 +315,11 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
         
         {/* Prompt Preventivo */}
         {config.logic.prompt.enabled && (
-          <div 
+          <div
             className="p-4 rounded-lg border text-center"
-            style={{ 
-              backgroundColor: '#075E54' + '08',
-              borderColor: '#075E54' + '30'
+            style={{
+              backgroundColor: 'rgb(249, 250, 251)',
+              borderColor: 'rgb(229, 231, 235)'
             }}
           >
             <p className="text-sm leading-relaxed" style={{ color: 'rgb(107, 114, 128)' }}>
