@@ -8,6 +8,7 @@ import {
   QrCode,
   Star,
   MessageSquare,
+  Users,
   User,
   LogOut,
   Settings,
@@ -31,6 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { icon: QrCode, label: 'QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
     { icon: Star, label: 'Reseñas', id: 'resenas', route: '/app/resenas', color: 'rgb(75, 85, 99)' },
     { icon: MessageSquare, label: 'Respuestas', id: 'respuestas', route: '/app/respuestas', color: 'rgb(75, 85, 99)' },
+    { icon: Users, label: 'Clientes', id: 'clientes', route: '/app/clientes', color: 'rgb(75, 85, 99)' },
   ];
 
   const handleLogout = async () => {
