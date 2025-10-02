@@ -737,7 +737,7 @@ const RespuestasPage: React.FC = () => {
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
-              Aún no hay reseñas
+              Aún no hay respuestas
             </h3>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
               Las reseñas aparecerán aquí cuando los clientes empiecen a votar.
