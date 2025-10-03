@@ -53,18 +53,35 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   }, [selectedBranch, config, generateQRURL]);
 
   const getBase64 = async (url: string): Promise<string> => {
-    const response = await fetch(url, {
-      mode: 'cors',
-      credentials: 'omit'
-    });
-    if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.status}`);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    try {
+      console.log('Fetching:', url);
+      const response = await fetch(url);
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      console.log('Blob size:', blob.size, 'type:', blob.type);
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          console.log('Base64 result length:', result.length);
+          resolve(result);
+        };
+        reader.onerror = (error) => {
+          console.error('FileReader error:', error);
+          reject(error);
+        };
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('getBase64 error for', url, ':', error);
+      throw error;
+    }
   };
 
   const handleDownload = async () => {
@@ -278,7 +295,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
     } catch (error) {
       console.error('Error generando PDF:', error);
-      alert('Error al generar el PDF. Revisa la consola para más detalles.');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al generar el PDF: ${errorMessage}\n\nRevisa la consola del navegador (F12) para más detalles.`);
     } finally {
       setIsGeneratingPDF(false);
       if (tempContainer.parentNode) {
