@@ -132,16 +132,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         console.error('Error loading QR code:', error);
       }
 
-      // --- Construcción del fondo ---
-      let backgroundStyle = '';
+      // --- Construcción del fondo como elemento hijo ---
+      let backgroundLayerHTML = '';
 
       if (config.background.type === 'solid') {
-        backgroundStyle = `background-color: ${config.background.color};`;
+        backgroundLayerHTML = `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: ${config.background.color}; z-index: 0;"></div>`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
-        backgroundStyle = `background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
+        backgroundLayerHTML = `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end}); z-index: 0;"></div>`;
       } else if (config.background.type === 'image' && backgroundSrc) {
-        backgroundStyle = `background-image: url('${backgroundSrc}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+        backgroundLayerHTML = `<img src="${backgroundSrc}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
       }
 
       // --- Construcción del contenido HTML ---
@@ -175,7 +175,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       `;
 
       tempContainer.innerHTML = `
-        <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px; ${backgroundStyle}">
+        <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px;">
+          ${backgroundLayerHTML}
           <div style="position: relative; z-index: 1; padding: 3rem 2rem; box-sizing: border-box; text-align: center;">
             ${contentHTML}
           </div>
