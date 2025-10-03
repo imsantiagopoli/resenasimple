@@ -877,7 +877,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                           e.currentTarget.style.color = '#075E54';
                         }}
                       >
-                        Ver más fondos ({backgroundImages.length - 6} más)
+                        Más fondos
                       </button>
                     )}
                   </>
@@ -917,6 +917,9 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             </div>
           </>
         )}
+
+        {/* Background Gallery Modal */}
+        {showGalleryModal && <BackgroundGalleryModal />}
       </div>
     );
   }
@@ -1307,12 +1310,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
     );
   }
 
-  return (
-    <>
-      {showGalleryModal && <BackgroundGalleryModal />}
-      {null}
-    </>
-  );
+  return null;
 
   function BackgroundGalleryModal() {
     const [selectedCategory, setSelectedCategory] = useState<string>('custom');
