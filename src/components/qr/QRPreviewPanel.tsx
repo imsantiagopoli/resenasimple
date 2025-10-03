@@ -24,7 +24,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isLoadingQR, setIsLoadingQR] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const proxy = 'https://api.allorigins.win/raw?url=';
 
   // Convert Tailwind direction to CSS gradient direction
   const convertGradientDirection = (tailwindDir: string): string => {
@@ -54,9 +53,11 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   }, [selectedBranch, config, generateQRURL]);
 
   const getBase64 = async (url: string): Promise<string> => {
-    const proxyUrl = proxy + encodeURIComponent(url);
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit'
+    });
+    if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.status}`);
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -135,12 +136,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       // --- Construcción del contenido HTML ---
       const contentHTML = `
-        ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+        ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img crossorigin="anonymous" src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img crossorigin="anonymous" src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
