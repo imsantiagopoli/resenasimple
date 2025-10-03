@@ -97,11 +97,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     tempContainer.style.visibility = 'hidden';
 
     try {
+      console.log('=== Starting PDF generation ===');
+      console.log('Config:', config);
+
       // Fetch images as base64
       let backgroundSrc = '';
       if (config.background.type === 'image' && config.background.imageUrl) {
+        console.log('Loading background image:', config.background.imageUrl);
         try {
           backgroundSrc = await getBase64(config.background.imageUrl);
+          console.log('Background image loaded, base64 length:', backgroundSrc.length);
         } catch (error) {
           console.error('Error loading background image:', error);
         }
@@ -109,16 +114,20 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       let logoSrc = '';
       if (config.design.showLogo && businessProfile?.logo_url) {
+        console.log('Loading logo:', businessProfile.logo_url);
         try {
           logoSrc = await getBase64(businessProfile.logo_url);
+          console.log('Logo loaded, base64 length:', logoSrc.length);
         } catch (error) {
           console.error('Error loading logo:', error);
         }
       }
 
       let qrSrc = '';
+      console.log('Loading QR code:', qrImageUrl);
       try {
         qrSrc = await getBase64(qrImageUrl);
+        console.log('QR code loaded, base64 length:', qrSrc.length);
       } catch (error) {
         console.error('Error loading QR code:', error);
       }
@@ -180,37 +189,66 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // Wait for images to load
       await new Promise(resolve => {
         const images = tempContainer.getElementsByTagName('img');
-        let loadedCount = 0;
         const totalImages = images.length;
-        
+
+        console.log(`Total images to load: ${totalImages}`);
+
         if (totalImages === 0) {
+          console.log('No images to load, proceeding...');
           resolve(true);
           return;
         }
-        
+
+        let loadedCount = 0;
+        const timeout = setTimeout(() => {
+          console.log(`Timeout reached. Loaded ${loadedCount}/${totalImages} images`);
+          resolve(true);
+        }, 5000);
+
         for (let i = 0; i < totalImages; i++) {
-          images[i].onload = () => {
+          if (images[i].complete) {
             loadedCount++;
-            if (loadedCount === totalImages) resolve(true);
-          };
-          images[i].onerror = () => {
-            loadedCount++;
-            if (loadedCount === totalImages) resolve(true);
-          };
+            console.log(`Image ${i + 1} already loaded (${loadedCount}/${totalImages})`);
+            if (loadedCount === totalImages) {
+              clearTimeout(timeout);
+              resolve(true);
+            }
+          } else {
+            images[i].onload = () => {
+              loadedCount++;
+              console.log(`Image ${i + 1} loaded successfully (${loadedCount}/${totalImages})`);
+              if (loadedCount === totalImages) {
+                clearTimeout(timeout);
+                resolve(true);
+              }
+            };
+            images[i].onerror = (error) => {
+              loadedCount++;
+              console.error(`Image ${i + 1} failed to load:`, error);
+              if (loadedCount === totalImages) {
+                clearTimeout(timeout);
+                resolve(true);
+              }
+            };
+          }
         }
       });
 
       await document.fonts.ready;
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      console.log('Starting canvas generation...');
+
       // --- Generar Canvas y PDF ---
       const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
+      console.log('Content div dimensions:', contentDiv.scrollWidth, 'x', contentDiv.scrollHeight);
+
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: null,
-        logging: false,
+        logging: true,
         width: 448,
         height: contentDiv.scrollHeight,
         onclone: (clonedDoc) => {
@@ -220,9 +258,13 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           }
         }
       });
-      
+
+      console.log('Canvas generated:', canvas.width, 'x', canvas.height);
+
       const imgWidth = 448;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      console.log('Creating PDF with dimensions:', imgWidth, 'x', imgHeight);
 
       const pdf = new jsPDF({
         orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
@@ -231,7 +273,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       });
 
       pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, imgWidth, imgHeight);
+      console.log('Saving PDF...');
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
+      console.log('PDF saved successfully!');
 
     } catch (error) {
       console.error('Error generando PDF:', error);
