@@ -302,20 +302,22 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       {/* Preview Content */}
       <div
         className="flex-1 overflow-y-auto"
-        style={{
-          ...(config.background.type === 'solid' && {
-            backgroundColor: config.background.color
-          }),
-          ...(config.background.type === 'gradient' && config.background.gradient && {
-            background: `linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end})`
-          }),
-          ...(config.background.type === 'image' && config.background.imageUrl && {
-            backgroundImage: `url(${config.background.imageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          })
-        }}
+        style={
+          config.background.type === 'solid'
+            ? { backgroundColor: config.background.color }
+            : config.background.type === 'gradient' && config.background.gradient
+            ? {
+                background: `linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end})`
+              }
+            : config.background.type === 'image' && config.background.imageUrl
+            ? {
+                backgroundImage: `url(${config.background.imageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }
+            : { backgroundColor: '#FFFFFF' }
+        }
       >
         <div className="min-h-full flex items-center justify-center py-12 px-8">
           <div className="text-center max-w-md">

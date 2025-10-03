@@ -1,8 +1,16 @@
-import React, { useEffect } from 'react';
-import { QrCode, FileText, Printer, RotateCcw, AlertCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { QrCode, FileText, Printer, RotateCcw, AlertCircle, Check } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { useFonts } from '../../hooks/useFonts';
 import { BusinessBranch } from '../../hooks/useBusiness';
+import { supabase } from '../../lib/supabase';
+
+interface BackgroundImage {
+  id: string;
+  name: string;
+  image_url: string;
+  category: string;
+}
 
 interface QRConfigTabProps {
   activeTab: 'design' | 'content' | 'print';
@@ -26,6 +34,33 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   selectedBranch
 }) => {
   const { fonts, loadMultipleFonts } = useFonts();
+  const [backgroundImages, setBackgroundImages] = useState<BackgroundImage[]>([]);
+  const [loadingBackgrounds, setLoadingBackgrounds] = useState(false);
+
+  // Load background images from database
+  useEffect(() => {
+    const loadBackgrounds = async () => {
+      setLoadingBackgrounds(true);
+      try {
+        const { data, error } = await supabase
+          .from('qr_backgrounds_resenasimple')
+          .select('id, name, image_url, category')
+          .eq('is_active', true)
+          .order('sort_order');
+
+        if (error) throw error;
+        setBackgroundImages(data || []);
+      } catch (error) {
+        console.error('Error loading backgrounds:', error);
+      } finally {
+        setLoadingBackgrounds(false);
+      }
+    };
+
+    if (activeTab === 'design') {
+      loadBackgrounds();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (config.typography) {
@@ -609,16 +644,51 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             )}
 
             {config.background.type === 'image' && (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <label className="block text-sm font-medium" style={{ color: '#161616' }}>
                   Fondos disponibles
                 </label>
-                <div className="text-sm text-gray-500 mb-2">
-                  Selecciona un fondo de la galería o sube tu propia imagen
-                </div>
-                <div className="text-sm text-gray-400">
-                  Próximamente: galería de fondos genéricos
-                </div>
+
+                {loadingBackgrounds ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+                    <p className="mt-2 text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Cargando fondos...</p>
+                  </div>
+                ) : backgroundImages.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {backgroundImages.map((bg) => (
+                      <button
+                        key={bg.id}
+                        onClick={() => updateBackground({ imageUrl: bg.image_url })}
+                        className="relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                        style={{
+                          borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                          aspectRatio: '16/9'
+                        }}
+                      >
+                        <img
+                          src={bg.image_url}
+                          alt={bg.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {config.background.imageUrl === bg.image_url && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: '#075E54' + '80' }}>
+                            <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
+                              <Check size={24} color="white" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                          <p className="text-xs font-medium text-white truncate">{bg.name}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+                    <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>No hay fondos disponibles</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
