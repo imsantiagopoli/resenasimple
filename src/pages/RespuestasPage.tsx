@@ -1,15 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Star, 
-  MessageCircle, 
-  TrendingUp, 
-  TrendingDown,
+import {
+  Star,
+  MessageCircle,
+  TrendingUp,
   Calendar,
   Filter,
   Search,
-  ExternalLink,
   Mail,
-  Phone,
   ChevronDown,
   User
 } from 'lucide-react';
@@ -209,11 +206,11 @@ const RespuestasPage: React.FC = () => {
 
         <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
-            <div 
+            <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#ef4444' + '20' }}
+              style={{ backgroundColor: '#10b981' + '20' }}
             >
-              <TrendingDown size={20} style={{ color: '#ef4444' }} />
+              <TrendingUp size={20} style={{ color: '#10b981' }} />
             </div>
           </div>
           <div className="space-y-1">
