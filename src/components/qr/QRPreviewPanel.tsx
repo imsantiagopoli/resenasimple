@@ -261,8 +261,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        useCORS: false,
-        allowTaint: true,
+        useCORS: true,
+        allowTaint: false,
         backgroundColor: null,
         logging: true,
         width: 448,
