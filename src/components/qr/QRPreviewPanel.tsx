@@ -306,8 +306,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           ...(config.background.type === 'solid' && {
             backgroundColor: config.background.color
           }),
-          ...(config.background.type === 'gradient' && {
-            backgroundImage: `linear-gradient(${config.background.gradientDirection}, ${config.background.gradientStartColor}, ${config.background.gradientEndColor})`
+          ...(config.background.type === 'gradient' && config.background.gradient && {
+            background: `linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end})`
           }),
           ...(config.background.type === 'image' && config.background.imageUrl && {
             backgroundImage: `url(${config.background.imageUrl})`,
