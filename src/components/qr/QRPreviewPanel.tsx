@@ -134,9 +134,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
               </div>
             ` : ''}
             ${config.content.showEmail && selectedBranch.email ? `
-              <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
+              <div style="display: inline-flex; align-items: center; gap: 0.5rem; pointer-events: none;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${config.typography.secondaryColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; vertical-align: middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                <span style="line-height: 1; vertical-align: middle;">${selectedBranch.email}</span>
+                <span style="line-height: 1; vertical-align: middle; cursor: text;">${selectedBranch.email}</span>
               </div>
             ` : ''}
           </div>
