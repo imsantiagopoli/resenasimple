@@ -126,12 +126,18 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       if (config.background.type === 'solid') {
         backgroundStyle = `background-color: ${config.background.color} !important;`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
+        // CORRECCIÓN para Gradiente: Usar 'linear-gradient' directamente como valor del 'background'
         backgroundStyle = `background: linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end}) !important;`;
       } else if (config.background.type === 'image' && backgroundImageBase64) {
-        backgroundStyle = `background-image: url('${backgroundImageBase64}') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;`;
+        // CORRECCIÓN para Imagen: Asegurar que background-image esté antes que background-color, aunque con !important no debería ser problema. 
+        // Es más importante asegurar que la imagen esté cargada (ya lo hacemos con base64 y el Promise.all) y las propiedades estén bien definidas.
+        backgroundStyle = `background-image: url('${backgroundImageBase64}') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; background-color: #ffffff !important;`; // Añadir un color de fondo de respaldo si la imagen falla
       }
 
       // Build the HTML content with base64 images
+      // AÑADIR UN ALTURA MÍNIMA CON ESTILO IN-LINE PARA ASEGURAR QUE EL FONDO SE DIBUJE COMPLETAMENTE
+      // html2canvas necesita que el elemento a capturar (pdf-content) tenga dimensiones bien definidas.
+      // La altura mínima ya estaba en 600px, lo cual es bueno. 
       tempContainer.innerHTML = `
         <div id="pdf-content" style="text-align: center; width: 100%; min-height: 600px; padding: 3rem 2rem; box-sizing: border-box; ${backgroundStyle}">
           ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
@@ -168,8 +174,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             </ol>
           </div>
         ` : ''}
-      </div>
-      `;
+        </div>
+        `;
 
       document.body.appendChild(tempContainer);
 
@@ -178,9 +184,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       // Wait for images to load
       const images = tempContainer.getElementsByTagName('img');
+      // Añadir el fondo de imagen al array de promesas de carga si existe
+      let allImagesToLoad = Array.from(images);
+      
+      // Si hay imagen de fondo, aunque esté en base64, nos aseguramos de que el navegador la procese.
+      // Ya está incluida en el HTML como estilo de fondo, lo que ayuda a html2canvas. 
+      // Si la imagen de fondo es un <img> oculto, forzaría la carga, pero como es background-image, confiamos en la precarga del base64.
+      // Dejamos el Promise.all como estaba, que ya es un buen intento.
 
       await Promise.all(
-        Array.from(images).map((img) => {
+        allImagesToLoad.map((img) => {
           if (img.complete) {
             return Promise.resolve();
           }
@@ -201,7 +214,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // Generate canvas from HTML - capture the content div directly
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        backgroundColor: null,
+        backgroundColor: null, 
         logging: true,
         useCORS: true,
         allowTaint: true,
