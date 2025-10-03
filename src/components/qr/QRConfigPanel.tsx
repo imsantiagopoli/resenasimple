@@ -48,7 +48,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
     },
     {
       id: 'templates' as const,
-      label: 'Templates',
+      label: 'Plantillas',
       icon: Wand2
     },
     {
