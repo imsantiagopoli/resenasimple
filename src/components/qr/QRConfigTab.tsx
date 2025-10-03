@@ -36,6 +36,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   const { fonts, loadMultipleFonts } = useFonts();
   const [backgroundImages, setBackgroundImages] = useState<BackgroundImage[]>([]);
   const [loadingBackgrounds, setLoadingBackgrounds] = useState(false);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
 
   // Load background images from database
   useEffect(() => {
@@ -732,35 +733,58 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     <p className="mt-2 text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Cargando fondos...</p>
                   </div>
                 ) : backgroundImages.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {backgroundImages.map((bg) => (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      {backgroundImages.slice(0, 6).map((bg) => (
+                        <button
+                          key={bg.id}
+                          onClick={() => updateBackground({ imageUrl: bg.image_url })}
+                          className="relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                          style={{
+                            borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                            aspectRatio: '16/9'
+                          }}
+                        >
+                          <img
+                            src={bg.image_url}
+                            alt={bg.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {config.background.imageUrl === bg.image_url && (
+                            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: '#075E54' + '80' }}>
+                              <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
+                                <Check size={24} color="white" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                            <p className="text-xs font-medium text-white truncate">{bg.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {backgroundImages.length > 6 && (
                       <button
-                        key={bg.id}
-                        onClick={() => updateBackground({ imageUrl: bg.image_url })}
-                        className="relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                        onClick={() => setShowGalleryModal(true)}
+                        className="w-full mt-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
                         style={{
-                          borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
-                          aspectRatio: '16/9'
+                          backgroundColor: 'white',
+                          borderColor: '#075E54',
+                          color: '#075E54'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#075E54';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'white';
+                          e.currentTarget.style.color = '#075E54';
                         }}
                       >
-                        <img
-                          src={bg.image_url}
-                          alt={bg.name}
-                          className="w-full h-full object-cover"
-                        />
-                        {config.background.imageUrl === bg.image_url && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: '#075E54' + '80' }}>
-                            <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
-                              <Check size={24} color="white" />
-                            </div>
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                          <p className="text-xs font-medium text-white truncate">{bg.name}</p>
-                        </div>
+                        Ver más fondos ({backgroundImages.length - 6} más)
                       </button>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
                     <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>No hay fondos disponibles</p>
@@ -1187,7 +1211,122 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
     );
   }
 
-  return null;
+  return (
+    <>
+      {showGalleryModal && <BackgroundGalleryModal />}
+      {null}
+    </>
+  );
+
+  function BackgroundGalleryModal() {
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+    const categories = [
+      { id: 'all', name: 'Todos' },
+      { id: 'abstract', name: 'Abstracto' },
+      { id: 'nature', name: 'Naturaleza' },
+      { id: 'business', name: 'Negocios' },
+      { id: 'minimalist', name: 'Minimalista' },
+      { id: 'colorful', name: 'Colorido' },
+      { id: 'patterns', name: 'Patrones' },
+      { id: 'texture', name: 'Texturas' }
+    ];
+
+    const filteredBackgrounds = selectedCategory === 'all'
+      ? backgroundImages
+      : backgroundImages.filter(bg => bg.category === selectedCategory);
+
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        onClick={() => setShowGalleryModal(false)}
+      >
+        <div
+          className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <h2 className="text-2xl font-bold" style={{ color: '#161616' }}>Galería de Fondos</h2>
+            <button
+              onClick={() => setShowGalleryModal(false)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="px-6 pt-4 border-b overflow-x-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <div className="flex space-x-1">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="px-4 py-2 text-sm font-medium rounded-t-lg transition-all whitespace-nowrap"
+                  style={{
+                    color: selectedCategory === category.id ? '#075E54' : 'rgb(107, 114, 128)',
+                    backgroundColor: selectedCategory === category.id ? 'white' : 'transparent',
+                    borderBottom: selectedCategory === category.id ? '2px solid #075E54' : '2px solid transparent'
+                  }}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {filteredBackgrounds.length > 0 ? (
+              <div className="grid grid-cols-3 gap-4">
+                {filteredBackgrounds.map((bg) => (
+                  <button
+                    key={bg.id}
+                    onClick={() => {
+                      updateBackground({ imageUrl: bg.image_url });
+                      setShowGalleryModal(false);
+                    }}
+                    className="relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                    style={{
+                      borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                      aspectRatio: '16/9'
+                    }}
+                  >
+                    <img
+                      src={bg.image_url}
+                      alt={bg.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {config.background.imageUrl === bg.image_url && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: '#075E54' + '80' }}>
+                        <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
+                          <Check size={24} color="white" />
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                      <p className="text-xs font-medium text-white truncate">{bg.name}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  No hay fondos disponibles en esta categoría
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default QRConfigTab;
