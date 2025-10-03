@@ -108,6 +108,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         logoBase64 = await getImageAsBase64(businessProfile.logo_url);
       }
 
+      // Convert background image to base64 if it exists
+      let backgroundImageBase64 = '';
+      if (config.background.type === 'image' && config.background.imageUrl) {
+        backgroundImageBase64 = await getImageAsBase64(config.background.imageUrl);
+      }
+
       // Create temporary container
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'absolute';
@@ -122,13 +128,13 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         backgroundStyle = `background-color: ${config.background.color};`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
         backgroundStyle = `background: linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
-      } else if (config.background.type === 'image' && config.background.imageUrl) {
-        backgroundStyle = `background-image: url(${config.background.imageUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+      } else if (config.background.type === 'image' && backgroundImageBase64) {
+        backgroundStyle = `background-image: url(${backgroundImageBase64}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
       }
 
       // Build the HTML content with base64 images
       tempContainer.innerHTML = `
-        <div style="text-align: center; width: 100%; padding: 3rem 2rem; ${backgroundStyle}">
+        <div style="text-align: center; width: 100%; min-height: 600px; padding: 3rem 2rem; ${backgroundStyle}">
           ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
           ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
           ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
@@ -193,11 +199,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // Generate canvas from HTML
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
-        backgroundColor: '#ffffff',
+        backgroundColor: null,
         logging: false,
-        useCORS: false,
+        useCORS: true,
         allowTaint: true,
-        foreignObjectRendering: false
+        foreignObjectRendering: false,
+        imageTimeout: 0
       });
 
       // Calculate PDF dimensions
