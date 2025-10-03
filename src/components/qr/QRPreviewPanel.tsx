@@ -87,36 +87,50 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const handlePrint = async () => {
     setIsGeneratingPDF(true);
     const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.left = '0';
     tempContainer.style.top = '0';
     tempContainer.style.width = '448px';
+    tempContainer.style.height = 'auto';
+    tempContainer.style.zIndex = '9999';
+    tempContainer.style.visibility = 'hidden';
 
     try {
       // Fetch images as base64
       let backgroundSrc = '';
       if (config.background.type === 'image' && config.background.imageUrl) {
-        backgroundSrc = await getBase64(config.background.imageUrl);
+        try {
+          backgroundSrc = await getBase64(config.background.imageUrl);
+        } catch (error) {
+          console.error('Error loading background image:', error);
+        }
       }
 
       let logoSrc = '';
       if (config.design.showLogo && businessProfile?.logo_url) {
-        logoSrc = await getBase64(businessProfile.logo_url);
+        try {
+          logoSrc = await getBase64(businessProfile.logo_url);
+        } catch (error) {
+          console.error('Error loading logo:', error);
+        }
       }
 
-      const qrSrc = await getBase64(qrImageUrl);
+      let qrSrc = '';
+      try {
+        qrSrc = await getBase64(qrImageUrl);
+      } catch (error) {
+        console.error('Error loading QR code:', error);
+      }
 
       // --- Construcción del fondo ---
-      let backgroundElement = '';
-      let mainContainerStyle = `background-color: ${config.background.type === 'solid' ? config.background.color : '#ffffff'};`;
-
-      if (config.background.type === 'gradient' && config.background.gradient) {
+      let backgroundStyle = '';
+      if (config.background.type === 'solid') {
+        backgroundStyle = `background-color: ${config.background.color};`;
+      } else if (config.background.type === 'gradient' && config.background.gradient) {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
-        backgroundElement = `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end}); z-index: 0;"></div>`;
-        mainContainerStyle = 'background-color: transparent;';
+        backgroundStyle = `background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
       } else if (config.background.type === 'image' && backgroundSrc) {
-        backgroundElement = `<img src="${backgroundSrc}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
-        mainContainerStyle = 'background-color: transparent;';
+        backgroundStyle = `background-image: url('${backgroundSrc}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
       }
 
       // --- Construcción del contenido HTML ---
@@ -150,8 +164,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       `;
 
       tempContainer.innerHTML = `
-        <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px; ${mainContainerStyle}">
-          ${backgroundElement}
+        <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px; ${backgroundStyle}">
           <div style="position: relative; z-index: 1; padding: 3rem 2rem; box-sizing: border-box; text-align: center;">
             ${contentHTML}
           </div>
@@ -160,32 +173,60 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       document.body.appendChild(tempContainer);
 
-      // Since using data URLs, no need to wait for img load
+      // Wait for images to load
+      await new Promise(resolve => {
+        const images = tempContainer.getElementsByTagName('img');
+        let loadedCount = 0;
+        const totalImages = images.length;
+        
+        if (totalImages === 0) {
+          resolve(true);
+          return;
+        }
+        
+        for (let i = 0; i < totalImages; i++) {
+          images[i].onload = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) resolve(true);
+          };
+          images[i].onerror = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) resolve(true);
+          };
+        }
+      });
+
       await document.fonts.ready;
-      await new Promise(resolve => setTimeout(resolve, 500)); // Increased timeout for render
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // --- Generar Canvas y PDF ---
       const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        useCORS: false,
-        allowTaint: true,
+        useCORS: true,
+        allowTaint: false,
         backgroundColor: null,
-        imageTimeout: 15000,
+        logging: false,
         width: 448,
-        windowWidth: 448,
+        height: contentDiv.scrollHeight,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('pdf-content');
+          if (clonedElement) {
+            clonedElement.style.width = '448px';
+          }
+        }
       });
       
       const imgWidth = 448;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
         unit: 'px',
         format: [imgWidth, imgHeight]
       });
 
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
 
     } catch (error) {
