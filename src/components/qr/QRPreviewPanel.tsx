@@ -79,16 +79,28 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   // Helper function to convert image URL to base64
   const getImageAsBase64 = async (url: string): Promise<string> => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          console.log('Image converted to base64, length:', result.length, 'starts with:', result.substring(0, 50));
+          resolve(result);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
     } catch (error) {
-      console.error('Error converting image to base64:', error);
+      console.error('Error converting image to base64:', url, error);
       return '';
     }
   };
@@ -107,11 +119,18 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       const qrBase64 = await getImageAsBase64(qrURL);
       console.log('QR Base64 length:', qrBase64.length);
 
+      if (!qrBase64) {
+        throw new Error('Failed to convert QR code to base64');
+      }
+
       // Convert logo to base64 if it exists
       let logoBase64 = '';
       if (config.design.showLogo && businessProfile?.logo_url) {
         logoBase64 = await getImageAsBase64(businessProfile.logo_url);
         console.log('Logo Base64 length:', logoBase64.length);
+        if (!logoBase64) {
+          console.warn('Failed to convert logo to base64, will proceed without logo');
+        }
       }
 
       // Convert background image to base64 if it exists
@@ -120,6 +139,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         console.log('Converting background image:', config.background.imageUrl);
         backgroundImageBase64 = await getImageAsBase64(config.background.imageUrl);
         console.log('Background Base64 length:', backgroundImageBase64.length);
+        if (!backgroundImageBase64) {
+          console.warn('Failed to convert background image to base64');
+        }
       }
 
       // Create temporary container
@@ -223,9 +245,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
         backgroundColor: null,
-        logging: true,
-        useCORS: true,
-        allowTaint: true,
+        logging: false,
+        useCORS: false,
+        allowTaint: false,
         foreignObjectRendering: false,
         imageTimeout: 0,
         width: 448,
