@@ -113,11 +113,33 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   };
 
   const updateBackground = (updates: Partial<QRConfiguration['background']>) => {
-    onConfigUpdate({
-      background: {
-        ...config.background,
-        ...updates
+    let newBackground = { ...config.background, ...updates };
+
+    // Clean up incompatible properties when changing background type
+    if (updates.type) {
+      if (updates.type === 'solid') {
+        // Remove gradient and image properties
+        delete newBackground.gradient;
+        delete newBackground.imageUrl;
+      } else if (updates.type === 'gradient') {
+        // Remove image property
+        delete newBackground.imageUrl;
+        // Ensure gradient exists
+        if (!newBackground.gradient) {
+          newBackground.gradient = {
+            start: '#FFFFFF',
+            end: '#F3F4F6',
+            direction: 'to-b'
+          };
+        }
+      } else if (updates.type === 'image') {
+        // Remove gradient property
+        delete newBackground.gradient;
       }
+    }
+
+    onConfigUpdate({
+      background: newBackground
     });
   };
 
