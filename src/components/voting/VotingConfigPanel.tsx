@@ -5,6 +5,20 @@ import LogicConfigTab from './LogicConfigTab';
 import LinksConfigTab from './LinksConfigTab';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 
+interface BusinessProfile {
+  id: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  website_url: string | null;
+}
+
 interface VotingConfigPanelProps {
   config: VotingConfiguration;
   onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
@@ -13,6 +27,7 @@ interface VotingConfigPanelProps {
   onReset: () => void;
   onResetToDefaults: () => Promise<{ data: VotingConfiguration | null; error: string | null }>;
   isSaving: boolean;
+  businessProfile: BusinessProfile | null;
 }
 
 const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
@@ -22,7 +37,8 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
   onSave,
   onReset,
   onResetToDefaults,
-  isSaving
+  isSaving,
+  businessProfile
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'logic' | 'links'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -122,6 +138,7 @@ const VotingConfigPanel: React.FC<VotingConfigPanelProps> = ({
             onConfigUpdate={onConfigUpdate}
             hasChanges={hasChanges}
             onResetToDefaults={() => setShowResetModal(true)}
+            businessProfile={businessProfile}
           />
         )}
         {activeTab === 'logic' && (

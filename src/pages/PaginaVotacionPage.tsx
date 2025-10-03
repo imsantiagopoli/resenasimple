@@ -68,6 +68,7 @@ const PaginaVotacionPage: React.FC = () => {
             onReset={resetChanges}
             onResetToDefaults={resetToDefaults}
             isSaving={isSaving}
+            businessProfile={businessProfile}
           />
         </div>
         

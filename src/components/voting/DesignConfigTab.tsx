@@ -1,16 +1,31 @@
 import React, { useEffect } from 'react';
-import { Instagram, Linkedin, Twitter, Youtube, Globe, RotateCcw, Facebook } from 'lucide-react';
+import { Instagram, Linkedin, Twitter, Youtube, Globe, RotateCcw, Facebook, AlertCircle } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 import { useFonts } from '../../hooks/useFonts';
+
+interface BusinessProfile {
+  id: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
+  youtube_url: string | null;
+  website_url: string | null;
+}
 
 interface DesignConfigTabProps {
   config: VotingConfiguration;
   onConfigUpdate: (updates: Partial<VotingConfiguration>) => void;
   hasChanges: boolean;
   onResetToDefaults: () => void;
+  businessProfile: BusinessProfile | null;
 }
 
-const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate, hasChanges, onResetToDefaults }) => {
+const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdate, hasChanges, onResetToDefaults, businessProfile }) => {
   const { fonts, loadMultipleFonts } = useFonts();
 
   useEffect(() => {
@@ -84,6 +99,23 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
     youtube: 'YouTube',
     website: 'Sitio web'
   };
+
+  const getSocialUrlStatus = (platform: string): boolean => {
+    if (!businessProfile) return false;
+    switch (platform) {
+      case 'facebook': return !!businessProfile.facebook_url;
+      case 'instagram': return !!businessProfile.instagram_url;
+      case 'tiktok': return !!businessProfile.tiktok_url;
+      case 'linkedin': return !!businessProfile.linkedin_url;
+      case 'twitter': return !!businessProfile.twitter_url;
+      case 'youtube': return !!businessProfile.youtube_url;
+      case 'website': return !!businessProfile.website_url;
+      default: return false;
+    }
+  };
+
+  const hasAnySocialUrl = Object.keys(socialIcons).some(platform => getSocialUrlStatus(platform));
+  const missingUrls = Object.keys(socialIcons).filter(platform => !getSocialUrlStatus(platform));
 
   return (
     <div className="p-6 space-y-8">
@@ -505,41 +537,70 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
         <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
           Redes Sociales
         </h3>
-        
+
         <p className="text-sm mb-4" style={{ color: 'rgb(107, 114, 128)' }}>
           Selecciona qué redes sociales mostrar al pie de la página. Los enlaces se configuran en "Mi Negocio".
         </p>
-        
+
+        {!hasAnySocialUrl && (
+          <div
+            className="p-4 rounded-lg border flex items-start space-x-3"
+            style={{
+              backgroundColor: '#fef3c7',
+              borderColor: '#fde047'
+            }}
+          >
+            <AlertCircle size={20} style={{ color: '#ca8a04', flexShrink: 0, marginTop: '2px' }} />
+            <div className="flex-1">
+              <p className="text-sm font-medium mb-1" style={{ color: '#854d0e' }}>
+                No hay enlaces configurados
+              </p>
+              <p className="text-xs" style={{ color: '#a16207' }}>
+                Para mostrar iconos de redes sociales, primero debes agregar los enlaces en la sección "Mi Negocio".
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(socialIcons).map(([key, Icon]) => (
-            <label key={key} className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={
-                  config.design.socials[key as keyof typeof config.design.socials]
-                }
-                onChange={(e) => {
-                  updateDesign({
-                    socials: {
-                      ...config.design.socials,
-                      [key]: e.target.checked
-                    }
-                  });
-                }}
-                className="rounded border-gray-300 focus:ring-2"
-                style={{ accentColor: '#075E54' }}
-              />
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: 'rgb(243, 244, 246)' }}
+          {Object.entries(socialIcons).map(([key, Icon]) => {
+            const hasUrl = getSocialUrlStatus(key);
+            const isChecked = config.design.socials[key as keyof typeof config.design.socials];
+
+            return (
+              <label
+                key={key}
+                className={`flex items-center space-x-3 ${hasUrl ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
               >
-                <Icon size={16} style={{ color: 'rgb(107, 114, 128)' }} />
-              </div>
-              <span className="text-sm font-medium" style={{ color: '#161616' }}>
-                {socialLabels[key as keyof typeof socialLabels]}
-              </span>
-            </label>
-          ))}
+                <input
+                  type="checkbox"
+                  checked={isChecked && hasUrl}
+                  disabled={!hasUrl}
+                  onChange={(e) => {
+                    if (hasUrl) {
+                      updateDesign({
+                        socials: {
+                          ...config.design.socials,
+                          [key]: e.target.checked
+                        }
+                      });
+                    }
+                  }}
+                  className="rounded border-gray-300 focus:ring-2"
+                  style={{ accentColor: '#075E54' }}
+                />
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgb(243, 244, 246)' }}
+                >
+                  <Icon size={16} style={{ color: 'rgb(107, 114, 128)' }} />
+                </div>
+                <span className="text-sm font-medium" style={{ color: '#161616' }}>
+                  {socialLabels[key as keyof typeof socialLabels]}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
