@@ -187,11 +187,11 @@ const RespuestasPage: React.FC = () => {
 
         <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
-            <div 
+            <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#10b981' + '20' }}
+              style={{ backgroundColor: '#3b82f6' + '20' }}
             >
-              <TrendingUp size={20} style={{ color: '#10b981' }} />
+              <Send size={20} style={{ color: '#3b82f6' }} />
             </div>
           </div>
           <div className="space-y-1">
