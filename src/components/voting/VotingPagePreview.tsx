@@ -320,11 +320,11 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
           <div
             className="p-4 rounded-lg border text-center"
             style={{
-              backgroundColor: config.logic.prompt.color,
-              borderColor: config.logic.prompt.color
+              backgroundColor: config.logic.prompt.color + '08',
+              borderColor: config.logic.prompt.color + '30'
             }}
           >
-            <p className="text-sm leading-relaxed" style={{ color: 'rgb(107, 114, 128)' }}>
+            <p className="text-sm leading-relaxed" style={{ color: config.logic.prompt.color }}>
               {config.logic.prompt.text}
             </p>
           </div>
