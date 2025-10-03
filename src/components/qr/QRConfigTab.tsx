@@ -604,61 +604,55 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             Muestra el teléfono y/o email de la sucursal en la página de QR
           </p>
 
-          {(!selectedBranch.phone || !selectedBranch.email) && (
-            <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: 'rgb(254, 249, 195)', borderLeft: '4px solid rgb(234, 179, 8)' }}>
-              <AlertCircle size={20} style={{ color: 'rgb(161, 98, 7)', flexShrink: 0, marginTop: '2px' }} />
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{ color: 'rgb(133, 77, 14)' }}>
-                  Información de contacto incompleta
-                </p>
-                <p className="text-xs mt-1" style={{ color: 'rgb(161, 98, 7)' }}>
-                  {!selectedBranch.phone && !selectedBranch.email
-                    ? 'Esta sucursal no tiene teléfono ni email configurado. Agrégalos en Mi Negocio > Sucursales.'
-                    : !selectedBranch.phone
-                    ? 'Esta sucursal no tiene teléfono configurado. Agrégalo en Mi Negocio > Sucursales.'
-                    : 'Esta sucursal no tiene email configurado. Agrégalo en Mi Negocio > Sucursales.'}
-                </p>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="showPhone"
-                checked={config.content.showPhone}
-                onChange={(e) => updateContent({ showPhone: e.target.checked })}
-                disabled={!selectedBranch.phone}
-                className="w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ accentColor: '#075E54' }}
-              />
-              <label
-                htmlFor="showPhone"
-                className={`text-sm font-medium ${!selectedBranch.phone ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{ color: '#161616' }}
-              >
-                Mostrar teléfono
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="showPhone"
+                  checked={config.content.showPhone}
+                  onChange={(e) => updateContent({ showPhone: e.target.checked })}
+                  className="w-4 h-4"
+                  style={{ accentColor: '#075E54' }}
+                />
+                <label htmlFor="showPhone" className="text-sm font-medium" style={{ color: '#161616' }}>
+                  Mostrar teléfono
+                </label>
+              </div>
+
+              {config.content.showPhone && !selectedBranch.phone && (
+                <div className="ml-7 flex items-start gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgb(254, 249, 195)', borderLeft: '3px solid rgb(234, 179, 8)' }}>
+                  <AlertCircle size={16} style={{ color: 'rgb(161, 98, 7)', flexShrink: 0, marginTop: '1px' }} />
+                  <p className="text-xs" style={{ color: 'rgb(161, 98, 7)' }}>
+                    Esta sucursal no tiene teléfono configurado. Agrégalo en Mi Negocio &gt; Sucursales.
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="showEmail"
-                checked={config.content.showEmail}
-                onChange={(e) => updateContent({ showEmail: e.target.checked })}
-                disabled={!selectedBranch.email}
-                className="w-4 h-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ accentColor: '#075E54' }}
-              />
-              <label
-                htmlFor="showEmail"
-                className={`text-sm font-medium ${!selectedBranch.email ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{ color: '#161616' }}
-              >
-                Mostrar email
-              </label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="showEmail"
+                  checked={config.content.showEmail}
+                  onChange={(e) => updateContent({ showEmail: e.target.checked })}
+                  className="w-4 h-4"
+                  style={{ accentColor: '#075E54' }}
+                />
+                <label htmlFor="showEmail" className="text-sm font-medium" style={{ color: '#161616' }}>
+                  Mostrar email
+                </label>
+              </div>
+
+              {config.content.showEmail && !selectedBranch.email && (
+                <div className="ml-7 flex items-start gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgb(254, 249, 195)', borderLeft: '3px solid rgb(234, 179, 8)' }}>
+                  <AlertCircle size={16} style={{ color: 'rgb(161, 98, 7)', flexShrink: 0, marginTop: '1px' }} />
+                  <p className="text-xs" style={{ color: 'rgb(161, 98, 7)' }}>
+                    Esta sucursal no tiene email configurado. Agrégalo en Mi Negocio &gt; Sucursales.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
