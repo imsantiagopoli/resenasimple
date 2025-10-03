@@ -24,7 +24,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isLoadingQR, setIsLoadingQR] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const proxy = 'https://cors-anywhere.herokuapp.com/';
+  const proxy = 'https://api.allorigins.win/raw?url=';
 
   // Convert Tailwind direction to CSS gradient direction
   const convertGradientDirection = (tailwindDir: string): string => {
@@ -53,32 +53,36 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     }
   }, [selectedBranch, config, generateQRURL]);
 
-  const handleDownload = () => {
-    const qrURL = generateQRURL(selectedBranch.slug, config);
-    
-    // Create a temporary link to download the QR image
-    const link = document.createElement('a');
-    
-    // Fetch the image and create a blob URL
-    fetch(proxy + qrURL)
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        link.download = `qr-${selectedBranch.slug}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch(error => {
-        console.error('Error downloading QR:', error);
-        // Fallback: open QR in new tab
-        window.open(qrURL, '_blank');
-      });
+  const getBase64 = async (url: string): Promise<string> => {
+    const proxyUrl = proxy + encodeURIComponent(url);
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   };
 
-  // Helper getImageAsBase64 ha sido eliminado. No es necesario.
+  const handleDownload = async () => {
+    const qrURL = generateQRURL(selectedBranch.slug, config);
+    
+    try {
+      const qrBase64 = await getBase64(qrURL);
+      const link = document.createElement('a');
+      link.href = qrBase64;
+      link.download = `qr-${selectedBranch.slug}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading QR:', error);
+      // Fallback: open QR in new tab
+      window.open(qrURL, '_blank');
+    }
+  };
 
   const handlePrint = async () => {
     setIsGeneratingPDF(true);
@@ -89,6 +93,19 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     tempContainer.style.width = '448px';
 
     try {
+      // Fetch images as base64
+      let backgroundSrc = '';
+      if (config.background.type === 'image' && config.background.imageUrl) {
+        backgroundSrc = await getBase64(config.background.imageUrl);
+      }
+
+      let logoSrc = '';
+      if (config.design.showLogo && businessProfile?.logo_url) {
+        logoSrc = await getBase64(businessProfile.logo_url);
+      }
+
+      const qrSrc = await getBase64(qrImageUrl);
+
       // --- Construcción del fondo ---
       let backgroundElement = '';
       let mainContainerStyle = `background-color: ${config.background.type === 'solid' ? config.background.color : '#ffffff'};`;
@@ -97,20 +114,19 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
         backgroundElement = `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end}); z-index: 0;"></div>`;
         mainContainerStyle = 'background-color: transparent;';
-      } else if (config.background.type === 'image' && config.background.imageUrl) {
-        // Usamos la URL original y crossorigin="anonymous"
-        backgroundElement = `<img src="${proxy + config.background.imageUrl}" crossorigin="anonymous" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
+      } else if (config.background.type === 'image' && backgroundSrc) {
+        backgroundElement = `<img src="${backgroundSrc}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
         mainContainerStyle = 'background-color: transparent;';
       }
 
       // --- Construcción del contenido HTML ---
       const contentHTML = `
-        ${config.design.showLogo && businessProfile?.logo_url ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${proxy + businessProfile.logo_url}" crossorigin="anonymous" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+        ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${proxy + qrImageUrl}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
@@ -144,30 +160,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       document.body.appendChild(tempContainer);
 
-      // --- Esperar a que las imágenes carguen ---
-      const images = tempContainer.getElementsByTagName('img');
-      await Promise.all(
-        Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = () => {
-              console.warn(`No se pudo cargar la imagen: ${img.src}`);
-              resolve(); // Resolvemos incluso en error para no detener todo el proceso.
-            };
-          });
-        })
-      );
-
+      // Since using data URLs, no need to wait for img load
       await document.fonts.ready;
-      await new Promise(resolve => setTimeout(resolve, 300)); // Pequeña espera para renderizado final
+      await new Promise(resolve => setTimeout(resolve, 500)); // Increased timeout for render
 
       // --- Generar Canvas y PDF ---
       const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        useCORS: true, // Clave para cargar imágenes de otros dominios
-        allowTaint: false,
+        useCORS: false,
+        allowTaint: true,
         backgroundColor: null,
         imageTimeout: 15000,
         width: 448,
@@ -188,7 +190,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
     } catch (error) {
       console.error('Error generando PDF:', error);
-      alert('Error al generar el PDF. Revisa la consola para más detalles. Es posible que las imágenes no puedan ser accedidas (problema de CORS).');
+      alert('Error al generar el PDF. Revisa la consola para más detalles.');
     } finally {
       setIsGeneratingPDF(false);
       if (tempContainer.parentNode) {
