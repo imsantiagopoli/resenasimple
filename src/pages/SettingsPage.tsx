@@ -195,15 +195,34 @@ const SettingsPage: React.FC = () => {
     setDeleteError('');
 
     try {
-      // Delete user account
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (error) throw error;
+      if (!session) {
+        throw new Error('No session found');
+      }
 
-      // Sign out
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user-account`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            emailConfirmation: deleteEmail
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al eliminar la cuenta');
+      }
+
       await supabase.auth.signOut();
 
-      // Show success message and redirect
       setShowDeleteModal(false);
       showMessage('success', 'Cuenta eliminada exitosamente');
 
@@ -648,7 +667,7 @@ const SettingsPage: React.FC = () => {
                     setDeleteEmail(e.target.value);
                     setDeleteError('');
                   }}
-                  placeholder="tu@email.com"
+                  placeholder={profileData.email}
                   disabled={isDeleting}
                   className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:opacity-50"
                   style={{
