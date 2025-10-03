@@ -82,6 +82,20 @@ const PaginaQRPage: React.FC = () => {
       });
   };
 
+  const convertGradientDirection = (tailwindDir: string): string => {
+    const directionMap: Record<string, string> = {
+      'to-t': 'to top',
+      'to-b': 'to bottom',
+      'to-l': 'to left',
+      'to-r': 'to right',
+      'to-tl': 'to top left',
+      'to-tr': 'to top right',
+      'to-bl': 'to bottom left',
+      'to-br': 'to bottom right'
+    };
+    return directionMap[tailwindDir] || tailwindDir;
+  };
+
   const handlePrint = async () => {
     if (!selectedBranch || !config) return;
 
@@ -146,7 +160,8 @@ const PaginaQRPage: React.FC = () => {
     if (config.background.type === 'solid') {
       backgroundStyle = `background-color: ${config.background.color};`;
     } else if (config.background.type === 'gradient' && config.background.gradient) {
-      backgroundStyle = `background: linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
+      const gradientDirection = convertGradientDirection(config.background.gradient.direction);
+      backgroundStyle = `background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
     } else if (config.background.type === 'image' && backgroundBase64) {
       backgroundStyle = `background-image: url(${backgroundBase64}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
     }
