@@ -423,14 +423,14 @@ const VotingPage: React.FC = () => {
           const Icon = socialIcons[platform as keyof typeof socialIcons];
           const url = getSocialUrl(platform);
           if (!Icon || url === '#') return null;
-          
+
           return (
             <a
               key={platform}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 hover:scale-110"
+              className="w-14 h-14 rounded-lg flex items-center justify-center transition-transform duration-200 hover:scale-110"
               style={{ backgroundColor: 'rgb(243, 244, 246)' }}
             >
               <Icon size={18} style={{ color: 'rgb(107, 114, 128)' }} />
@@ -539,14 +539,14 @@ const VotingPage: React.FC = () => {
 
             {/* Stars */}
             <div className="flex justify-center mb-6 relative">
-              <div className="flex items-center space-x-2 relative">
+              <div className="flex items-center space-x-3 relative">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <div key={star} className="relative">
                     <button
                       onMouseEnter={() => setHoveredStars(star)}
                       onMouseLeave={() => setHoveredStars(0)}
                       onClick={() => handleStarClick(star)}
-                      className="p-2 transition-transform duration-200 hover:scale-110"
+                      className="p-3 transition-transform duration-200 hover:scale-110"
                       disabled={isSubmitting}
                     >
                       <Star
@@ -558,19 +558,19 @@ const VotingPage: React.FC = () => {
                         }`}
                       />
                     </button>
-                    
+
                     {config.design.starLabels.enabled && hoveredStars === star && (
-                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-10">
-                        <div 
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg border"
-                          style={{ 
+                      <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 z-10">
+                        <div
+                          className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg border"
+                          style={{
                             backgroundColor: '#161616',
                             color: 'white',
                             borderColor: 'rgb(75, 85, 99)'
                           }}
                         >
                           {config.design.starLabels.labels[star as keyof typeof config.design.starLabels.labels]}
-                          <div 
+                          <div
                             className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
                             style={{ borderTopColor: '#161616' }}
                           />
@@ -585,7 +585,7 @@ const VotingPage: React.FC = () => {
             {/* Special Offer */}
             {config.design.specialOffer.enabled && (
               <div
-                className="p-6 rounded-lg border text-center mb-6"
+                className="p-8 rounded-lg border text-center mb-6"
                 style={{
                   backgroundColor: config.design.specialOffer.color + '08',
                   borderColor: config.design.specialOffer.color + '30'
@@ -640,7 +640,7 @@ const VotingPage: React.FC = () => {
             {/* Prompt Preventivo */}
             {config.logic.prompt.enabled && (
               <div
-                className="p-4 rounded-lg border text-center"
+                className="p-6 rounded-lg border text-center"
                 style={{
                   backgroundColor: config.logic.prompt.color + '08',
                   borderColor: config.logic.prompt.color + '30'
@@ -736,7 +736,7 @@ const VotingPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 px-8 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: config.colors.buttonColor,
                   color: getContrastColor(config.colors.buttonColor)
@@ -797,7 +797,7 @@ const VotingPage: React.FC = () => {
           <button
             onClick={handlePublicReview}
             disabled={isSubmitting}
-            className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 px-8 rounded-lg font-medium text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundColor: config.colors.buttonColor,
               color: getContrastColor(config.colors.buttonColor)
@@ -869,7 +869,7 @@ const VotingPage: React.FC = () => {
             {config.logic.privateWorkflow.showWhatsAppButton && branch?.phone && (
               <button
                 onClick={handleWhatsAppClick}
-                className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 flex items-center justify-center space-x-2"
+                className="w-full py-4 px-8 rounded-lg font-medium text-base transition-all duration-200 flex items-center justify-center space-x-2"
                 style={{
                   backgroundColor: config.logic.privateWorkflow.whatsAppButtonColor,
                   color: getContrastColor(config.logic.privateWorkflow.whatsAppButtonColor)
@@ -883,7 +883,7 @@ const VotingPage: React.FC = () => {
             {config.logic.privateWorkflow.showEmailButton && business?.email && (
               <button
                 onClick={handleEmailClick}
-                className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200 flex items-center justify-center space-x-2"
+                className="w-full py-4 px-8 rounded-lg font-medium text-base transition-all duration-200 flex items-center justify-center space-x-2"
                 style={{
                   backgroundColor: config.logic.privateWorkflow.emailButtonColor,
                   color: getContrastColor(config.logic.privateWorkflow.emailButtonColor)
