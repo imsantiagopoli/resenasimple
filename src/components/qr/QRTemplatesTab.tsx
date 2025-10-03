@@ -94,7 +94,7 @@ const QRTemplatesTab: React.FC<QRTemplatesTabProps> = ({
         <div className="flex items-center space-x-2 mb-2">
           <Wand2 size={20} style={{ color: '#075E54' }} />
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Templates de QR
+            Plantillas de QR
           </h3>
         </div>
         <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
