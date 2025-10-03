@@ -32,7 +32,11 @@ const SettingsPage: React.FC = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const [tempProfileData, setTempProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -177,6 +181,41 @@ const SettingsPage: React.FC = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user || !profileData.email) return;
+
+    if (deleteEmail.toLowerCase().trim() !== profileData.email.toLowerCase().trim()) {
+      setDeleteError('El email no coincide');
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    try {
+      // Delete user account
+      const { error } = await supabase.auth.admin.deleteUser(user.id);
+
+      if (error) throw error;
+
+      // Sign out
+      await supabase.auth.signOut();
+
+      // Show success message and redirect
+      setShowDeleteModal(false);
+      showMessage('success', 'Cuenta eliminada exitosamente');
+
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 1500);
+    } catch (err: any) {
+      console.error('Error deleting account:', err);
+      setDeleteError(err.message || 'Error al eliminar la cuenta');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (loading) {
@@ -509,6 +548,7 @@ const SettingsPage: React.FC = () => {
               </p>
             </div>
             <button
+              onClick={() => setShowDeleteModal(true)}
               className="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
               style={{
                 backgroundColor: 'white',
@@ -573,6 +613,138 @@ const SettingsPage: React.FC = () => {
           </a>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: '#ef4444' + '20' }}
+              >
+                <AlertCircle size={24} style={{ color: '#ef4444' }} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+                  Eliminar Cuenta
+                </h3>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  Esta acción es irreversible
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <p className="text-sm" style={{ color: '#161616' }}>
+                Para confirmar la eliminación de tu cuenta, ingresa tu email:
+              </p>
+
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  value={deleteEmail}
+                  onChange={(e) => {
+                    setDeleteEmail(e.target.value);
+                    setDeleteError('');
+                  }}
+                  placeholder="tu@email.com"
+                  disabled={isDeleting}
+                  className="w-full px-3 py-3 rounded-lg border text-sm transition-all duration-200 disabled:opacity-50"
+                  style={{
+                    borderColor: deleteError ? '#ef4444' : 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                />
+                {deleteError && (
+                  <p className="text-xs" style={{ color: '#ef4444' }}>
+                    {deleteError}
+                  </p>
+                )}
+              </div>
+
+              <div
+                className="p-3 rounded-lg text-sm"
+                style={{
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca'
+                }}
+              >
+                <p className="font-medium mb-2" style={{ color: '#991b1b' }}>
+                  Se eliminarán permanentemente:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-xs" style={{ color: '#991b1b' }}>
+                  <li>Tu perfil y datos personales</li>
+                  <li>Configuraciones de negocio</li>
+                  <li>Todas las votaciones y reseñas</li>
+                  <li>Códigos QR generados</li>
+                  <li>Historial completo</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting || !deleteEmail}
+                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: '1px solid #ef4444'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting && deleteEmail) {
+                    e.currentTarget.style.backgroundColor = '#dc2626';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = '#ef4444';
+                  }
+                }}
+              >
+                {isDeleting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Eliminando...</span>
+                  </div>
+                ) : (
+                  'Eliminar Cuenta'
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteEmail('');
+                  setDeleteError('');
+                }}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#161616',
+                  border: '1px solid rgb(209, 213, 219)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
