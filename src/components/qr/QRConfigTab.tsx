@@ -1338,13 +1338,13 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
+        className="fixed inset-0 z-50 flex items-center justify-center p-8"
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
         onClick={() => setShowGalleryModal(false)}
       >
         <div
           className="bg-white rounded-2xl shadow-2xl flex flex-col"
-          style={{ width: '1000px', height: '700px' }}
+          style={{ width: '1000px', height: '700px', maxHeight: '100%' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -1353,18 +1353,63 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
               <h2 className="text-2xl font-bold" style={{ color: '#161616' }}>Fondos para QR</h2>
               <p className="text-sm mt-1" style={{ color: 'rgb(107, 114, 128)' }}>Selecciona o sube tus propios fondos</p>
             </div>
-            <button
-              onClick={() => setShowGalleryModal(false)}
-              className="p-2.5 rounded-lg transition-colors"
-              style={{ color: 'rgb(107, 114, 128)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+            <div className="flex items-center space-x-2">
+              {mainTab === 'custom' && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingBackground}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all border"
+                    style={{
+                      backgroundColor: uploadingBackground ? 'rgb(243, 244, 246)' : '#075E54',
+                      borderColor: '#075E54',
+                      color: uploadingBackground ? 'rgb(107, 114, 128)' : 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!uploadingBackground) {
+                        e.currentTarget.style.backgroundColor = '#064c43';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!uploadingBackground) {
+                        e.currentTarget.style.backgroundColor = '#075E54';
+                      }
+                    }}
+                  >
+                    {uploadingBackground ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#075E54' }}></div>
+                        <span>Subiendo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} />
+                        <span>Subir fondo</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setShowGalleryModal(false)}
+                className="p-2.5 rounded-lg transition-colors"
+                style={{ color: 'rgb(107, 114, 128)' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Main Tabs */}
@@ -1500,41 +1545,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
               </>
             ) : (
               <div className="flex-1 overflow-y-auto p-6">
-                <div className="mb-6">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingBackground}
-                    className="w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 border-2 border-dashed"
-                    style={{
-                      backgroundColor: uploadingBackground ? 'rgb(243, 244, 246)' : 'white',
-                      borderColor: uploadingBackground ? 'rgb(209, 213, 219)' : '#075E54',
-                      color: uploadingBackground ? 'rgb(107, 114, 128)' : '#075E54'
-                    }}
-                  >
-                    {uploadingBackground ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#075E54' }}></div>
-                        <span>Subiendo imagen...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={22} />
-                        <span>Subir nuevo fondo</span>
-                      </>
-                    )}
-                  </button>
-                  <p className="text-xs text-center mt-3" style={{ color: 'rgb(107, 114, 128)' }}>
-                    JPG, PNG o WEBP • Máximo 5MB
-                  </p>
-                </div>
-
                 {userBackgrounds.length > 0 ? (
                   <div className="grid grid-cols-4 gap-4">
                     {userBackgrounds.map((bg) => (
@@ -1578,7 +1588,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center py-16">
+                  <div className="flex items-center justify-center h-full">
                     <div className="text-center max-w-sm">
                       <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
                         <Upload size={32} style={{ color: 'rgb(156, 163, 175)' }} />
@@ -1587,7 +1597,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                         No tienes fondos personalizados
                       </p>
                       <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                        Sube tus propias imágenes para usarlas como fondo de tus códigos QR
+                        Haz clic en "Subir fondo" para agregar tus propias imágenes
                       </p>
                     </div>
                   </div>
