@@ -590,25 +590,27 @@ const VotingPage: React.FC = () => {
           {renderLogo()}
           
           <div className="text-center space-y-6">
-            <h2
-              className="text-2xl font-bold"
-              style={{
-                color: '#161616',
-                fontFamily: config.typography.primaryFont
-              }}
-            >
-              {config.logic.privateWorkflow.title}
-            </h2>
-            
-            <p 
-              className="text-base" 
-              style={{ 
-                color: 'rgb(107, 114, 128)',
-                fontFamily: config.typography.secondaryFont
-              }}
-            >
-              {config.logic.privateWorkflow.feedbackMessage}
-            </p>
+            <div className="space-y-3">
+              <h2
+                className="text-2xl font-bold"
+                style={{
+                  color: '#161616',
+                  fontFamily: config.typography.primaryFont
+                }}
+              >
+                {config.logic.privateWorkflow.title}
+              </h2>
+
+              <p
+                className="text-base"
+                style={{
+                  color: 'rgb(107, 114, 128)',
+                  fontFamily: config.typography.secondaryFont
+                }}
+              >
+                {config.logic.privateWorkflow.feedbackMessage}
+              </p>
+            </div>
 
             {/* Prompt Preventivo */}
             {config.logic.prompt.enabled && (
@@ -744,27 +746,29 @@ const VotingPage: React.FC = () => {
               />
             ))}
           </div>
-          
-          <h2
-            className="text-2xl font-bold"
-            style={{
-              color: '#161616',
-              fontFamily: config.typography.primaryFont
-            }}
-          >
-            {config.logic.publicWorkflow.title}
-          </h2>
-          
-          <p 
-            className="text-base" 
-            style={{ 
-              color: 'rgb(107, 114, 128)',
-              fontFamily: config.typography.secondaryFont
-            }}
-          >
-            {config.logic.publicWorkflow.thankYouMessage}
-          </p>
-          
+
+          <div className="space-y-3">
+            <h2
+              className="text-2xl font-bold"
+              style={{
+                color: '#161616',
+                fontFamily: config.typography.primaryFont
+              }}
+            >
+              {config.logic.publicWorkflow.title}
+            </h2>
+
+            <p
+              className="text-base"
+              style={{
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont
+              }}
+            >
+              {config.logic.publicWorkflow.thankYouMessage}
+            </p>
+          </div>
+
           <button
             onClick={handlePublicReview}
             disabled={isSubmitting}
@@ -787,26 +791,28 @@ const VotingPage: React.FC = () => {
       <div className="min-h-screen bg-white flex flex-col justify-center px-6 py-12">
         <div className="max-w-md mx-auto w-full text-center space-y-6">
           {renderLogo()}
-          
-          <h2
-            className="text-2xl font-bold"
-            style={{
-              color: '#161616',
-              fontFamily: config.typography.primaryFont
-            }}
-          >
-            {config.logic.privateWorkflow.thankYouTitle}
-          </h2>
-          
-          <p 
-            className="text-base" 
-            style={{ 
-              color: 'rgb(107, 114, 128)',
-              fontFamily: config.typography.secondaryFont
-            }}
-          >
-            {config.logic.privateWorkflow.thankYouMessage}
-          </p>
+
+          <div className="space-y-3">
+            <h2
+              className="text-2xl font-bold"
+              style={{
+                color: '#161616',
+                fontFamily: config.typography.primaryFont
+              }}
+            >
+              {config.logic.privateWorkflow.thankYouTitle}
+            </h2>
+
+            <p
+              className="text-base"
+              style={{
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont
+              }}
+            >
+              {config.logic.privateWorkflow.thankYouMessage}
+            </p>
+          </div>
         </div>
       </div>
     );

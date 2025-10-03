@@ -226,26 +226,28 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
           </div>
         )}
         
-        <h2
-          className="text-2xl font-bold"
-          style={{
-            color: '#161616',
-            fontFamily: config.typography.primaryFont
-          }}
-        >
-          {config.logic.privateWorkflow.title}
-        </h2>
-        
-        <p 
-          className="text-base" 
-          style={{ 
-            color: 'rgb(107, 114, 128)',
-            fontFamily: config.typography.secondaryFont
-          }}
-        >
-          {config.logic.privateWorkflow.feedbackMessage}
-        </p>
-        
+        <div className="space-y-3">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: '#161616',
+              fontFamily: config.typography.primaryFont
+            }}
+          >
+            {config.logic.privateWorkflow.title}
+          </h2>
+
+          <p
+            className="text-base"
+            style={{
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont
+            }}
+          >
+            {config.logic.privateWorkflow.feedbackMessage}
+          </p>
+        </div>
+
         {/* Campos adicionales */}
         {(config.logic.privateWorkflow.collectName || config.logic.privateWorkflow.collectPhone || config.logic.privateWorkflow.collectEmail) && (
           <div className="space-y-4">
@@ -354,27 +356,29 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
             />
           ))}
         </div>
-        
-        <h2
-          className="text-2xl font-bold"
-          style={{
-            color: '#161616',
-            fontFamily: config.typography.primaryFont
-          }}
-        >
-          {config.logic.publicWorkflow.title}
-        </h2>
-        
-        <p 
-          className="text-base" 
-          style={{ 
-            color: 'rgb(107, 114, 128)',
-            fontFamily: config.typography.secondaryFont
-          }}
-        >
-          {config.logic.publicWorkflow.thankYouMessage}
-        </p>
-        
+
+        <div className="space-y-3">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: '#161616',
+              fontFamily: config.typography.primaryFont
+            }}
+          >
+            {config.logic.publicWorkflow.title}
+          </h2>
+
+          <p
+            className="text-base"
+            style={{
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont
+            }}
+          >
+            {config.logic.publicWorkflow.thankYouMessage}
+          </p>
+        </div>
+
         <button
           className="w-full py-3 px-6 rounded-lg font-medium text-base transition-all duration-200"
           style={{
@@ -397,26 +401,28 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
             {renderLogo()}
           </div>
         )}
-        
-        <h2
-          className="text-2xl font-bold"
-          style={{
-            color: '#161616',
-            fontFamily: config.typography.primaryFont
-          }}
-        >
-          {config.logic.privateWorkflow.thankYouTitle}
-        </h2>
-        
-        <p 
-          className="text-base" 
-          style={{ 
-            color: 'rgb(107, 114, 128)',
-            fontFamily: config.typography.secondaryFont
-          }}
-        >
-          {config.logic.privateWorkflow.thankYouMessage}
-        </p>
+
+        <div className="space-y-3">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: '#161616',
+              fontFamily: config.typography.primaryFont
+            }}
+          >
+            {config.logic.privateWorkflow.thankYouTitle}
+          </h2>
+
+          <p
+            className="text-base"
+            style={{
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont
+            }}
+          >
+            {config.logic.privateWorkflow.thankYouMessage}
+          </p>
+        </div>
       </div>
     </div>
   );
