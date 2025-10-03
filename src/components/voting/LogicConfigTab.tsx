@@ -416,17 +416,31 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
               <label className="block text-sm font-medium" style={{ color: '#161616' }}>
                 Color de fondo
               </label>
-              <input
-                type="color"
-                value={config.logic.prompt.color}
-                onChange={(e) => updateLogic({
-                  prompt: { ...config.logic.prompt, color: e.target.value }
-                })}
-                className="w-full h-10 rounded-lg border cursor-pointer"
-                style={{
-                  borderColor: 'rgb(209, 213, 219)'
-                }}
-              />
+              <div className="flex items-center space-x-3">
+                <input
+                  type="color"
+                  value={config.logic.prompt.color}
+                  onChange={(e) => updateLogic({
+                    prompt: { ...config.logic.prompt, color: e.target.value }
+                  })}
+                  className="w-12 h-10 rounded-lg border cursor-pointer"
+                  style={{ borderColor: 'rgb(209, 213, 219)' }}
+                />
+                <input
+                  type="text"
+                  value={config.logic.prompt.color}
+                  onChange={(e) => updateLogic({
+                    prompt: { ...config.logic.prompt, color: e.target.value }
+                  })}
+                  className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+                  style={{
+                    borderColor: 'rgb(209, 213, 219)',
+                    color: '#161616',
+                    backgroundColor: 'white'
+                  }}
+                  placeholder="#FEF3C7"
+                />
+              </div>
             </div>
           </div>
         )}
