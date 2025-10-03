@@ -125,13 +125,15 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       // --- Construcción del fondo ---
       let backgroundStyle = '';
+      let backgroundImageHTML = '';
+
       if (config.background.type === 'solid') {
         backgroundStyle = `background-color: ${config.background.color};`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
         backgroundStyle = `background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
       } else if (config.background.type === 'image' && backgroundSrc) {
-        backgroundStyle = `background-image: url('${backgroundSrc}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+        backgroundImageHTML = `<img crossorigin="anonymous" src="${backgroundSrc}" alt="Background" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
       }
 
       // --- Construcción del contenido HTML ---
@@ -166,6 +168,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       tempContainer.innerHTML = `
         <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px; ${backgroundStyle}">
+          ${backgroundImageHTML}
           <div style="position: relative; z-index: 1; padding: 3rem 2rem; box-sizing: border-box; text-align: center;">
             ${contentHTML}
           </div>
