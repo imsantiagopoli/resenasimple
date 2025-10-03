@@ -241,9 +241,9 @@ const PaginaQRPage: React.FC = () => {
       // Longer delay to ensure all content is rendered
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Generate canvas from HTML
+      // Generate canvas from HTML with high quality
       const canvas = await html2canvas(tempContainer, {
-        scale: 2,
+        scale: 4,
         backgroundColor: '#ffffff',
         logging: true,
         useCORS: true,
@@ -252,19 +252,21 @@ const PaginaQRPage: React.FC = () => {
 
       console.log('Canvas generated:', canvas.width, 'x', canvas.height);
 
-      // Calculate PDF dimensions
-      const imgWidth = 448;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Calculate PDF dimensions (8.5" x 11" at 72 DPI = 612x792 points)
+      // We'll use A4 portrait dimensions for better quality
+      const pdfWidth = 595.28;  // A4 width in points (210mm)
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      // Create PDF
+      // Create PDF with high quality
       const pdf = new jsPDF({
         orientation: 'portrait',
-        unit: 'px',
-        format: [imgWidth, imgHeight]
+        unit: 'pt',
+        format: [pdfWidth, pdfHeight]
       });
 
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Convert canvas to high-quality PNG
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
 
       // Download PDF
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
