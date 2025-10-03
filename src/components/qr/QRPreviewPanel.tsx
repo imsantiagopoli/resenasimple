@@ -106,7 +106,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.callToAction}</p>` : ''}
-        ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && businessProfile?.email) ? `
+        ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email) ? `
           <div style="margin-top: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor};">
             ${config.content.showPhone && selectedBranch.phone ? `
               <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -114,10 +114,10 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 <span>${selectedBranch.phone}</span>
               </div>
             ` : ''}
-            ${config.content.showEmail && businessProfile?.email ? `
+            ${config.content.showEmail && selectedBranch.email ? `
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${config.typography.secondaryColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                <span>${businessProfile.email}</span>
+                <span>${selectedBranch.email}</span>
               </div>
             ` : ''}
           </div>
@@ -372,7 +372,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             )}
 
             {/* Contact Info */}
-            {((config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && businessProfile?.email)) && (
+            {((config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email)) && (
               <div
                 className="mt-4 flex flex-col items-center gap-2"
                 style={{
@@ -387,10 +387,10 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                     <span>{selectedBranch.phone}</span>
                   </div>
                 )}
-                {config.content.showEmail && businessProfile?.email && (
+                {config.content.showEmail && selectedBranch.email && (
                   <div className="flex items-center gap-2">
                     <Mail size={16} style={{ color: config.typography.secondaryColor }} />
-                    <span>{businessProfile.email}</span>
+                    <span>{selectedBranch.email}</span>
                   </div>
                 )}
               </div>

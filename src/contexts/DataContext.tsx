@@ -29,6 +29,7 @@ export interface BusinessBranch {
   name: string;
   address: string | null;
   phone: string | null;
+  email: string | null;
   google_maps_link: string | null;
   slug: string;
   is_main: boolean;

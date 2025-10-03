@@ -217,6 +217,7 @@ const PaginaQRPage: React.FC = () => {
             onDownload={handleDownload}
             onPrint={handlePrint}
             currentBranchSlug={selectedBranch.slug}
+            selectedBranch={selectedBranch}
           />
         </div>
         

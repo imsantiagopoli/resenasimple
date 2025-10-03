@@ -41,6 +41,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
         name: branch.name,
         address: branch.address || '',
         phone: branch.phone || '',
+        email: branch.email || '',
         isMain: branch.is_main,
         googleMapsLink: branch.google_maps_link || '',
         slug: branch.slug
@@ -59,6 +60,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       name: 'Nueva Sucursal',
       address: '',
       phone: '',
+      email: '',
       isMain: false,
       googleMapsLink: '',
       slug: ''
@@ -132,6 +134,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
         name: tempBranchData.name,
         address: tempBranchData.address,
         phone: tempBranchData.phone,
+        email: tempBranchData.email,
         is_main: tempBranchData.isMain,
         google_maps_link: tempBranchData.googleMapsLink,
         slug: tempBranchData.slug || await generateSlug(tempBranchData.name)
@@ -360,6 +363,24 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                       type="tel"
                       value={currentData.phone}
                       onChange={(e) => updateBranch(index, 'phone', e.target.value)}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      style={{
+                        borderColor: 'rgb(209, 213, 219)',
+                        color: '#161616',
+                        backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={currentData.email}
+                      onChange={(e) => updateBranch(index, 'email', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                       style={{

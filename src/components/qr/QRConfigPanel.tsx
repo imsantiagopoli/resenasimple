@@ -3,6 +3,7 @@ import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Wand2, C
 import QRConfigTab from './QRConfigTab';
 import QRTemplatesTab from './QRTemplatesTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
+import { BusinessBranch } from '../../hooks/useBusiness';
 
 interface QRConfigPanelProps {
   config: QRConfiguration;
@@ -15,6 +16,7 @@ interface QRConfigPanelProps {
   onDownload?: () => void;
   onPrint?: () => void;
   currentBranchSlug: string;
+  selectedBranch: BusinessBranch;
 }
 
 const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
@@ -27,7 +29,8 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   isSaving,
   onDownload,
   onPrint,
-  currentBranchSlug
+  currentBranchSlug,
+  selectedBranch
 }) => {
   const [activeTab, setActiveTab] = useState<'design' | 'templates' | 'content' | 'print'>('design');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -255,6 +258,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             onPrint={onPrint}
             hasChanges={hasChanges}
             onResetToDefaults={() => setShowResetModal(true)}
+            selectedBranch={selectedBranch}
           />
         )}
       </div>
