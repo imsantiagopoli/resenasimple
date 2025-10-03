@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Instagram, Linkedin, Twitter, Youtube, Globe, RotateCcw } from 'lucide-react';
+import { Instagram, Linkedin, Twitter, Youtube, Globe, RotateCcw, Facebook } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 import { useFonts } from '../../hooks/useFonts';
 
@@ -66,6 +66,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
   );
 
   const socialIcons = {
+    facebook: Facebook,
     instagram: Instagram,
     tiktok: TikTokIcon,
     linkedin: Linkedin,
@@ -75,6 +76,7 @@ const DesignConfigTab: React.FC<DesignConfigTabProps> = ({ config, onConfigUpdat
   };
 
   const socialLabels = {
+    facebook: 'Facebook',
     instagram: 'Instagram',
     tiktok: 'TikTok',
     linkedin: 'LinkedIn',

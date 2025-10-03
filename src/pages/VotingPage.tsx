@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Building2, Instagram, Linkedin, Twitter, Youtube, Globe, ExternalLink } from 'lucide-react';
+import { Star, Building2, Instagram, Linkedin, Twitter, Youtube, Globe, ExternalLink, Facebook } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { VotingConfiguration } from '../hooks/useVotingConfig';
 
@@ -380,6 +380,7 @@ const VotingPage: React.FC = () => {
   );
 
   const socialIcons = {
+    facebook: Facebook,
     instagram: Instagram,
     tiktok: TikTokIcon,
     linkedin: Linkedin,
@@ -391,6 +392,7 @@ const VotingPage: React.FC = () => {
   const getSocialUrl = (platform: string) => {
     if (!business) return '#';
     switch (platform) {
+      case 'facebook': return business.facebook_url || '#';
       case 'instagram': return business.instagram_url || '#';
       case 'tiktok': return business.tiktok_url || '#';
       case 'linkedin': return business.linkedin_url || '#';

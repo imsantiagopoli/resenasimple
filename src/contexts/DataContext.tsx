@@ -73,6 +73,7 @@ export interface VotingConfigurationRecord {
   oferta_especial_activa: boolean
   oferta_especial_titulo: string
   oferta_especial_descripcion: string
+  mostrar_facebook: boolean
   mostrar_instagram: boolean
   mostrar_tiktok: boolean
   mostrar_linkedin: boolean
@@ -205,6 +206,7 @@ export interface VotingConfiguration {
       textColor: string
     }
     socials: {
+      facebook: boolean
       instagram: boolean
       tiktok: boolean
       linkedin: boolean
@@ -406,6 +408,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           textColor: record.color_texto_oferta || '#6b7280'
         },
         socials: {
+          facebook: record.mostrar_facebook,
           instagram: record.mostrar_instagram,
           tiktok: record.mostrar_tiktok,
           linkedin: record.mostrar_linkedin,
@@ -556,6 +559,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       oferta_especial_descripcion: config.design.specialOffer.body,
       oferta_especial_color: config.design.specialOffer.color,
       color_texto_oferta: config.design.specialOffer.textColor,
+      mostrar_facebook: config.design.socials.facebook,
       mostrar_instagram: config.design.socials.instagram,
       mostrar_tiktok: config.design.socials.tiktok,
       mostrar_linkedin: config.design.socials.linkedin,

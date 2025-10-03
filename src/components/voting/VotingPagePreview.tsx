@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Building2, Instagram, Linkedin, Twitter, Youtube, Globe } from 'lucide-react';
+import { Star, Building2, Instagram, Linkedin, Twitter, Youtube, Globe, Facebook } from 'lucide-react';
 import { VotingConfiguration } from '../../hooks/useVotingConfig';
 import { BusinessProfile } from '../../contexts/DataContext';
 
@@ -48,6 +48,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
   );
 
   const socialIcons = {
+    facebook: Facebook,
     instagram: Instagram,
     tiktok: TikTokIcon,
     linkedin: Linkedin,
@@ -58,6 +59,7 @@ const VotingPagePreview: React.FC<VotingPagePreviewProps> = ({ config, viewType,
 
   const getSocialColor = (platform: string) => {
     switch (platform) {
+      case 'facebook': return '#1877f2';
       case 'instagram': return '#E4405F';
       case 'tiktok': return '#000000';
       case 'linkedin': return '#0077B5';
