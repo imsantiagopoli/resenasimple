@@ -125,6 +125,8 @@ export interface QRConfigurationRecord {
   subtitle: string
   show_call_to_action: boolean
   call_to_action: string
+  show_phone: boolean
+  show_email: boolean
   tipografia_principal: string
   color_tipografia_principal: string
   tamano_tipografia_principal: number
@@ -163,6 +165,8 @@ export interface QRConfiguration {
     subtitle: string
     showCallToAction: boolean
     callToAction: string
+    showPhone: boolean
+    showEmail: boolean
   }
   typography: {
     primaryFont: string
@@ -499,7 +503,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showSubtitle: record.show_subtitle,
         subtitle: record.subtitle,
         showCallToAction: record.show_call_to_action,
-        callToAction: record.call_to_action
+        callToAction: record.call_to_action,
+        showPhone: record.show_phone ?? false,
+        showEmail: record.show_email ?? false
       },
       typography: {
         primaryFont: record.tipografia_principal,
@@ -540,6 +546,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       subtitle: config.content.subtitle,
       show_call_to_action: config.content.showCallToAction,
       call_to_action: config.content.callToAction,
+      show_phone: config.content.showPhone,
+      show_email: config.content.showEmail,
       tipografia_principal: config.typography.primaryFont,
       color_tipografia_principal: config.typography.primaryColor,
       tamano_tipografia_principal: config.typography.primaryFontSize,

@@ -592,6 +592,49 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
         {/* Separador */}
         <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
+        {/* Información de Contacto */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Información de Contacto
+          </h3>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+            Muestra el teléfono y/o email de la sucursal en la página de QR
+          </p>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="showPhone"
+                checked={config.content.showPhone}
+                onChange={(e) => updateContent({ showPhone: e.target.checked })}
+                className="w-4 h-4"
+                style={{ accentColor: '#075E54' }}
+              />
+              <label htmlFor="showPhone" className="text-sm font-medium" style={{ color: '#161616' }}>
+                Mostrar teléfono
+              </label>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="showEmail"
+                checked={config.content.showEmail}
+                onChange={(e) => updateContent({ showEmail: e.target.checked })}
+                className="w-4 h-4"
+                style={{ accentColor: '#075E54' }}
+              />
+              <label htmlFor="showEmail" className="text-sm font-medium" style={{ color: '#161616' }}>
+                Mostrar email
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
         {/* Tipografía */}
         <div className="space-y-8">
           {/* Tipografía Principal */}

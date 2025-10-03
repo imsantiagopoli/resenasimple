@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, ChevronDown, Download, Printer, RefreshCw } from 'lucide-react';
+import { Building2, ChevronDown, Download, Printer, RefreshCw, Phone, Mail } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { BusinessBranch } from '../../hooks/useBusiness';
 import { BusinessProfile } from '../../contexts/DataContext';
@@ -106,6 +106,22 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.callToAction}</p>` : ''}
+        ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && businessProfile?.email) ? `
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor};">
+            ${config.content.showPhone && selectedBranch.phone ? `
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${config.typography.secondaryColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <span>${selectedBranch.phone}</span>
+              </div>
+            ` : ''}
+            ${config.content.showEmail && businessProfile?.email ? `
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${config.typography.secondaryColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <span>${businessProfile.email}</span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
         ${config.print.includeInstructions ? `
           <div style="margin-top: 1.5rem; padding: 1rem; background: rgb(249, 250, 251); border: 1px solid rgb(229, 231, 235); border-radius: 0.5rem; font-size: 0.75rem; text-align: left; color: rgb(107, 114, 128); max-width: 400px; margin-left: auto; margin-right: auto;">
             <strong style="color: #161616;">Instrucciones:</strong>
@@ -354,7 +370,32 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 {config.content.callToAction}
               </p>
             )}
-            
+
+            {/* Contact Info */}
+            {((config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && businessProfile?.email)) && (
+              <div
+                className="mt-4 flex flex-col items-center gap-2"
+                style={{
+                  fontFamily: config.typography.secondaryFont,
+                  fontSize: `${config.typography.secondaryFontSize}px`,
+                  color: config.typography.secondaryColor
+                }}
+              >
+                {config.content.showPhone && selectedBranch.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone size={16} style={{ color: config.typography.secondaryColor }} />
+                    <span>{selectedBranch.phone}</span>
+                  </div>
+                )}
+                {config.content.showEmail && businessProfile?.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail size={16} style={{ color: config.typography.secondaryColor }} />
+                    <span>{businessProfile.email}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Instructions for print mode */}
             {config.print.includeInstructions && (
               <div className="mt-6 p-4 rounded-lg border text-xs text-left" style={{
