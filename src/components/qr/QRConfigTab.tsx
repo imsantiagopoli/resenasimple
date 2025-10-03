@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { QrCode, FileText, Printer, RotateCcw, AlertCircle, Check, ArrowDown, ArrowUp, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft, ArrowUpRight, ArrowUpLeft } from 'lucide-react';
+import { QrCode, FileText, Printer, RotateCcw, AlertCircle, Check, ArrowDown, ArrowUp, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft, ArrowUpRight, ArrowUpLeft, Upload, Trash2 } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { useFonts } from '../../hooks/useFonts';
 import { BusinessBranch } from '../../hooks/useBusiness';
@@ -37,6 +37,8 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   const [backgroundImages, setBackgroundImages] = useState<BackgroundImage[]>([]);
   const [loadingBackgrounds, setLoadingBackgrounds] = useState(false);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [userBackgrounds, setUserBackgrounds] = useState<BackgroundImage[]>([]);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   // Load background images from database
   useEffect(() => {
@@ -60,6 +62,31 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
     if (activeTab === 'design') {
       loadBackgrounds();
+    }
+  }, [activeTab]);
+
+  // Load user's custom backgrounds
+  useEffect(() => {
+    const loadUserBackgrounds = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('user_qr_backgrounds')
+          .select('id, name, image_url, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setUserBackgrounds((data || []).map(bg => ({ ...bg, category: 'custom' })));
+      } catch (error) {
+        console.error('Error loading user backgrounds:', error);
+      }
+    };
+
+    if (activeTab === 'design') {
+      loadUserBackgrounds();
     }
   }, [activeTab]);
 
@@ -102,6 +129,75 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
         ...updates
       }
     });
+  };
+
+  const handleUploadBackground = async (file: File) => {
+    setUploadingBackground(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        throw new Error('El archivo debe ser una imagen');
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error('El archivo no debe exceder 5MB');
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${selectedBranch.business_id}/${fileName}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('qr-backgrounds')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('qr-backgrounds')
+        .getPublicUrl(filePath);
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('user_qr_backgrounds')
+        .insert({
+          user_id: user.id,
+          business_id: selectedBranch.business_id,
+          name: file.name,
+          image_url: publicUrl,
+          file_size: file.size
+        });
+
+      if (dbError) throw dbError;
+
+      // Reload user backgrounds
+      const { data } = await supabase
+        .from('user_qr_backgrounds')
+        .select('id, name, image_url, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      setUserBackgrounds((data || []).map(bg => ({ ...bg, category: 'custom' })));
+
+      // Automatically select the new background
+      updateBackground({ imageUrl: publicUrl });
+
+    } catch (error: any) {
+      console.error('Error uploading background:', error);
+      alert(error.message || 'Error al cargar la imagen');
+    } finally {
+      setUploadingBackground(false);
+    }
   };
 
   const updateTypography = (updates: Partial<QRConfiguration['typography']>) => {
@@ -1219,10 +1315,12 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   );
 
   function BackgroundGalleryModal() {
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedCategory, setSelectedCategory] = useState<string>('custom');
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const categories = [
-      { id: 'all', name: 'Todos' },
+      { id: 'custom', name: 'Mis Fondos' },
+      { id: 'all', name: 'Librería' },
       { id: 'abstract', name: 'Abstracto' },
       { id: 'nature', name: 'Naturaleza' },
       { id: 'business', name: 'Negocios' },
@@ -1232,9 +1330,22 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
       { id: 'texture', name: 'Texturas' }
     ];
 
-    const filteredBackgrounds = selectedCategory === 'all'
+    const filteredBackgrounds = selectedCategory === 'custom'
+      ? userBackgrounds
+      : selectedCategory === 'all'
       ? backgroundImages
       : backgroundImages.filter(bg => bg.category === selectedCategory);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handleUploadBackground(file);
+      }
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
 
     return (
       <div
@@ -1282,6 +1393,43 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
+            {selectedCategory === 'custom' && (
+              <div className="mb-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingBackground}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 border-2 border-dashed"
+                  style={{
+                    backgroundColor: uploadingBackground ? 'rgb(243, 244, 246)' : 'white',
+                    borderColor: '#075E54',
+                    color: uploadingBackground ? 'rgb(107, 114, 128)' : '#075E54'
+                  }}
+                >
+                  {uploadingBackground ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#075E54' }}></div>
+                      <span>Subiendo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={20} />
+                      <span>Cargar fondo personalizado</span>
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-center mt-2" style={{ color: 'rgb(107, 114, 128)' }}>
+                  Formatos: JPG, PNG, WEBP | Máximo: 5MB
+                </p>
+              </div>
+            )}
+
             {filteredBackgrounds.length > 0 ? (
               <div className="grid grid-cols-3 gap-4">
                 {filteredBackgrounds.map((bg) => (
@@ -1314,6 +1462,16 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     </div>
                   </button>
                 ))}
+              </div>
+            ) : selectedCategory === 'custom' ? (
+              <div className="text-center py-12 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+                <Upload size={48} className="mx-auto mb-4" style={{ color: 'rgb(209, 213, 219)' }} />
+                <p className="text-sm font-medium mb-1" style={{ color: '#161616' }}>
+                  No tienes fondos personalizados
+                </p>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  Haz clic en "Cargar fondo personalizado" para agregar tus propias imágenes
+                </p>
               </div>
             ) : (
               <div className="text-center py-12 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
