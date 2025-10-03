@@ -100,37 +100,17 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       console.log('=== Starting PDF generation ===');
       console.log('Config:', config);
 
-      // Fetch images as base64
-      let backgroundSrc = '';
-      if (config.background.type === 'image' && config.background.imageUrl) {
-        console.log('Loading background image:', config.background.imageUrl);
-        try {
-          backgroundSrc = await getBase64(config.background.imageUrl);
-          console.log('Background image loaded, base64 length:', backgroundSrc.length);
-        } catch (error) {
-          console.error('Error loading background image:', error);
-        }
-      }
+      const backgroundSrc = config.background.type === 'image' && config.background.imageUrl
+        ? config.background.imageUrl
+        : '';
 
-      let logoSrc = '';
-      if (config.design.showLogo && businessProfile?.logo_url) {
-        console.log('Loading logo:', businessProfile.logo_url);
-        try {
-          logoSrc = await getBase64(businessProfile.logo_url);
-          console.log('Logo loaded, base64 length:', logoSrc.length);
-        } catch (error) {
-          console.error('Error loading logo:', error);
-        }
-      }
+      const logoSrc = config.design.showLogo && businessProfile?.logo_url
+        ? businessProfile.logo_url
+        : '';
 
-      let qrSrc = '';
-      console.log('Loading QR code:', qrImageUrl);
-      try {
-        qrSrc = await getBase64(qrImageUrl);
-        console.log('QR code loaded, base64 length:', qrSrc.length);
-      } catch (error) {
-        console.error('Error loading QR code:', error);
-      }
+      const qrSrc = qrImageUrl;
+
+      console.log('Image sources:', { backgroundSrc, logoSrc, qrSrc });
 
       // --- Construcción del fondo ---
       let backgroundStyle = '';
@@ -251,10 +231,15 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         logging: true,
         width: 448,
         height: contentDiv.scrollHeight,
+        proxy: undefined,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById('pdf-content');
           if (clonedElement) {
             clonedElement.style.width = '448px';
+            const images = clonedElement.getElementsByTagName('img');
+            for (let i = 0; i < images.length; i++) {
+              images[i].crossOrigin = 'anonymous';
+            }
           }
         }
       });
