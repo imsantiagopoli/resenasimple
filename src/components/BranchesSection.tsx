@@ -391,7 +391,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                     />
                   </div>
 
-                  <div className="md:col-span-2 space-y-2">
+                  <div className="space-y-2">
                     <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
                       Dirección
                     </label>
@@ -407,6 +407,41 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                         backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
                       }}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Link de Google Maps
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="url"
+                        value={currentData.googleMapsLink}
+                        onChange={(e) => updateBranch(index, 'googleMapsLink', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="https://maps.google.com/..."
+                        className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        style={{
+                          borderColor: 'rgb(209, 213, 219)',
+                          color: '#161616',
+                          backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
+                        }}
+                      />
+
+                      {!isEditing && currentData.googleMapsLink && (
+                        <a
+                          href={currentData.googleMapsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg transition-colors duration-200"
+                          style={{ color: 'rgb(107, 114, 128)' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <ExternalLink size={16} />
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   <div className="md:col-span-2 space-y-2">
@@ -467,41 +502,6 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                         <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
                           {window.location.origin}/v/{currentData.slug}
                         </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
-                      Link de Google Maps
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="url"
-                        value={currentData.googleMapsLink}
-                        onChange={(e) => updateBranch(index, 'googleMapsLink', e.target.value)}
-                        disabled={!isEditing}
-                        placeholder="https://maps.google.com/place/..."
-                        className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        style={{
-                          borderColor: 'rgb(209, 213, 219)',
-                          color: '#161616',
-                          backgroundColor: isEditing ? 'white' : 'rgb(243, 244, 246)'
-                        }}
-                      />
-
-                      {!isEditing && currentData.googleMapsLink && (
-                        <a
-                          href={currentData.googleMapsLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-lg transition-colors duration-200"
-                          style={{ color: 'rgb(107, 114, 128)' }}
-                          onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
-                        >
-                          <ExternalLink size={16} />
-                        </a>
                       )}
                     </div>
                   </div>
