@@ -93,6 +93,7 @@ export interface VotingConfigurationRecord {
   email_requerido: boolean
   prompt_preventivo_activo: boolean
   texto_prompt_preventivo: string
+  color_prompt: string
   created_at: string
   updated_at: string
 }
@@ -243,6 +244,7 @@ export interface VotingConfiguration {
     prompt: {
       enabled: boolean
       text: string
+      color: string
     }
   }
   created_at: string
@@ -442,7 +444,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         },
         prompt: {
           enabled: record.prompt_preventivo_activo,
-          text: record.texto_prompt_preventivo
+          text: record.texto_prompt_preventivo,
+          color: record.color_prompt || '#FEF3C7'
         }
       },
       created_at: record.created_at,
@@ -576,7 +579,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       solicitar_email: config.logic.privateWorkflow.collectEmail,
       email_requerido: config.logic.privateWorkflow.emailRequired,
       prompt_preventivo_activo: config.logic.prompt.enabled,
-      texto_prompt_preventivo: config.logic.prompt.text
+      texto_prompt_preventivo: config.logic.prompt.text,
+      color_prompt: config.logic.prompt.color
     };
   };
 

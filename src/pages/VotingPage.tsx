@@ -179,7 +179,8 @@ const VotingPage: React.FC = () => {
             },
             prompt: {
               enabled: configData.prompt_preventivo_activo,
-              text: configData.texto_prompt_preventivo
+              text: configData.texto_prompt_preventivo,
+              color: configData.color_prompt || '#FEF3C7'
             }
           },
           created_at: configData.created_at,
@@ -611,11 +612,11 @@ const VotingPage: React.FC = () => {
 
             {/* Prompt Preventivo */}
             {config.logic.prompt.enabled && (
-              <div 
+              <div
                 className="p-4 rounded-lg border text-center"
-                style={{ 
-                  backgroundColor: '#075E54' + '08',
-                  borderColor: '#075E54' + '30'
+                style={{
+                  backgroundColor: config.logic.prompt.color,
+                  borderColor: config.logic.prompt.color
                 }}
               >
                 <p className="text-sm leading-relaxed" style={{ color: 'rgb(107, 114, 128)' }}>

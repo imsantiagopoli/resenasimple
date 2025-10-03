@@ -392,23 +392,42 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
         </label>
 
         {config.logic.prompt.enabled && (
-          <div className="space-y-2 ml-6">
-            <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-              Texto del prompt
-            </label>
-            <textarea
-              value={config.logic.prompt.text}
-              onChange={(e) => updateLogic({
-                prompt: { ...config.logic.prompt, text: e.target.value }
-              })}
-              rows={3}
-              className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: 'white'
-              }}
-            />
+          <div className="space-y-4 ml-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                Texto del prompt
+              </label>
+              <textarea
+                value={config.logic.prompt.text}
+                onChange={(e) => updateLogic({
+                  prompt: { ...config.logic.prompt, text: e.target.value }
+                })}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200 resize-none"
+                style={{
+                  borderColor: 'rgb(209, 213, 219)',
+                  color: '#161616',
+                  backgroundColor: 'white'
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                Color de fondo
+              </label>
+              <input
+                type="color"
+                value={config.logic.prompt.color}
+                onChange={(e) => updateLogic({
+                  prompt: { ...config.logic.prompt, color: e.target.value }
+                })}
+                className="w-full h-10 rounded-lg border cursor-pointer"
+                style={{
+                  borderColor: 'rgb(209, 213, 219)'
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
