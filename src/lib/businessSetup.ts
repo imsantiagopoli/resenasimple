@@ -11,7 +11,8 @@ const generateSlug = (name: string): string => {
 export const createBusinessAndBranch = async (
   userId: string,
   restaurantName: string,
-  businessType: string
+  businessType: string,
+  logoUrl?: string
 ) => {
   try {
     const { data: businessData, error: businessError } = await supabase
@@ -21,6 +22,7 @@ export const createBusinessAndBranch = async (
           user_id: userId,
           name: restaurantName,
           description: `Auténtico ${businessType.toLowerCase()} con los mejores sabores.`,
+          logo_url: logoUrl || null,
         }
       ])
       .select()

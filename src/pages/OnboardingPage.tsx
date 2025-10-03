@@ -69,6 +69,7 @@ const OnboardingPage: React.FC = () => {
     }
 
     try {
+      // Update profile with Google data if needed
       const { data: profile } = await supabase
         .from('profiles')
         .select('first_name, last_name')
@@ -90,10 +91,38 @@ const OnboardingPage: React.FC = () => {
           .eq('id', user.id);
       }
 
+      // Upload logo if provided
+      let logoUrl: string | undefined = undefined;
+      if (formData.logo) {
+        const fileExt = formData.logo.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('business-logos')
+          .upload(filePath, formData.logo, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Error uploading logo:', uploadError);
+          throw new Error('Error al subir el logo');
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('business-logos')
+          .getPublicUrl(filePath);
+
+        logoUrl = publicUrl;
+      }
+
+      // Create business and branch with logo
       await createBusinessAndBranch(
         user.id,
         formData.restaurantName,
-        formData.businessType
+        formData.businessType,
+        logoUrl
       );
 
       await refetchBusinessData();
