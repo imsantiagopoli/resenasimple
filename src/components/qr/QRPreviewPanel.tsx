@@ -120,21 +120,20 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       tempContainer.style.left = '-9999px';
       tempContainer.style.top = '0';
       tempContainer.style.width = '448px';
-      tempContainer.style.background = 'white';
 
       // Build background styles
       let backgroundStyle = '';
       if (config.background.type === 'solid') {
-        backgroundStyle = `background-color: ${config.background.color};`;
+        backgroundStyle = `background-color: ${config.background.color} !important;`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
-        backgroundStyle = `background: linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
+        backgroundStyle = `background: linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end}) !important;`;
       } else if (config.background.type === 'image' && backgroundImageBase64) {
-        backgroundStyle = `background-image: url(${backgroundImageBase64}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+        backgroundStyle = `background-image: url('${backgroundImageBase64}') !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;`;
       }
 
       // Build the HTML content with base64 images
       tempContainer.innerHTML = `
-        <div style="text-align: center; width: 100%; min-height: 600px; padding: 3rem 2rem; ${backgroundStyle}">
+        <div id="pdf-content" style="text-align: center; width: 100%; min-height: 600px; padding: 3rem 2rem; box-sizing: border-box; ${backgroundStyle}">
           ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
           ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
           ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
@@ -196,15 +195,20 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // Longer delay to ensure all content is rendered
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Generate canvas from HTML
-      const canvas = await html2canvas(tempContainer, {
+      // Get the actual content div (not the container)
+      const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
+
+      // Generate canvas from HTML - capture the content div directly
+      const canvas = await html2canvas(contentDiv, {
         scale: 2,
         backgroundColor: null,
-        logging: false,
+        logging: true,
         useCORS: true,
         allowTaint: true,
         foreignObjectRendering: false,
-        imageTimeout: 0
+        imageTimeout: 0,
+        width: 448,
+        windowWidth: 448
       });
 
       // Calculate PDF dimensions
