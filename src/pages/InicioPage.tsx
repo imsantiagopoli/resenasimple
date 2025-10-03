@@ -1,15 +1,9 @@
 import React from 'react';
-import { 
+import {
   TrendingUp,
   Users,
   Star,
   MessageCircle,
-  Calendar,
-  Clock,
-  ArrowUp,
-  ArrowDown,
-  BarChart3,
-  QrCode,
   Building2,
   Vote
 } from 'lucide-react';
@@ -27,32 +21,24 @@ const InicioPage: React.FC = () => {
     {
       title: 'Votaciones Este Mes',
       value: statistics.totalSessions.toString(),
-      change: `+${todayStats.totalToday}`,
-      changeType: 'increase' as const,
       icon: Users,
       color: '#075E54'
     },
     {
       title: 'Rating Promedio',
       value: statistics.averageRating,
-      change: statistics.totalSessions > 0 ? `+${todayStats.totalToday}` : '+0',
-      changeType: 'increase' as const,
       icon: Star,
       color: '#f59e0b'
     },
     {
       title: 'Reseñas en Google',
       value: statistics.publicSessions.toString(),
-      change: `+${todayStats.publicToday}`,
-      changeType: 'increase' as const,
       icon: MessageCircle,
       color: '#3b82f6'
     },
     {
       title: 'Tasa de Reseñas Positivas',
       value: `${statistics.positiveReviewsRate}%`,
-      change: statistics.totalSessions > 0 ? `${todayStats.publicToday > 0 ? '+' : ''}${todayStats.publicToday}` : '+0',
-      changeType: 'increase' as const,
       icon: TrendingUp,
       color: '#10b981'
     }
@@ -119,18 +105,12 @@ const InicioPage: React.FC = () => {
             className="bg-white rounded-lg border p-6 transition-all duration-200 hover:shadow-md"
             style={{ borderColor: 'rgb(229, 231, 235)' }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div 
+            <div className="mb-4">
+              <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: stat.color + '20' }}
               >
                 <stat.icon size={20} style={{ color: stat.color }} />
-              </div>
-              <div className={`flex items-center space-x-1 text-xs font-medium ${
-                stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.changeType === 'increase' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                <span>{stat.change}</span>
               </div>
             </div>
             
