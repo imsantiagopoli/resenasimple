@@ -496,6 +496,150 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
               }}
             />
           </div>
+
+          {/* Botón de WhatsApp */}
+          <div className="space-y-3 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.logic.privateWorkflow.showWhatsAppButton}
+                onChange={(e) => updateLogic({
+                  privateWorkflow: { ...config.logic.privateWorkflow, showWhatsAppButton: e.target.checked }
+                })}
+                className="rounded border-gray-300 focus:ring-2"
+                style={{ accentColor: '#075E54' }}
+              />
+              <span className="text-sm font-medium" style={{ color: '#161616' }}>
+                Mostrar botón de contacto por WhatsApp
+              </span>
+            </label>
+
+            {config.logic.privateWorkflow.showWhatsAppButton && (
+              <div className="space-y-3 pl-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Texto del botón
+                  </label>
+                  <input
+                    type="text"
+                    value={config.logic.privateWorkflow.whatsAppButtonText}
+                    onChange={(e) => updateLogic({
+                      privateWorkflow: { ...config.logic.privateWorkflow, whatsAppButtonText: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+                    style={{
+                      borderColor: 'rgb(209, 213, 219)',
+                      color: '#161616',
+                      backgroundColor: 'white'
+                    }}
+                    placeholder="Contáctanos por WhatsApp"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Color del botón
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.logic.privateWorkflow.whatsAppButtonColor}
+                      onChange={(e) => updateLogic({
+                        privateWorkflow: { ...config.logic.privateWorkflow, whatsAppButtonColor: e.target.value }
+                      })}
+                      className="w-12 h-10 rounded-lg border cursor-pointer"
+                      style={{ borderColor: 'rgb(209, 213, 219)' }}
+                    />
+                    <input
+                      type="text"
+                      value={config.logic.privateWorkflow.whatsAppButtonColor}
+                      onChange={(e) => updateLogic({
+                        privateWorkflow: { ...config.logic.privateWorkflow, whatsAppButtonColor: e.target.value }
+                      })}
+                      className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+                      style={{
+                        borderColor: 'rgb(209, 213, 219)',
+                        color: '#161616',
+                        backgroundColor: 'white'
+                      }}
+                      placeholder="#25D366"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Botón de Email */}
+          <div className="space-y-3 p-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.logic.privateWorkflow.showEmailButton}
+                onChange={(e) => updateLogic({
+                  privateWorkflow: { ...config.logic.privateWorkflow, showEmailButton: e.target.checked }
+                })}
+                className="rounded border-gray-300 focus:ring-2"
+                style={{ accentColor: '#075E54' }}
+              />
+              <span className="text-sm font-medium" style={{ color: '#161616' }}>
+                Mostrar botón de contacto por Email
+              </span>
+            </label>
+
+            {config.logic.privateWorkflow.showEmailButton && (
+              <div className="space-y-3 pl-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Texto del botón
+                  </label>
+                  <input
+                    type="text"
+                    value={config.logic.privateWorkflow.emailButtonText}
+                    onChange={(e) => updateLogic({
+                      privateWorkflow: { ...config.logic.privateWorkflow, emailButtonText: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+                    style={{
+                      borderColor: 'rgb(209, 213, 219)',
+                      color: '#161616',
+                      backgroundColor: 'white'
+                    }}
+                    placeholder="Contáctanos por Email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Color del botón
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.logic.privateWorkflow.emailButtonColor}
+                      onChange={(e) => updateLogic({
+                        privateWorkflow: { ...config.logic.privateWorkflow, emailButtonColor: e.target.value }
+                      })}
+                      className="w-12 h-10 rounded-lg border cursor-pointer"
+                      style={{ borderColor: 'rgb(209, 213, 219)' }}
+                    />
+                    <input
+                      type="text"
+                      value={config.logic.privateWorkflow.emailButtonColor}
+                      onChange={(e) => updateLogic({
+                        privateWorkflow: { ...config.logic.privateWorkflow, emailButtonColor: e.target.value }
+                      })}
+                      className="flex-1 px-3 py-2 rounded-lg border text-sm transition-all duration-200"
+                      style={{
+                        borderColor: 'rgb(209, 213, 219)',
+                        color: '#161616',
+                        backgroundColor: 'white'
+                      }}
+                      placeholder="#075E54"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

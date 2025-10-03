@@ -92,6 +92,12 @@ export interface VotingConfigurationRecord {
   telefono_requerido: boolean
   solicitar_email: boolean
   email_requerido: boolean
+  mostrar_boton_whatsapp: boolean
+  texto_boton_whatsapp: string
+  color_boton_whatsapp: string
+  mostrar_boton_email: boolean
+  texto_boton_email: string
+  color_boton_email: string
   prompt_preventivo_activo: boolean
   texto_prompt_preventivo: string
   color_prompt: string
@@ -242,6 +248,12 @@ export interface VotingConfiguration {
       phoneRequired: boolean
       collectEmail: boolean
       emailRequired: boolean
+      showWhatsAppButton: boolean
+      whatsAppButtonText: string
+      whatsAppButtonColor: string
+      showEmailButton: boolean
+      emailButtonText: string
+      emailButtonColor: string
     }
     prompt: {
       enabled: boolean
@@ -443,7 +455,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           collectPhone: record.solicitar_telefono,
           phoneRequired: record.telefono_requerido,
           collectEmail: record.solicitar_email,
-          emailRequired: record.email_requerido
+          emailRequired: record.email_requerido,
+          showWhatsAppButton: record.mostrar_boton_whatsapp,
+          whatsAppButtonText: record.texto_boton_whatsapp || 'Contáctanos por WhatsApp',
+          whatsAppButtonColor: record.color_boton_whatsapp || '#25D366',
+          showEmailButton: record.mostrar_boton_email,
+          emailButtonText: record.texto_boton_email || 'Contáctanos por Email',
+          emailButtonColor: record.color_boton_email || '#075E54'
         },
         prompt: {
           enabled: record.prompt_preventivo_activo,
@@ -582,6 +600,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       telefono_requerido: config.logic.privateWorkflow.phoneRequired,
       solicitar_email: config.logic.privateWorkflow.collectEmail,
       email_requerido: config.logic.privateWorkflow.emailRequired,
+      mostrar_boton_whatsapp: config.logic.privateWorkflow.showWhatsAppButton,
+      texto_boton_whatsapp: config.logic.privateWorkflow.whatsAppButtonText,
+      color_boton_whatsapp: config.logic.privateWorkflow.whatsAppButtonColor,
+      mostrar_boton_email: config.logic.privateWorkflow.showEmailButton,
+      texto_boton_email: config.logic.privateWorkflow.emailButtonText,
+      color_boton_email: config.logic.privateWorkflow.emailButtonColor,
       prompt_preventivo_activo: config.logic.prompt.enabled,
       texto_prompt_preventivo: config.logic.prompt.text,
       color_prompt: config.logic.prompt.color
