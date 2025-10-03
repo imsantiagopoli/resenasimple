@@ -246,6 +246,7 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
+    <>
     <div className="p-6 space-y-8">
       {/* Header */}
       <div className="space-y-2">
@@ -632,6 +633,7 @@ const SettingsPage: React.FC = () => {
           </a>
         </div>
       </div>
+    </div>
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
@@ -764,7 +766,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
