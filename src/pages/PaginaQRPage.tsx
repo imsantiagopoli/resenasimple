@@ -117,6 +117,14 @@ const PaginaQRPage: React.FC = () => {
       console.log('Logo base64 length:', logoBase64.length);
     }
 
+    // Convert background image to base64 if exists
+    let backgroundBase64 = '';
+    if (config.background.type === 'image' && config.background.imageUrl) {
+      console.log('Converting background to base64:', config.background.imageUrl);
+      backgroundBase64 = await getImageAsBase64(config.background.imageUrl);
+      console.log('Background base64 length:', backgroundBase64.length);
+    }
+
     // Log contact info
     console.log('Contact info:', {
       showPhone: config.content.showPhone,
@@ -139,8 +147,8 @@ const PaginaQRPage: React.FC = () => {
       backgroundStyle = `background-color: ${config.background.color};`;
     } else if (config.background.type === 'gradient' && config.background.gradient) {
       backgroundStyle = `background: linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
-    } else if (config.background.type === 'image' && config.background.imageUrl) {
-      backgroundStyle = `background-image: url(${config.background.imageUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+    } else if (config.background.type === 'image' && backgroundBase64) {
+      backgroundStyle = `background-image: url(${backgroundBase64}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
     }
 
     // Build the HTML content
@@ -223,8 +231,8 @@ const PaginaQRPage: React.FC = () => {
         scale: 2,
         backgroundColor: '#ffffff',
         logging: true,
-        useCORS: false,
-        allowTaint: true
+        useCORS: true,
+        allowTaint: false
       });
 
       console.log('Canvas generated:', canvas.width, 'x', canvas.height);
