@@ -24,6 +24,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isLoadingQR, setIsLoadingQR] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const proxy = 'https://cors-anywhere.herokuapp.com/';
 
   // Convert Tailwind direction to CSS gradient direction
   const convertGradientDirection = (tailwindDir: string): string => {
@@ -59,7 +60,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     const link = document.createElement('a');
     
     // Fetch the image and create a blob URL
-    fetch(qrURL)
+    fetch(proxy + qrURL)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
@@ -98,18 +99,18 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         mainContainerStyle = 'background-color: transparent;';
       } else if (config.background.type === 'image' && config.background.imageUrl) {
         // Usamos la URL original y crossorigin="anonymous"
-        backgroundElement = `<img src="${config.background.imageUrl}" crossorigin="anonymous" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
+        backgroundElement = `<img src="${proxy + config.background.imageUrl}" crossorigin="anonymous" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
         mainContainerStyle = 'background-color: transparent;';
       }
 
       // --- Construcción del contenido HTML ---
       const contentHTML = `
-        ${config.design.showLogo && businessProfile?.logo_url ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${businessProfile.logo_url}" crossorigin="anonymous" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+        ${config.design.showLogo && businessProfile?.logo_url ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${proxy + businessProfile.logo_url}" crossorigin="anonymous" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${qrImageUrl}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img src="${proxy + qrImageUrl}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
