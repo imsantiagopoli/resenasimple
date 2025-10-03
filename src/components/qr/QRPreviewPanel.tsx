@@ -77,57 +77,18 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       });
   };
 
-  // Helper function to convert image URL to base64
-  const getImageAsBase64 = async (url: string): Promise<string> => {
-    try {
-      const response = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit'
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          resolve(result);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error converting image to base64:', url, error);
-      return '';
-    }
-  };
+  // Helper getImageAsBase64 ha sido eliminado. No es necesario.
 
   const handlePrint = async () => {
     setIsGeneratingPDF(true);
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
+    tempContainer.style.width = '448px';
+
     try {
-      const qrURL = generateQRURL(selectedBranch.slug, config);
-      const qrBase64 = await getImageAsBase64(qrURL);
-      if (!qrBase64) throw new Error('Failed to convert QR code to base64');
-
-      let logoBase64 = '';
-      if (config.design.showLogo && businessProfile?.logo_url) {
-        logoBase64 = await getImageAsBase64(businessProfile.logo_url);
-      }
-
-      let backgroundImageBase64 = '';
-      if (config.background.type === 'image' && config.background.imageUrl) {
-        backgroundImageBase64 = await getImageAsBase64(config.background.imageUrl);
-      }
-
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '448px';
-
+      // --- Construcción del fondo ---
       let backgroundElement = '';
       let mainContainerStyle = `background-color: ${config.background.type === 'solid' ? config.background.color : '#ffffff'};`;
 
@@ -135,33 +96,27 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
         backgroundElement = `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end}); z-index: 0;"></div>`;
         mainContainerStyle = 'background-color: transparent;';
-      } else if (config.background.type === 'image' && backgroundImageBase64) {
-        backgroundElement = `<img src="${backgroundImageBase64}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
+      } else if (config.background.type === 'image' && config.background.imageUrl) {
+        // Usamos la URL original y crossorigin="anonymous"
+        backgroundElement = `<img src="${config.background.imageUrl}" crossorigin="anonymous" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
         mainContainerStyle = 'background-color: transparent;';
       }
 
+      // --- Construcción del contenido HTML ---
       const contentHTML = `
-        ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+        ${config.design.showLogo && businessProfile?.logo_url ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${businessProfile.logo_url}" crossorigin="anonymous" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${qrBase64}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img src="${qrImageUrl}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
         ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email) ? `
           <div style="margin-top: 1.5rem; text-align: center; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor}; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
-            ${config.content.showPhone && selectedBranch.phone ? `
-              <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                <span style="font-weight: 500;">Teléfono:</span> <span>${selectedBranch.phone}</span>
-              </div>
-            ` : ''}
-            ${config.content.showEmail && selectedBranch.email ? `
-              <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                <span style="font-weight: 500;">Correo:</span> <span>${selectedBranch.email}</span>
-              </div>
-            ` : ''}
+            ${config.content.showPhone && selectedBranch.phone ? `<div style="display: inline-flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 500;">Teléfono:</span> <span>${selectedBranch.phone}</span></div>` : ''}
+            ${config.content.showEmail && selectedBranch.email ? `<div style="display: inline-flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 500;">Correo:</span> <span>${selectedBranch.email}</span></div>` : ''}
           </div>
         ` : ''}
         ${config.print.includeInstructions ? `
@@ -188,30 +143,34 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       document.body.appendChild(tempContainer);
 
-      await document.fonts.ready;
-      
+      // --- Esperar a que las imágenes carguen ---
       const images = tempContainer.getElementsByTagName('img');
       await Promise.all(
         Array.from(images).map((img) => {
           if (img.complete) return Promise.resolve();
           return new Promise((resolve) => {
             img.onload = resolve;
-            img.onerror = resolve;
+            img.onerror = () => {
+              console.warn(`No se pudo cargar la imagen: ${img.src}`);
+              resolve(); // Resolvemos incluso en error para no detener todo el proceso.
+            };
           });
         })
       );
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await document.fonts.ready;
+      await new Promise(resolve => setTimeout(resolve, 300)); // Pequeña espera para renderizado final
 
+      // --- Generar Canvas y PDF ---
       const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
-      
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
+        useCORS: true, // Clave para cargar imágenes de otros dominios
+        allowTaint: false,
         backgroundColor: null,
-        useCORS: true,
-        imageTimeout: 0,
+        imageTimeout: 15000,
         width: 448,
-        windowWidth: 448
+        windowWidth: 448,
       });
       
       const imgWidth = 448;
@@ -223,16 +182,17 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         format: [imgWidth, imgHeight]
       });
 
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
 
-      document.body.removeChild(tempContainer);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error al generar el PDF. Por favor intenta de nuevo.');
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el PDF. Revisa la consola para más detalles. Es posible que las imágenes no puedan ser accedidas (problema de CORS).');
     } finally {
       setIsGeneratingPDF(false);
+      if (tempContainer.parentNode) {
+        tempContainer.parentNode.removeChild(tempContainer);
+      }
     }
   };
 
