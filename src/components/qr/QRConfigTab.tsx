@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { QrCode, FileText, Printer, RotateCcw, AlertCircle, Check } from 'lucide-react';
+import { QrCode, FileText, Printer, RotateCcw, AlertCircle, Check, ArrowDown, ArrowUp, ArrowRight, ArrowLeft, ArrowDownRight, ArrowDownLeft, ArrowUpRight, ArrowUpLeft } from 'lucide-react';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { useFonts } from '../../hooks/useFonts';
 import { BusinessBranch } from '../../hooks/useBusiness';
@@ -638,29 +638,43 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Dirección
+                    Dirección del Gradiente
                   </label>
-                  <select
-                    value={config.background.gradient?.direction || 'to-b'}
-                    onChange={(e) => updateBackground({
-                      gradient: {
-                        start: config.background.gradient?.start || '#FFFFFF',
-                        end: config.background.gradient?.end || '#F3F4F6',
-                        direction: e.target.value
-                      }
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { value: 'to-t', icon: ArrowUp, label: 'Arriba' },
+                      { value: 'to-b', icon: ArrowDown, label: 'Abajo' },
+                      { value: 'to-l', icon: ArrowLeft, label: 'Izquierda' },
+                      { value: 'to-r', icon: ArrowRight, label: 'Derecha' },
+                      { value: 'to-tl', icon: ArrowUpLeft, label: '↖' },
+                      { value: 'to-tr', icon: ArrowUpRight, label: '↗' },
+                      { value: 'to-bl', icon: ArrowDownLeft, label: '↙' },
+                      { value: 'to-br', icon: ArrowDownRight, label: '↘' }
+                    ].map((dir) => {
+                      const Icon = dir.icon;
+                      const isSelected = (config.background.gradient?.direction || 'to-b') === dir.value;
+                      return (
+                        <button
+                          key={dir.value}
+                          onClick={() => updateBackground({
+                            gradient: {
+                              start: config.background.gradient?.start || '#FFFFFF',
+                              end: config.background.gradient?.end || '#F3F4F6',
+                              direction: dir.value
+                            }
+                          })}
+                          className="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+                          style={{
+                            borderColor: isSelected ? '#075E54' : 'rgb(209, 213, 219)',
+                            backgroundColor: isSelected ? '#075E54' + '10' : 'white'
+                          }}
+                          title={dir.label}
+                        >
+                          <Icon size={20} style={{ color: isSelected ? '#075E54' : 'rgb(107, 114, 128)' }} />
+                        </button>
+                      );
                     })}
-                    className="w-full px-3 py-2 border rounded-lg text-sm"
-                    style={{ borderColor: 'rgb(209, 213, 219)' }}
-                  >
-                    <option value="to-b">Arriba → Abajo</option>
-                    <option value="to-t">Abajo → Arriba</option>
-                    <option value="to-r">Izquierda → Derecha</option>
-                    <option value="to-l">Derecha → Izquierda</option>
-                    <option value="to-br">Diagonal ↘</option>
-                    <option value="to-bl">Diagonal ↙</option>
-                    <option value="to-tr">Diagonal ↗</option>
-                    <option value="to-tl">Diagonal ↖</option>
-                  </select>
+                  </div>
                 </div>
               </div>
             )}

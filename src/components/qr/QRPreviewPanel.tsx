@@ -24,6 +24,21 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const [isLoadingQR, setIsLoadingQR] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
+  // Convert Tailwind direction to CSS gradient direction
+  const convertGradientDirection = (tailwindDir: string): string => {
+    const directionMap: Record<string, string> = {
+      'to-t': 'to top',
+      'to-b': 'to bottom',
+      'to-l': 'to left',
+      'to-r': 'to right',
+      'to-tl': 'to top left',
+      'to-tr': 'to top right',
+      'to-bl': 'to bottom left',
+      'to-br': 'to bottom right'
+    };
+    return directionMap[tailwindDir] || 'to bottom';
+  };
+
   // Generate QR URL whenever config or selected branch changes
   React.useEffect(() => {
     if (selectedBranch && config) {
@@ -106,7 +121,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       if (config.background.type === 'solid') {
         backgroundStyle = `background-color: ${config.background.color};`;
       } else if (config.background.type === 'gradient' && config.background.gradient) {
-        backgroundStyle = `background: linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
+        backgroundStyle = `background: linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
       } else if (config.background.type === 'image' && config.background.imageUrl) {
         backgroundStyle = `background-image: url(${config.background.imageUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;`;
       }
@@ -307,7 +322,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             ? { backgroundColor: config.background.color }
             : config.background.type === 'gradient' && config.background.gradient
             ? {
-                background: `linear-gradient(${config.background.gradient.direction}, ${config.background.gradient.start}, ${config.background.gradient.end})`
+                background: `linear-gradient(${convertGradientDirection(config.background.gradient.direction)}, ${config.background.gradient.start}, ${config.background.gradient.end})`
               }
             : config.background.type === 'image' && config.background.imageUrl
             ? {
