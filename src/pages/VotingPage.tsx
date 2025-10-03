@@ -141,6 +141,7 @@ const VotingPage: React.FC = () => {
               textColor: configData.color_texto_oferta || '#6b7280'
             },
             socials: {
+              facebook: configData.mostrar_facebook,
               instagram: configData.mostrar_instagram,
               tiktok: configData.mostrar_tiktok,
               linkedin: configData.mostrar_linkedin,
