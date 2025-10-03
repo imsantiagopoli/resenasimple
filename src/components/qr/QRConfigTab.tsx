@@ -1313,33 +1313,24 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   return null;
 
   function BackgroundGalleryModal() {
-    const [selectedCategory, setSelectedCategory] = useState<string>('custom');
+    const [mainTab, setMainTab] = useState<'gallery' | 'custom'>('gallery');
+    const [selectedFilter, setSelectedFilter] = useState<string>('all');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const categories = [
-      { id: 'custom', name: 'Mis Fondos' },
-      { id: 'all', name: 'Librería' },
-      { id: 'abstract', name: 'Abstracto' },
-      { id: 'nature', name: 'Naturaleza' },
-      { id: 'business', name: 'Negocios' },
-      { id: 'minimalist', name: 'Minimalista' },
-      { id: 'colorful', name: 'Colorido' },
-      { id: 'patterns', name: 'Patrones' },
-      { id: 'texture', name: 'Texturas' }
-    ];
+    // Get unique categories from backgroundImages
+    const libraryCategories = Array.from(new Set(backgroundImages.map(bg => bg.category)))
+      .filter(cat => cat && cat !== 'custom')
+      .sort();
 
-    const filteredBackgrounds = selectedCategory === 'custom'
-      ? userBackgrounds
-      : selectedCategory === 'all'
+    const filteredLibraryBackgrounds = selectedFilter === 'all'
       ? backgroundImages
-      : backgroundImages.filter(bg => bg.category === selectedCategory);
+      : backgroundImages.filter(bg => bg.category === selectedFilter);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
         handleUploadBackground(file);
       }
-      // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -1347,135 +1338,260 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
         onClick={() => setShowGalleryModal(false)}
       >
         <div
-          className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+          className="bg-white rounded-2xl shadow-2xl flex flex-col"
+          style={{ width: '1000px', height: '700px' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <h2 className="text-2xl font-bold" style={{ color: '#161616' }}>Galería de Fondos</h2>
+          <div className="flex items-center justify-between px-8 py-6 border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <div>
+              <h2 className="text-2xl font-bold" style={{ color: '#161616' }}>Fondos para QR</h2>
+              <p className="text-sm mt-1" style={{ color: 'rgb(107, 114, 128)' }}>Selecciona o sube tus propios fondos</p>
+            </div>
             <button
               onClick={() => setShowGalleryModal(false)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2.5 rounded-lg transition-colors"
+              style={{ color: 'rgb(107, 114, 128)' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
           </div>
 
-          {/* Category Tabs */}
-          <div className="px-6 pt-4 border-b overflow-x-auto" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-            <div className="flex space-x-1">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="px-4 py-2 text-sm font-medium rounded-t-lg transition-all whitespace-nowrap"
-                  style={{
-                    color: selectedCategory === category.id ? '#075E54' : 'rgb(107, 114, 128)',
-                    backgroundColor: selectedCategory === category.id ? 'white' : 'transparent',
-                    borderBottom: selectedCategory === category.id ? '2px solid #075E54' : '2px solid transparent'
-                  }}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
+          {/* Main Tabs */}
+          <div className="flex border-b px-8" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <button
+              onClick={() => setMainTab('gallery')}
+              className="px-4 py-3 text-sm font-semibold transition-all relative"
+              style={{
+                color: mainTab === 'gallery' ? '#075E54' : 'rgb(107, 114, 128)'
+              }}
+            >
+              Galería
+              {mainTab === 'gallery' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#075E54' }}></div>
+              )}
+            </button>
+            <button
+              onClick={() => setMainTab('custom')}
+              className="px-4 py-3 text-sm font-semibold transition-all relative ml-2"
+              style={{
+                color: mainTab === 'custom' ? '#075E54' : 'rgb(107, 114, 128)'
+              }}
+            >
+              Mis Fondos
+              {mainTab === 'custom' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#075E54' }}></div>
+              )}
+            </button>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {selectedCategory === 'custom' && (
-              <div className="mb-4">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingBackground}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 border-2 border-dashed"
-                  style={{
-                    backgroundColor: uploadingBackground ? 'rgb(243, 244, 246)' : 'white',
-                    borderColor: '#075E54',
-                    color: uploadingBackground ? 'rgb(107, 114, 128)' : '#075E54'
-                  }}
-                >
-                  {uploadingBackground ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#075E54' }}></div>
-                      <span>Subiendo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={20} />
-                      <span>Cargar fondo personalizado</span>
-                    </>
-                  )}
-                </button>
-                <p className="text-xs text-center mt-2" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Formatos: JPG, PNG, WEBP | Máximo: 5MB
-                </p>
-              </div>
-            )}
+          {/* Content Area */}
+          <div className="flex-1 flex overflow-hidden">
+            {mainTab === 'gallery' ? (
+              <>
+                {/* Sidebar with filters */}
+                <div className="w-48 border-r py-6 px-4 overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)', backgroundColor: 'rgb(249, 250, 251)' }}>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-3 px-2" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Filtrar
+                  </p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setSelectedFilter('all')}
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                      style={{
+                        backgroundColor: selectedFilter === 'all' ? '#075E54' : 'transparent',
+                        color: selectedFilter === 'all' ? 'white' : 'rgb(55, 65, 81)'
+                      }}
+                    >
+                      Todos ({backgroundImages.length})
+                    </button>
+                    {libraryCategories.map((category) => {
+                      const count = backgroundImages.filter(bg => bg.category === category).length;
+                      const categoryNames: Record<string, string> = {
+                        abstract: 'Abstracto',
+                        nature: 'Naturaleza',
+                        business: 'Negocios',
+                        minimalist: 'Minimalista',
+                        colorful: 'Colorido',
+                        patterns: 'Patrones',
+                        texture: 'Texturas'
+                      };
+                      return (
+                        <button
+                          key={category}
+                          onClick={() => setSelectedFilter(category)}
+                          className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                          style={{
+                            backgroundColor: selectedFilter === category ? '#075E54' : 'transparent',
+                            color: selectedFilter === category ? 'white' : 'rgb(55, 65, 81)'
+                          }}
+                        >
+                          {categoryNames[category] || category} ({count})
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            {filteredBackgrounds.length > 0 ? (
-              <div className="grid grid-cols-3 gap-4">
-                {filteredBackgrounds.map((bg) => (
+                {/* Gallery Grid */}
+                <div className="flex-1 overflow-y-auto p-6">
+                  {filteredLibraryBackgrounds.length > 0 ? (
+                    <div className="grid grid-cols-4 gap-4">
+                      {filteredLibraryBackgrounds.map((bg) => (
+                        <button
+                          key={bg.id}
+                          onClick={() => {
+                            updateBackground({ imageUrl: bg.image_url });
+                            setShowGalleryModal(false);
+                          }}
+                          className="relative group rounded-xl overflow-hidden border-2 transition-all duration-200"
+                          style={{
+                            borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                            aspectRatio: '16/10'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (config.background.imageUrl !== bg.image_url) {
+                              e.currentTarget.style.borderColor = '#075E54';
+                              e.currentTarget.style.transform = 'scale(1.02)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (config.background.imageUrl !== bg.image_url) {
+                              e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }
+                          }}
+                        >
+                          <img
+                            src={bg.image_url}
+                            alt={bg.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {config.background.imageUrl === bg.image_url && (
+                            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(7, 94, 84, 0.7)' }}>
+                              <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
+                                <Check size={20} color="white" strokeWidth={3} />
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                          No hay fondos en esta categoría
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="mb-6">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
                   <button
-                    key={bg.id}
-                    onClick={() => {
-                      updateBackground({ imageUrl: bg.image_url });
-                      setShowGalleryModal(false);
-                    }}
-                    className="relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingBackground}
+                    className="w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 border-2 border-dashed"
                     style={{
-                      borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
-                      aspectRatio: '16/9'
+                      backgroundColor: uploadingBackground ? 'rgb(243, 244, 246)' : 'white',
+                      borderColor: uploadingBackground ? 'rgb(209, 213, 219)' : '#075E54',
+                      color: uploadingBackground ? 'rgb(107, 114, 128)' : '#075E54'
                     }}
                   >
-                    <img
-                      src={bg.image_url}
-                      alt={bg.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {config.background.imageUrl === bg.image_url && (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: '#075E54' + '80' }}>
-                        <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
-                          <Check size={24} color="white" />
-                        </div>
-                      </div>
+                    {uploadingBackground ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#075E54' }}></div>
+                        <span>Subiendo imagen...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={22} />
+                        <span>Subir nuevo fondo</span>
+                      </>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                      <p className="text-xs font-medium text-white truncate">{bg.name}</p>
-                    </div>
                   </button>
-                ))}
-              </div>
-            ) : selectedCategory === 'custom' ? (
-              <div className="text-center py-12 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
-                <Upload size={48} className="mx-auto mb-4" style={{ color: 'rgb(209, 213, 219)' }} />
-                <p className="text-sm font-medium mb-1" style={{ color: '#161616' }}>
-                  No tienes fondos personalizados
-                </p>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Haz clic en "Cargar fondo personalizado" para agregar tus propias imágenes
-                </p>
-              </div>
-            ) : (
-              <div className="text-center py-12 px-4 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  No hay fondos disponibles en esta categoría
-                </p>
+                  <p className="text-xs text-center mt-3" style={{ color: 'rgb(107, 114, 128)' }}>
+                    JPG, PNG o WEBP • Máximo 5MB
+                  </p>
+                </div>
+
+                {userBackgrounds.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-4">
+                    {userBackgrounds.map((bg) => (
+                      <button
+                        key={bg.id}
+                        onClick={() => {
+                          updateBackground({ imageUrl: bg.image_url });
+                          setShowGalleryModal(false);
+                        }}
+                        className="relative group rounded-xl overflow-hidden border-2 transition-all duration-200"
+                        style={{
+                          borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                          aspectRatio: '16/10'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (config.background.imageUrl !== bg.image_url) {
+                            e.currentTarget.style.borderColor = '#075E54';
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (config.background.imageUrl !== bg.image_url) {
+                            e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }
+                        }}
+                      >
+                        <img
+                          src={bg.image_url}
+                          alt={bg.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {config.background.imageUrl === bg.image_url && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(7, 94, 84, 0.7)' }}>
+                            <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
+                              <Check size={20} color="white" strokeWidth={3} />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center py-16">
+                    <div className="text-center max-w-sm">
+                      <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
+                        <Upload size={32} style={{ color: 'rgb(156, 163, 175)' }} />
+                      </div>
+                      <p className="text-base font-medium mb-2" style={{ color: '#161616' }}>
+                        No tienes fondos personalizados
+                      </p>
+                      <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                        Sube tus propias imágenes para usarlas como fondo de tus códigos QR
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
