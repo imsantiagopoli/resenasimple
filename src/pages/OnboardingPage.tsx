@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { createBusinessAndBranch } from '../lib/businessSetup';
+import { supabase } from '../lib/supabase';
 import {
   ArrowRight,
   Building2,
@@ -68,6 +69,27 @@ const OnboardingPage: React.FC = () => {
     }
 
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+      if (profile && (!profile.first_name || !profile.last_name)) {
+        const fullName = user.user_metadata?.full_name || '';
+        const [firstName, ...lastNameParts] = fullName.split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName || null,
+            last_name: lastName || null,
+            avatar_url: user.user_metadata?.avatar_url || null
+          })
+          .eq('id', user.id);
+      }
+
       await createBusinessAndBranch(
         user.id,
         formData.restaurantName,
