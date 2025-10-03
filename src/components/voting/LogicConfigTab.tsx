@@ -438,7 +438,7 @@ const LogicConfigTab: React.FC<LogicConfigTabProps> = ({ config, onConfigUpdate,
                     color: '#161616',
                     backgroundColor: 'white'
                   }}
-                  placeholder="#FEF3C7"
+                  placeholder="#075E54"
                 />
               </div>
             </div>

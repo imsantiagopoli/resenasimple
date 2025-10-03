@@ -180,7 +180,7 @@ const VotingPage: React.FC = () => {
             prompt: {
               enabled: configData.prompt_preventivo_activo,
               text: configData.texto_prompt_preventivo,
-              color: configData.color_prompt || '#FEF3C7'
+              color: configData.color_prompt || '#075E54'
             }
           },
           created_at: configData.created_at,

@@ -445,7 +445,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         prompt: {
           enabled: record.prompt_preventivo_activo,
           text: record.texto_prompt_preventivo,
-          color: record.color_prompt || '#FEF3C7'
+          color: record.color_prompt || '#075E54'
         }
       },
       created_at: record.created_at,
