@@ -14,7 +14,7 @@ interface QRConfigPanelProps {
   onResetToDefaults: () => Promise<{ data: QRConfiguration | null; error: string | null }>;
   isSaving: boolean;
   onDownload?: () => void;
-  onPrint?: () => void;
+  onPrint?: () => Promise<void>;
   currentBranchSlug: string;
   selectedBranch: BusinessBranch;
 }
@@ -37,6 +37,7 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
@@ -359,22 +360,45 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
             </button>
             
             <button
-              onClick={onPrint}
-              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1"
+              onClick={async () => {
+                if (onPrint && !isGeneratingPDF) {
+                  setIsGeneratingPDF(true);
+                  try {
+                    await onPrint();
+                  } finally {
+                    setIsGeneratingPDF(false);
+                  }
+                }
+              }}
+              disabled={isGeneratingPDF}
+              className="group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex-1 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: '#075E54',
                 color: 'white',
                 border: '1px solid #075E54'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#064e45';
+                if (!isGeneratingPDF) {
+                  e.currentTarget.style.backgroundColor = '#064e45';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#075E54';
+                if (!isGeneratingPDF) {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }
               }}
             >
-              <Printer size={16} />
-              <span>Imprimir QR</span>
+              {isGeneratingPDF ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Generando PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Printer size={16} />
+                  <span>Imprimir QR</span>
+                </>
+              )}
             </button>
           </div>
         </div>

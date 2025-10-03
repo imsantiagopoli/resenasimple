@@ -22,6 +22,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [qrImageUrl, setQrImageUrl] = useState<string>('');
   const [isLoadingQR, setIsLoadingQR] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Generate QR URL whenever config or selected branch changes
   React.useEffect(() => {
@@ -78,43 +79,51 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
   };
 
   const handlePrint = async () => {
-    const qrURL = generateQRURL(selectedBranch.slug, config);
+    setIsGeneratingPDF(true);
 
-    // Convert images to base64 if they exist
-    let logoBase64 = '';
-    if (config.design.showLogo && businessProfile?.logo_url) {
-      console.log('Converting logo to base64:', businessProfile.logo_url);
-      logoBase64 = await getImageAsBase64(businessProfile.logo_url);
-      console.log('Logo base64 length:', logoBase64.length);
-    }
+    try {
+      const qrURL = generateQRURL(selectedBranch.slug, config);
 
-    // Log contact info for debugging
-    console.log('Contact info in print:', {
-      showPhone: config.content.showPhone,
-      phone: selectedBranch.phone,
-      showEmail: config.content.showEmail,
-      email: selectedBranch.email
-    });
+      // Convert QR code to base64
+      console.log('Converting QR to base64:', qrURL);
+      const qrBase64 = await getImageAsBase64(qrURL);
+      console.log('QR base64 length:', qrBase64.length);
 
-    // Create temporary container
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.top = '0';
-    tempContainer.style.width = '448px';
-    tempContainer.style.background = 'white';
+      // Convert logo to base64 if it exists
+      let logoBase64 = '';
+      if (config.design.showLogo && businessProfile?.logo_url) {
+        console.log('Converting logo to base64:', businessProfile.logo_url);
+        logoBase64 = await getImageAsBase64(businessProfile.logo_url);
+        console.log('Logo base64 length:', logoBase64.length);
+      }
 
-    // Build the HTML content with base64 images
-    tempContainer.innerHTML = `
-      <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
-        ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
-        ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
-        ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
-        <div style="display: inline-block; margin-bottom: 1.5rem;">
-          <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img src="${qrURL}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+      // Log contact info for debugging
+      console.log('Contact info in print:', {
+        showPhone: config.content.showPhone,
+        phone: selectedBranch.phone,
+        showEmail: config.content.showEmail,
+        email: selectedBranch.email
+      });
+
+      // Create temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '448px';
+      tempContainer.style.background = 'white';
+
+      // Build the HTML content with base64 images
+      tempContainer.innerHTML = `
+        <div style="text-align: center; width: 100%; padding: 3rem 2rem;">
+          ${logoBase64 && config.design.showLogo ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoBase64}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+          ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
+          ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
+          <div style="display: inline-block; margin-bottom: 1.5rem;">
+            <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
+              <img src="${qrBase64}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            </div>
           </div>
-        </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
         ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email) ? `
           <div style="margin-top: 1rem; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 1.5rem; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor}; flex-wrap: wrap;">
@@ -144,13 +153,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           </div>
         ` : ''}
       </div>
-    `;
+      `;
 
-    document.body.appendChild(tempContainer);
+      document.body.appendChild(tempContainer);
 
-    console.log('Temp container HTML:', tempContainer.innerHTML);
+      console.log('Temp container HTML:', tempContainer.innerHTML);
 
-    try {
       // Wait for images to load
       const images = tempContainer.getElementsByTagName('img');
       console.log('Number of images to load:', images.length);
@@ -209,11 +217,14 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // Download PDF
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
       console.log('PDF generated successfully');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    } finally {
+
       // Remove temporary container
       document.body.removeChild(tempContainer);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error al generar el PDF. Por favor intenta de nuevo.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
