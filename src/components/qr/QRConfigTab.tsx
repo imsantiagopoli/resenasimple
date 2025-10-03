@@ -592,47 +592,88 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Color inicial
+                    Colores del Gradiente
                   </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      value={config.background.gradient?.start || '#FFFFFF'}
-                      onChange={(e) => updateBackground({
-                        gradient: {
-                          start: e.target.value,
-                          end: config.background.gradient?.end || '#F3F4F6',
-                          direction: config.background.gradient?.direction || 'to-b'
-                        }
-                      })}
-                      className="w-8 h-8 rounded border"
-                    />
-                    <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                      {config.background.gradient?.start || '#FFFFFF'}
-                    </span>
-                  </div>
-                </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Color inicial */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                        Inicial
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={config.background.gradient?.start || '#FFFFFF'}
+                          onChange={(e) => updateBackground({
+                            gradient: {
+                              start: e.target.value,
+                              end: config.background.gradient?.end || '#F3F4F6',
+                              direction: config.background.gradient?.direction || 'to-b'
+                            }
+                          })}
+                          className="w-10 h-10 rounded-lg border cursor-pointer"
+                          style={{ borderColor: 'rgb(209, 213, 219)' }}
+                        />
+                        <input
+                          type="text"
+                          value={config.background.gradient?.start || '#FFFFFF'}
+                          onChange={(e) => updateBackground({
+                            gradient: {
+                              start: e.target.value,
+                              end: config.background.gradient?.end || '#F3F4F6',
+                              direction: config.background.gradient?.direction || 'to-b'
+                            }
+                          })}
+                          className="flex-1 px-2 py-1.5 rounded-lg border text-xs font-mono"
+                          style={{
+                            borderColor: 'rgb(209, 213, 219)',
+                            color: '#161616',
+                            backgroundColor: 'white'
+                          }}
+                          placeholder="#FFFFFF"
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Color final
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      value={config.background.gradient?.end || '#F3F4F6'}
-                      onChange={(e) => updateBackground({
-                        gradient: {
-                          start: config.background.gradient?.start || '#FFFFFF',
-                          end: e.target.value,
-                          direction: config.background.gradient?.direction || 'to-b'
-                        }
-                      })}
-                      className="w-8 h-8 rounded border"
-                    />
-                    <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                      {config.background.gradient?.end || '#F3F4F6'}
-                    </span>
+                    {/* Color final */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                        Final
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={config.background.gradient?.end || '#F3F4F6'}
+                          onChange={(e) => updateBackground({
+                            gradient: {
+                              start: config.background.gradient?.start || '#FFFFFF',
+                              end: e.target.value,
+                              direction: config.background.gradient?.direction || 'to-b'
+                            }
+                          })}
+                          className="w-10 h-10 rounded-lg border cursor-pointer"
+                          style={{ borderColor: 'rgb(209, 213, 219)' }}
+                        />
+                        <input
+                          type="text"
+                          value={config.background.gradient?.end || '#F3F4F6'}
+                          onChange={(e) => updateBackground({
+                            gradient: {
+                              start: config.background.gradient?.start || '#FFFFFF',
+                              end: e.target.value,
+                              direction: config.background.gradient?.direction || 'to-b'
+                            }
+                          })}
+                          className="flex-1 px-2 py-1.5 rounded-lg border text-xs font-mono"
+                          style={{
+                            borderColor: 'rgb(209, 213, 219)',
+                            color: '#161616',
+                            backgroundColor: 'white'
+                          }}
+                          placeholder="#F3F4F6"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
