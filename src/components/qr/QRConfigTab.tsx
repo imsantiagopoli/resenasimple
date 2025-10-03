@@ -77,6 +77,15 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
     });
   };
 
+  const updateBackground = (updates: Partial<QRConfiguration['background']>) => {
+    onConfigUpdate({
+      background: {
+        ...config.background,
+        ...updates
+      }
+    });
+  };
+
   // Funciones para manejo de descarga e impresión
 
   if (activeTab === 'design') {
@@ -438,6 +447,177 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                       {config.design.frameColor}
                     </span>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
+        {/* Fondo del QR */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+            Fondo
+          </h3>
+
+          <div className="space-y-4">
+            {/* Tipo de fondo */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                Tipo de fondo
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => updateBackground({ type: 'solid' })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    config.background.type === 'solid' ? '' : 'border'
+                  }`}
+                  style={{
+                    backgroundColor: config.background.type === 'solid' ? '#075E54' : 'white',
+                    color: config.background.type === 'solid' ? 'white' : '#161616',
+                    borderColor: config.background.type === 'solid' ? '#075E54' : 'rgb(209, 213, 219)'
+                  }}
+                >
+                  Sólido
+                </button>
+                <button
+                  onClick={() => updateBackground({ type: 'gradient', gradient: { start: '#FFFFFF', end: '#F3F4F6', direction: 'to-b' } })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    config.background.type === 'gradient' ? '' : 'border'
+                  }`}
+                  style={{
+                    backgroundColor: config.background.type === 'gradient' ? '#075E54' : 'white',
+                    color: config.background.type === 'gradient' ? 'white' : '#161616',
+                    borderColor: config.background.type === 'gradient' ? '#075E54' : 'rgb(209, 213, 219)'
+                  }}
+                >
+                  Gradiente
+                </button>
+                <button
+                  onClick={() => updateBackground({ type: 'image' })}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    config.background.type === 'image' ? '' : 'border'
+                  }`}
+                  style={{
+                    backgroundColor: config.background.type === 'image' ? '#075E54' : 'white',
+                    color: config.background.type === 'image' ? 'white' : '#161616',
+                    borderColor: config.background.type === 'image' ? '#075E54' : 'rgb(209, 213, 219)'
+                  }}
+                >
+                  Imagen
+                </button>
+              </div>
+            </div>
+
+            {/* Opciones según el tipo */}
+            {config.background.type === 'solid' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Color de fondo
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="color"
+                    value={config.background.color}
+                    onChange={(e) => updateBackground({ color: e.target.value })}
+                    className="w-8 h-8 rounded border"
+                  />
+                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    {config.background.color}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {config.background.type === 'gradient' && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Color inicial
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.background.gradient?.start || '#FFFFFF'}
+                      onChange={(e) => updateBackground({
+                        gradient: {
+                          start: e.target.value,
+                          end: config.background.gradient?.end || '#F3F4F6',
+                          direction: config.background.gradient?.direction || 'to-b'
+                        }
+                      })}
+                      className="w-8 h-8 rounded border"
+                    />
+                    <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                      {config.background.gradient?.start || '#FFFFFF'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Color final
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="color"
+                      value={config.background.gradient?.end || '#F3F4F6'}
+                      onChange={(e) => updateBackground({
+                        gradient: {
+                          start: config.background.gradient?.start || '#FFFFFF',
+                          end: e.target.value,
+                          direction: config.background.gradient?.direction || 'to-b'
+                        }
+                      })}
+                      className="w-8 h-8 rounded border"
+                    />
+                    <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                      {config.background.gradient?.end || '#F3F4F6'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                    Dirección
+                  </label>
+                  <select
+                    value={config.background.gradient?.direction || 'to-b'}
+                    onChange={(e) => updateBackground({
+                      gradient: {
+                        start: config.background.gradient?.start || '#FFFFFF',
+                        end: config.background.gradient?.end || '#F3F4F6',
+                        direction: e.target.value
+                      }
+                    })}
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                    style={{ borderColor: 'rgb(209, 213, 219)' }}
+                  >
+                    <option value="to-b">Arriba → Abajo</option>
+                    <option value="to-t">Abajo → Arriba</option>
+                    <option value="to-r">Izquierda → Derecha</option>
+                    <option value="to-l">Derecha → Izquierda</option>
+                    <option value="to-br">Diagonal ↘</option>
+                    <option value="to-bl">Diagonal ↙</option>
+                    <option value="to-tr">Diagonal ↗</option>
+                    <option value="to-tl">Diagonal ↖</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {config.background.type === 'image' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Fondos disponibles
+                </label>
+                <div className="text-sm text-gray-500 mb-2">
+                  Selecciona un fondo de la galería o sube tu propia imagen
+                </div>
+                <div className="text-sm text-gray-400">
+                  Próximamente: galería de fondos genéricos
                 </div>
               </div>
             )}

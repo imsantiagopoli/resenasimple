@@ -138,6 +138,12 @@ export interface QRConfigurationRecord {
   print_orientation: 'portrait' | 'landscape'
   qrs_per_page: number
   include_instructions: boolean
+  background_type: 'solid' | 'gradient' | 'image'
+  background_color: string
+  background_gradient_start: string | null
+  background_gradient_end: string | null
+  background_gradient_direction: string | null
+  background_image_url: string | null
   created_at: string
   updated_at: string
 }
@@ -158,6 +164,16 @@ export interface QRConfiguration {
     frameThickness: number
     showLogo: boolean
     logoShape: 'circular' | 'square'
+  }
+  background: {
+    type: 'solid' | 'gradient' | 'image'
+    color: string
+    gradient?: {
+      start: string
+      end: string
+      direction: string
+    }
+    imageUrl?: string
   }
   content: {
     showTitle: boolean
@@ -498,6 +514,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         showLogo: record.show_logo ?? false,
         logoShape: record.logo_shape ?? 'circular'
       },
+      background: {
+        type: record.background_type,
+        color: record.background_color,
+        ...(record.background_gradient_start && record.background_gradient_end ? {
+          gradient: {
+            start: record.background_gradient_start,
+            end: record.background_gradient_end,
+            direction: record.background_gradient_direction || 'to-b'
+          }
+        } : {}),
+        ...(record.background_image_url ? { imageUrl: record.background_image_url } : {})
+      },
       content: {
         showTitle: record.show_title,
         title: record.title,
@@ -541,6 +569,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       frame_thickness: config.design.frameThickness,
       show_logo: config.design.showLogo,
       logo_shape: config.design.logoShape,
+      background_type: config.background.type,
+      background_color: config.background.color,
+      background_gradient_start: config.background.gradient?.start || null,
+      background_gradient_end: config.background.gradient?.end || null,
+      background_gradient_direction: config.background.gradient?.direction || null,
+      background_image_url: config.background.imageUrl || null,
       show_title: config.content.showTitle,
       title: config.content.title,
       show_subtitle: config.content.showSubtitle,
