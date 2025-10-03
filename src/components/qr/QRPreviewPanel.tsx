@@ -97,21 +97,29 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
     setIsGeneratingPDF(true);
 
     try {
+      console.log('Starting PDF generation...');
+      console.log('Background config:', config.background);
+
       const qrURL = generateQRURL(selectedBranch.slug, config);
+      console.log('QR URL:', qrURL);
 
       // Convert QR code to base64
       const qrBase64 = await getImageAsBase64(qrURL);
+      console.log('QR Base64 length:', qrBase64.length);
 
       // Convert logo to base64 if it exists
       let logoBase64 = '';
       if (config.design.showLogo && businessProfile?.logo_url) {
         logoBase64 = await getImageAsBase64(businessProfile.logo_url);
+        console.log('Logo Base64 length:', logoBase64.length);
       }
 
       // Convert background image to base64 if it exists
       let backgroundImageBase64 = '';
       if (config.background.type === 'image' && config.background.imageUrl) {
+        console.log('Converting background image:', config.background.imageUrl);
         backgroundImageBase64 = await getImageAsBase64(config.background.imageUrl);
+        console.log('Background Base64 length:', backgroundImageBase64.length);
       }
 
       // Create temporary container
@@ -178,22 +186,17 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         `;
 
       document.body.appendChild(tempContainer);
+      console.log('HTML appended to body');
 
       // Wait for fonts to load
       await document.fonts.ready;
 
       // Wait for images to load
       const images = tempContainer.getElementsByTagName('img');
-      // Añadir el fondo de imagen al array de promesas de carga si existe
-      let allImagesToLoad = Array.from(images);
-      
-      // Si hay imagen de fondo, aunque esté en base64, nos aseguramos de que el navegador la procese.
-      // Ya está incluida en el HTML como estilo de fondo, lo que ayuda a html2canvas. 
-      // Si la imagen de fondo es un <img> oculto, forzaría la carga, pero como es background-image, confiamos en la precarga del base64.
-      // Dejamos el Promise.all como estaba, que ya es un buen intento.
+      console.log('Images found:', images.length);
 
       await Promise.all(
-        allImagesToLoad.map((img) => {
+        Array.from(images).map((img) => {
           if (img.complete) {
             return Promise.resolve();
           }
@@ -210,11 +213,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       // Get the actual content div (not the container)
       const contentDiv = tempContainer.querySelector('#pdf-content') as HTMLElement;
+      console.log('Content div found:', !!contentDiv);
+      if (contentDiv) {
+        console.log('Content div background:', window.getComputedStyle(contentDiv).background);
+      }
 
       // Generate canvas from HTML - capture the content div directly
+      console.log('Starting html2canvas...');
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        backgroundColor: null, 
+        backgroundColor: null,
         logging: true,
         useCORS: true,
         allowTaint: true,
@@ -223,6 +231,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         width: 448,
         windowWidth: 448
       });
+      console.log('Canvas generated:', canvas.width, 'x', canvas.height);
 
       // Calculate PDF dimensions
       const imgWidth = 448;
