@@ -100,17 +100,37 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       console.log('=== Starting PDF generation ===');
       console.log('Config:', config);
 
-      const backgroundSrc = config.background.type === 'image' && config.background.imageUrl
-        ? config.background.imageUrl
-        : '';
+      // Fetch images as base64
+      let backgroundSrc = '';
+      if (config.background.type === 'image' && config.background.imageUrl) {
+        console.log('Loading background image:', config.background.imageUrl);
+        try {
+          backgroundSrc = await getBase64(config.background.imageUrl);
+          console.log('Background image loaded, base64 length:', backgroundSrc.length);
+        } catch (error) {
+          console.error('Error loading background image:', error);
+        }
+      }
 
-      const logoSrc = config.design.showLogo && businessProfile?.logo_url
-        ? businessProfile.logo_url
-        : '';
+      let logoSrc = '';
+      if (config.design.showLogo && businessProfile?.logo_url) {
+        console.log('Loading logo:', businessProfile.logo_url);
+        try {
+          logoSrc = await getBase64(businessProfile.logo_url);
+          console.log('Logo loaded, base64 length:', logoSrc.length);
+        } catch (error) {
+          console.error('Error loading logo:', error);
+        }
+      }
 
-      const qrSrc = qrImageUrl;
-
-      console.log('Image sources:', { backgroundSrc, logoSrc, qrSrc });
+      let qrSrc = '';
+      console.log('Loading QR code:', qrImageUrl);
+      try {
+        qrSrc = await getBase64(qrImageUrl);
+        console.log('QR code loaded, base64 length:', qrSrc.length);
+      } catch (error) {
+        console.error('Error loading QR code:', error);
+      }
 
       // --- Construcción del fondo ---
       let backgroundStyle = '';
@@ -122,17 +142,17 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         const gradientDirection = convertGradientDirection(config.background.gradient.direction);
         backgroundStyle = `background: linear-gradient(${gradientDirection}, ${config.background.gradient.start}, ${config.background.gradient.end});`;
       } else if (config.background.type === 'image' && backgroundSrc) {
-        backgroundImageHTML = `<img crossorigin="anonymous" src="${backgroundSrc}" alt="Background" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
+        backgroundImageHTML = `<img src="${backgroundSrc}" alt="Background" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" />`;
       }
 
       // --- Construcción del contenido HTML ---
       const contentHTML = `
-        ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img crossorigin="anonymous" src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
+        ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
         ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
         ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
-            <img crossorigin="anonymous" src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
+            <img src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
@@ -225,21 +245,16 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       const canvas = await html2canvas(contentDiv, {
         scale: 2,
-        useCORS: true,
-        allowTaint: false,
+        useCORS: false,
+        allowTaint: true,
         backgroundColor: null,
         logging: true,
         width: 448,
         height: contentDiv.scrollHeight,
-        proxy: undefined,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById('pdf-content');
           if (clonedElement) {
             clonedElement.style.width = '448px';
-            const images = clonedElement.getElementsByTagName('img');
-            for (let i = 0; i < images.length; i++) {
-              images[i].crossOrigin = 'anonymous';
-            }
           }
         }
       });
