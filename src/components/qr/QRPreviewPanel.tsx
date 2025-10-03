@@ -85,25 +85,13 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       const qrURL = generateQRURL(selectedBranch.slug, config);
 
       // Convert QR code to base64
-      console.log('Converting QR to base64:', qrURL);
       const qrBase64 = await getImageAsBase64(qrURL);
-      console.log('QR base64 length:', qrBase64.length);
 
       // Convert logo to base64 if it exists
       let logoBase64 = '';
       if (config.design.showLogo && businessProfile?.logo_url) {
-        console.log('Converting logo to base64:', businessProfile.logo_url);
         logoBase64 = await getImageAsBase64(businessProfile.logo_url);
-        console.log('Logo base64 length:', logoBase64.length);
       }
-
-      // Log contact info for debugging
-      console.log('Contact info in print:', {
-        showPhone: config.content.showPhone,
-        phone: selectedBranch.phone,
-        showEmail: config.content.showEmail,
-        email: selectedBranch.email
-      });
 
       // Create temporary container
       const tempContainer = document.createElement('div');
@@ -155,35 +143,21 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       document.body.appendChild(tempContainer);
 
-      console.log('Temp container HTML:', tempContainer.innerHTML);
-
       // Wait for fonts to load
       await document.fonts.ready;
-      console.log('Fonts loaded');
 
       // Wait for images to load
       const images = tempContainer.getElementsByTagName('img');
-      console.log('Number of images to load:', images.length);
 
       await Promise.all(
-        Array.from(images).map((img, index) => {
+        Array.from(images).map((img) => {
           if (img.complete) {
-            console.log(`Image ${index} already loaded`);
             return Promise.resolve();
           }
           return new Promise((resolve) => {
-            img.onload = () => {
-              console.log(`Image ${index} loaded successfully`);
-              resolve();
-            };
-            img.onerror = (e) => {
-              console.warn(`Image ${index} failed to load:`, img.src, e);
-              resolve();
-            };
-            setTimeout(() => {
-              console.log(`Image ${index} load timeout`);
-              resolve();
-            }, 5000);
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(() => resolve(), 5000);
           });
         })
       );
@@ -195,13 +169,11 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         backgroundColor: '#ffffff',
-        logging: true,
+        logging: false,
         useCORS: false,
         allowTaint: true,
         foreignObjectRendering: false
       });
-
-      console.log('Canvas generated:', canvas.width, 'x', canvas.height);
 
       // Calculate PDF dimensions
       const imgWidth = 448;
@@ -219,7 +191,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       // Download PDF
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
-      console.log('PDF generated successfully');
 
       // Remove temporary container
       document.body.removeChild(tempContainer);
