@@ -35,7 +35,7 @@ const InicioPage: React.FC = () => {
     {
       title: 'Rating Promedio',
       value: statistics.averageRating,
-      change: '+0.3',
+      change: statistics.totalSessions > 0 ? `+${todayStats.totalToday}` : '+0',
       changeType: 'increase' as const,
       icon: Star,
       color: '#f59e0b'
@@ -51,7 +51,7 @@ const InicioPage: React.FC = () => {
     {
       title: 'Tasa de Reseñas Positivas',
       value: `${statistics.positiveReviewsRate}%`,
-      change: '+2.1%',
+      change: statistics.totalSessions > 0 ? `${todayStats.publicToday > 0 ? '+' : ''}${todayStats.publicToday}` : '+0',
       changeType: 'increase' as const,
       icon: TrendingUp,
       color: '#10b981'
