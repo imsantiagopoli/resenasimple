@@ -126,14 +126,14 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           </div>
         ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
         ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email) ? `
-          <div style="margin-top: 1.5rem; text-align: center; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor};">
+          <div style="margin-top: 1.5rem; text-align: center; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor}; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
             ${config.content.showPhone && selectedBranch.phone ? `
-              <div style="margin-bottom: 0.25rem;">
+              <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
                 <span style="font-weight: 500;">Teléfono:</span> <span>${selectedBranch.phone}</span>
               </div>
             ` : ''}
             ${config.content.showEmail && selectedBranch.email ? `
-              <div>
+              <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
                 <span style="font-weight: 500;">Correo:</span> <span>${selectedBranch.email}</span>
               </div>
             ` : ''}
@@ -413,7 +413,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             {/* Contact Info */}
             {((config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email)) && (
               <div
-                className="mt-4 flex flex-col items-center justify-center gap-1"
+                className="mt-4 flex flex-row items-center justify-center gap-6"
                 style={{
                   fontFamily: config.typography.secondaryFont,
                   fontSize: `${config.typography.secondaryFontSize}px`,
