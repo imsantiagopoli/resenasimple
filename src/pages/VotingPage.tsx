@@ -338,20 +338,27 @@ const VotingPage: React.FC = () => {
       console.log('Updating session to positive_clicked:', currentSessionId);
 
       // Update the session to mark that Google button was clicked
-      const { error: updateError } = await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from('voting_sessions')
         .update({
           status: 'positive_clicked',
           google_redirect_clicked_at: new Date().toISOString()
         })
-        .eq('id', currentSessionId);
+        .eq('id', currentSessionId)
+        .select();
+
+      console.log('Update response:', { data: updateData, error: updateError });
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw updateError;
       }
 
-      console.log('Session updated successfully');
+      if (!updateData || updateData.length === 0) {
+        console.error('Update succeeded but no rows were affected. Session may not exist or RLS prevented update.');
+      }
+
+      console.log('Session updated successfully:', updateData);
 
       // Redirect to Google or show success based on config
       if (config.logic.smartAutoRedirect && business) {
@@ -402,7 +409,7 @@ const VotingPage: React.FC = () => {
       console.log('Form data:', formData);
 
       // Update the existing incomplete session to mark it as complete
-      const { error: updateError } = await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from('voting_sessions')
         .update({
           customer_name: formData.name || null,
@@ -413,14 +420,21 @@ const VotingPage: React.FC = () => {
           form_submitted_at: new Date().toISOString(),
           form_completed: true
         })
-        .eq('id', currentSessionId);
+        .eq('id', currentSessionId)
+        .select();
+
+      console.log('Update response:', { data: updateData, error: updateError });
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw updateError;
       }
 
-      console.log('Session updated successfully to negative_complete');
+      if (!updateData || updateData.length === 0) {
+        console.error('Update succeeded but no rows were affected. Session may not exist or RLS prevented update.');
+      }
+
+      console.log('Session updated successfully to negative_complete:', updateData);
 
       setViewState('private-thanks');
 
