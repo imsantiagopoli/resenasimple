@@ -226,14 +226,35 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
                 design: {
                   showFrame: template.show_frame,
                   frameColor: template.frame_color,
-                  frameThickness: template.frame_thickness || 2
+                  frameThickness: template.frame_thickness || 2,
+                  showLogo: template.show_logo,
+                  logoShape: template.logo_shape
                 },
-                content: config.content,
+                background: {
+                  type: template.background_type,
+                  color: template.background_color,
+                  gradient: template.background_gradient_start && template.background_gradient_end ? {
+                    start: template.background_gradient_start,
+                    end: template.background_gradient_end,
+                    direction: template.background_gradient_direction || 'to-b'
+                  } : undefined,
+                  imageUrl: template.background_image_url || undefined
+                },
+                content: {
+                  ...config.content,
+                  showPhone: template.show_phone,
+                  showEmail: template.show_email
+                },
                 typography: {
                   primaryFont: template.tipografia_principal,
                   primaryColor: template.color_tipografia_principal,
+                  primaryFontSize: template.tamano_tipografia_principal,
                   secondaryFont: template.tipografia_secundaria,
-                  secondaryColor: template.color_tipografia_secundaria
+                  secondaryColor: template.color_tipografia_secundaria,
+                  secondaryFontSize: template.tamano_tipografia_secundaria,
+                  titleFontSize: template.tamano_titulo,
+                  subtitleFontSize: template.tamano_subtitulo,
+                  ctaFontSize: template.tamano_cta
                 },
                 print: {
                   format: template.print_format,
