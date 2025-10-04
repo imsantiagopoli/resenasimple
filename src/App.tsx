@@ -16,7 +16,6 @@ import PaginaQRPage from './pages/PaginaQRPage';
 import ResenasPage from './pages/ResenasPage';
 import RespuestasPage from './pages/RespuestasPage';
 import ClientesPage from './pages/ClientesPage';
-import AnalyticasPage from './pages/AnalyticasPage';
 import VotingPage from './pages/VotingPage';
 import SettingsPage from './pages/SettingsPage';
 import PoliticasPrivacidadPage from './pages/PoliticasPrivacidadPage';
@@ -114,16 +113,6 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <DashboardLayout activePage="clientes">
                 <ClientesPage />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/app/analiticas"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout activePage="analiticas">
-                <AnalyticasPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
