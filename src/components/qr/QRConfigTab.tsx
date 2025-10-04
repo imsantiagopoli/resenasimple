@@ -268,7 +268,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             <input
               type="range"
               min="100"
-              max="600"
+              max="400"
               value={config.qr.size}
               onChange={(e) => updateQR({ size: parseInt(e.target.value) })}
               className="w-full"
@@ -276,7 +276,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             />
             <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
               <span>100px</span>
-              <span>600px</span>
+              <span>400px</span>
             </div>
           </div>
         </div>
