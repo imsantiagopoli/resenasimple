@@ -15,6 +15,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useSubscription } from '../hooks/useSubscription';
+import { useBusiness } from '../hooks/useBusiness';
 import { supabase } from '../lib/supabase';
 
 interface UserProfile {
@@ -27,6 +29,8 @@ interface UserProfile {
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
+  const { businessProfile } = useBusiness(user?.id);
+  const { subscription, loading: subscriptionLoading } = useSubscription(user?.id, businessProfile?.id);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -48,21 +52,6 @@ const SettingsPage: React.FC = () => {
     lastName: '',
     email: ''
   });
-
-  // Mock subscription data - in a real app this would come from Stripe/payment provider
-  const subscriptionData = {
-    plan: 'Profesional',
-    status: 'active',
-    nextBilling: '2025-02-15',
-    amount: 39,
-    features: [
-      'Hasta 2,000 votaciones por mes',
-      'Códigos QR ilimitados',
-      'Personalización avanzada',
-      'Multiple ubicaciones',
-      'Soporte prioritario'
-    ]
-  };
 
   // Load user profile
   useEffect(() => {
@@ -237,7 +226,35 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Helper functions for subscription display
+  const getPlanName = () => {
+    if (!subscription) return 'Gratuito';
+    return subscription.plan_name.charAt(0).toUpperCase() + subscription.plan_name.slice(1);
+  };
+
+  const getPlanAmount = () => {
+    if (!subscription) return 0;
+    const amounts: Record<string, number> = {
+      basico: 9,
+      profesional: 39,
+      empresarial: 99,
+    };
+    return amounts[subscription.plan_name] || 0;
+  };
+
+  const getStatusLabel = () => {
+    if (!subscription) return 'Inactivo';
+    const labels: Record<string, string> = {
+      active: 'Activo',
+      cancelled: 'Cancelado',
+      expired: 'Expirado',
+      past_due: 'Pago Pendiente',
+      on_trial: 'En Prueba',
+    };
+    return labels[subscription.status] || 'Desconocido';
+  };
+
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
@@ -482,9 +499,9 @@ const SettingsPage: React.FC = () => {
         {/* Plan and Billing Info - Two Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Current Plan Card */}
-          <div 
+          <div
             className="p-6 rounded-lg border"
-            style={{ 
+            style={{
               backgroundColor: '#075E54' + '08',
               borderColor: '#075E54' + '30'
             }}
@@ -492,28 +509,34 @@ const SettingsPage: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-semibold text-lg" style={{ color: '#075E54' }}>
-                  Plan {subscriptionData.plan}
+                  Plan {getPlanName()}
                 </h3>
-                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  ${subscriptionData.amount}/mes
-                </p>
+                {subscription ? (
+                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    ${getPlanAmount()}/mes
+                  </p>
+                ) : (
+                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    Sin suscripción activa
+                  </p>
+                )}
               </div>
-              <div 
+              <div
                 className="px-3 py-1 rounded-full text-xs font-medium"
                 style={{
-                  backgroundColor: subscriptionData.status === 'active' ? '#10b981' : '#ef4444',
+                  backgroundColor: subscription?.status === 'active' ? '#10b981' : '#ef4444',
                   color: 'white'
                 }}
               >
-                {subscriptionData.status === 'active' ? 'Activo' : 'Inactivo'}
+                {getStatusLabel()}
               </div>
             </div>
           </div>
 
           {/* Next Billing Card */}
-          <div 
+          <div
             className="p-6 rounded-lg border"
-            style={{ 
+            style={{
               backgroundColor: 'rgb(249, 250, 251)',
               borderColor: 'rgb(229, 231, 235)'
             }}
@@ -524,16 +547,27 @@ const SettingsPage: React.FC = () => {
                 Próxima Facturación
               </h4>
             </div>
-            <p className="text-2xl font-semibold mb-2" style={{ color: '#161616' }}>
-              {new Date(subscriptionData.nextBilling).toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </p>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Se cobrará ${subscriptionData.amount}
-            </p>
+            {subscription?.current_period_end ? (
+              <>
+                <p className="text-2xl font-semibold mb-2" style={{ color: '#161616' }}>
+                  {new Date(subscription.current_period_end).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
+                <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  {subscription.cancel_at_period_end ?
+                    'La suscripción terminará en esta fecha' :
+                    `Se cobrará $${getPlanAmount()}`
+                  }
+                </p>
+              </>
+            ) : (
+              <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                No hay una próxima facturación programada
+              </p>
+            )}
           </div>
         </div>
       </div>
