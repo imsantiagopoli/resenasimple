@@ -1339,12 +1339,12 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
     return (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', padding: '2rem' }}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
         onClick={() => setShowGalleryModal(false)}
       >
         <div
           className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          style={{ width: '1000px', height: '700px', maxHeight: '100%' }}
+          style={{ width: '1000px', height: '700px', maxHeight: 'calc(100vh - 4rem)', margin: '2rem' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
