@@ -28,7 +28,7 @@ const FeaturesSection: React.FC = () => {
     },
     {
       icon: BarChart3,
-      title: 'Dashboard de Análisis',
+      title: 'Dashboard de Métricas',
       description: 'Monitorea las votaciones internas, identifica áreas de mejora y optimiza la experiencia del cliente.',
       stats: 'Informes en tiempo real'
     },

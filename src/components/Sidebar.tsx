@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { icon: Vote, label: 'Página de votación', id: 'pagina-votacion', route: '/app/pagina-votacion', color: 'rgb(75, 85, 99)' },
     { icon: QrCode, label: 'QR', id: 'pagina-qr', route: '/app/qr', color: 'rgb(75, 85, 99)' },
     { icon: MessageSquare, label: 'Respuestas', id: 'respuestas', route: '/app/respuestas', color: 'rgb(75, 85, 99)' },
-    { icon: BarChart3, label: 'Análisis', id: 'analisis', route: '/app/analisis', color: 'rgb(75, 85, 99)' },
+    { icon: BarChart3, label: 'Métricas', id: 'analisis', route: '/app/analisis', color: 'rgb(75, 85, 99)' },
   ];
 
   const handleLogout = async () => {
