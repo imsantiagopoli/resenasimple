@@ -190,7 +190,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             </ol>
           </div>
         ` : ''}
-        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid ${config.typography.secondaryColor}; text-align: center; font-size: 10px; font-weight: 400; color: ${config.typography.secondaryColor}; font-family: ${config.typography.secondaryFont}, sans-serif;">
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 0.5px solid ${config.typography.secondaryColor}; text-align: center; font-size: 10px; font-weight: 400; color: ${config.typography.secondaryColor}; font-family: ${config.typography.secondaryFont}, sans-serif;">
           Creado con Reseña Simple
         </div>
       `;
