@@ -190,8 +190,8 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
       setUserBackgrounds((data || []).map(bg => ({ ...bg, category: 'custom' })));
 
-      // Automatically select the new background
-      updateBackground({ imageUrl: publicUrl });
+      // Automatically select the new background in the modal (but don't apply it yet)
+      setSelectedBackground(publicUrl);
 
     } catch (error: any) {
       console.error('Error uploading background:', error);
