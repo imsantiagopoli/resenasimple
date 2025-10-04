@@ -36,8 +36,10 @@ interface VotingSession {
   rating: number;
   comment?: string;
   is_public: boolean;
-  google_redirect_clicked?: boolean;
-  google_redirect_attempted_at?: string;
+  status: 'positive_viewed' | 'positive_clicked' | 'negative_incomplete' | 'negative_complete';
+  google_redirect_clicked_at?: string;
+  form_submitted_at?: string;
+  form_completed: boolean;
 }
 
 type ViewState = 'loading' | 'voting' | 'private-feedback' | 'public-review' | 'private-thanks' | 'error';
@@ -209,7 +211,7 @@ const VotingPage: React.FC = () => {
   // Handle star selection
   const handleStarClick = (stars: number) => {
     setSelectedStars(stars);
-    
+
     if (!config) return;
 
     // Determine next view based on rating and threshold
@@ -220,7 +222,28 @@ const VotingPage: React.FC = () => {
       setViewState('public-review');
     } else {
       // Low rating - show private feedback flow
+      // Create incomplete negative session immediately
+      submitNegativeIncompleteSession(stars);
       setViewState('private-feedback');
+    }
+  };
+
+  // Submit negative incomplete session when user clicks low rating
+  const submitNegativeIncompleteSession = async (stars: number) => {
+    try {
+      const session = await submitVotingSession({
+        rating: stars,
+        is_public: false,
+        status: 'negative_incomplete',
+        form_completed: false
+      });
+
+      if (session) {
+        setCurrentSessionId(session.id);
+      }
+    } catch (err) {
+      console.error('Error submitting negative incomplete session:', err);
+      setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
     }
   };
 
@@ -234,10 +257,10 @@ const VotingPage: React.FC = () => {
 
   // Submit voting session
   const submitVotingSession = async (sessionData: VotingSession) => {
-    if (!branch) return;
+    if (!branch) return null;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('voting_sessions')
         .insert([{
           branch_id: branch.id,
@@ -247,30 +270,43 @@ const VotingPage: React.FC = () => {
           rating: sessionData.rating,
           comment: sessionData.comment || null,
           is_public: sessionData.is_public,
-          google_redirect_clicked: sessionData.google_redirect_clicked || false,
-          google_redirect_attempted_at: sessionData.google_redirect_attempted_at || null,
-          ip_address: null, // Could be populated with actual IP
+          status: sessionData.status,
+          google_redirect_clicked_at: sessionData.google_redirect_clicked_at || null,
+          form_submitted_at: sessionData.form_submitted_at || null,
+          form_completed: sessionData.form_completed,
+          ip_address: null,
           user_agent: navigator.userAgent
-        }]);
+        }])
+        .select()
+        .single();
 
       if (error) {
         throw error;
       }
+
+      return data;
     } catch (err) {
       console.error('Error submitting voting session:', err);
       throw err;
     }
   };
 
+  // State to store current session ID
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
   // Submit public voting session when reaching thank you page
   const submitPublicVotingSession = async (stars: number) => {
     try {
-      await submitVotingSession({
+      const session = await submitVotingSession({
         rating: stars,
         is_public: true,
-        google_redirect_clicked: false,
-        google_redirect_attempted_at: new Date().toISOString()
+        status: 'positive_viewed',
+        form_completed: false
       });
+
+      if (session) {
+        setCurrentSessionId(session.id);
+      }
     } catch (err) {
       console.error('Error submitting public voting session:', err);
       setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
@@ -278,27 +314,24 @@ const VotingPage: React.FC = () => {
   };
   // Handle public review submission
   const handlePublicReview = async () => {
-    if (!config) return;
+    if (!config || !currentSessionId) return;
 
     setIsSubmitting(true);
 
     try {
-      // Update the existing session to mark that Google button was clicked
-      // We need to find the most recent session for this user/rating
+      // Update the session to mark that Google button was clicked
       const { error: updateError } = await supabase
         .from('voting_sessions')
-        .update({ 
-          google_redirect_clicked: true 
+        .update({
+          status: 'positive_clicked',
+          google_redirect_clicked_at: new Date().toISOString()
         })
-        .eq('branch_id', branch!.id)
-        .eq('rating', selectedStars)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .eq('id', currentSessionId);
 
       if (updateError) {
         throw updateError;
       }
+
       // Redirect to Google or show success based on config
       if (config.logic.smartAutoRedirect && business) {
         // Try to redirect to Google My Business
@@ -317,7 +350,7 @@ const VotingPage: React.FC = () => {
   // Handle private feedback submission
   const handlePrivateFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config) return;
+    if (!config || !currentSessionId) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -334,14 +367,23 @@ const VotingPage: React.FC = () => {
         throw new Error('El teléfono es requerido');
       }
 
-      await submitVotingSession({
-        customer_name: formData.name || undefined,
-        customer_email: formData.email || undefined,
-        customer_phone: formData.phone || undefined,
-        rating: selectedStars,
-        comment: formData.comment || undefined,
-        is_public: false
-      });
+      // Update the existing incomplete session to mark it as complete
+      const { error: updateError } = await supabase
+        .from('voting_sessions')
+        .update({
+          customer_name: formData.name || null,
+          customer_email: formData.email || null,
+          customer_phone: formData.phone || null,
+          comment: formData.comment || null,
+          status: 'negative_complete',
+          form_submitted_at: new Date().toISOString(),
+          form_completed: true
+        })
+        .eq('id', currentSessionId);
+
+      if (updateError) {
+        throw updateError;
+      }
 
       setViewState('private-thanks');
 
