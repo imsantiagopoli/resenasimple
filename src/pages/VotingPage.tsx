@@ -515,7 +515,7 @@ const VotingPage: React.FC = () => {
   // Voting page
   if (viewState === 'voting') {
     return (
-      <div className="min-h-screen bg-white flex flex-col justify-between px-6 py-12">
+      <div className="min-h-screen bg-white px-6 py-12">
         <div className="max-w-md mx-auto w-full">
           {renderLogo()}
 
@@ -605,19 +605,19 @@ const VotingPage: React.FC = () => {
           )}
 
           {renderSocialIcons()}
-        </div>
 
-        {/* Footer */}
-        <div className="max-w-md mx-auto w-full pt-12">
-          <div
-            className="text-center text-xs"
-            style={{
-              color: 'rgb(107, 114, 128)',
-              fontFamily: config.typography.secondaryFont,
-              fontWeight: 400
-            }}
-          >
-            Creado con Reseña Simple
+          {/* Footer */}
+          <div className="pt-8">
+            <div
+              className="text-center text-xs"
+              style={{
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont,
+                fontWeight: 400
+              }}
+            >
+              Creado con Reseña Simple
+            </div>
           </div>
         </div>
       </div>
