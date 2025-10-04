@@ -73,8 +73,16 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const fetchTemplates = async () => {
+    if (!userId || !businessId) {
+      console.error('Missing userId or businessId', { userId, businessId });
+      setError('Usuario o negocio no identificado');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('user_qr_templates')
         .select('*')
@@ -82,12 +90,15 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
         .eq('business_id', businessId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       setTemplates(data || []);
     } catch (err) {
       console.error('Error fetching user templates:', err);
-      setError('No se pudieron cargar tus plantillas guardadas');
+      setError('No se pudieron cargar tus plantillas guardadas: ' + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -100,6 +111,12 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
   const handleSaveTemplate = async () => {
     if (!saveName.trim()) {
       setError('El nombre es requerido');
+      return;
+    }
+
+    if (!userId || !businessId) {
+      console.error('Missing userId or businessId', { userId, businessId });
+      setError('Usuario o negocio no identificado');
       return;
     }
 
@@ -151,11 +168,16 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
         background_image_url: currentConfig.background.imageUrl || null
       };
 
+      console.log('Saving template with data:', templateData);
+
       const { error: insertError } = await supabase
         .from('user_qr_templates')
         .insert([templateData]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
 
       setSaveName('');
       setSaveDescription('');
@@ -163,7 +185,7 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
       await fetchTemplates();
     } catch (err) {
       console.error('Error saving template:', err);
-      setError('No se pudo guardar la plantilla');
+      setError('No se pudo guardar la plantilla: ' + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setSaving(false);
     }
