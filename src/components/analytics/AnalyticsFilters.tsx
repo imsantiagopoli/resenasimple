@@ -33,7 +33,7 @@ const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
   };
 
   return (
-    <div className="mb-6 p-6 rounded-lg bg-white shadow-sm" style={{ border: '1px solid #e5e7eb' }}>
+    <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <Filter size={20} style={{ color: '#075E54' }} className="mr-2" />

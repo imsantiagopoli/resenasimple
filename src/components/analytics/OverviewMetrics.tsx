@@ -19,13 +19,9 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({
   formsCompleted,
 }) => {
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6" style={{ color: '#161616' }}>
-        Vista General
-      </h2>
-
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-lg bg-white" style={{ border: '1px solid #e5e7eb' }}>
+        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
@@ -51,7 +47,7 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({
           </div>
         </div>
 
-        <div className="p-6 rounded-lg bg-white" style={{ border: '1px solid #e5e7eb' }}>
+        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#fef2f2' }}>
@@ -77,7 +73,7 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({
           </div>
         </div>
 
-        <div className="p-6 rounded-lg bg-white" style={{ border: '1px solid #e5e7eb' }}>
+        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f0fdfa' }}>
@@ -108,7 +104,7 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({
           </div>
         </div>
 
-        <div className="p-6 rounded-lg bg-white" style={{ border: '1px solid #e5e7eb' }}>
+        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#eff6ff' }}>

@@ -185,121 +185,113 @@ const AnalyticsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#f8f9fa' }}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#075E54' }}></div>
-            <p className="mt-4" style={{ color: '#6b7280' }}>Cargando análisis...</p>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f8f9fa' }}>
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#161616' }}>
-            Análisis de Reseñas
-          </h1>
-          <p style={{ color: '#6b7280' }}>
-            Visualiza el rendimiento de tus respuestas y reseñas
-          </p>
-        </div>
+    <div className="p-6 space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold" style={{ color: '#161616' }}>
+          Análisis de Reseñas
+        </h1>
+        <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+          Visualiza el rendimiento de tus respuestas y reseñas
+        </p>
+      </div>
 
-        <AnalyticsFilters
-          branches={branches}
-          selectedBranch={selectedBranch}
-          setSelectedBranch={setSelectedBranch}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-        />
+      <AnalyticsFilters
+        branches={branches}
+        selectedBranch={selectedBranch}
+        setSelectedBranch={setSelectedBranch}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        groupBy={groupBy}
+        setGroupBy={setGroupBy}
+      />
 
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-3">
-            <div className="p-4 rounded-lg bg-white shadow-sm" style={{ border: '1px solid #e5e7eb' }}>
-              <div className="space-y-1">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as AnalyticsTab)}
-                    className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-all ${
-                      activeTab === tab.id ? 'shadow-sm' : ''
-                    }`}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-3">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as AnalyticsTab)}
+              className={`w-full p-4 rounded-lg border bg-white text-left transition-all duration-200 ${
+                activeTab === tab.id ? 'shadow-md border-gray-300' : 'hover:shadow-md hover:border-gray-300'
+              }`}
+              style={{
+                borderColor: activeTab === tab.id ? 'rgb(209, 213, 219)' : 'rgb(229, 231, 235)'
+              }}
+            >
+              <div className="flex items-start space-x-3">
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform ${
+                    activeTab === tab.id ? 'scale-110' : ''
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === tab.id ? '#075E54' + '20' : '#f3f4f6'
+                  }}
+                >
+                  <tab.icon
+                    size={18}
                     style={{
-                      backgroundColor: activeTab === tab.id ? '#075E54' : 'transparent',
+                      color: activeTab === tab.id ? '#075E54' : 'rgb(107, 114, 128)'
                     }}
-                    onMouseEnter={(e) => {
-                      if (activeTab !== tab.id) {
-                        e.currentTarget.style.backgroundColor = '#f3f4f6';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeTab !== tab.id) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="font-medium text-sm"
+                    style={{
+                      color: activeTab === tab.id ? '#075E54' : '#161616'
                     }}
                   >
-                    <tab.icon
-                      size={18}
-                      style={{
-                        color: activeTab === tab.id ? '#ffffff' : '#6b7280',
-                      }}
-                    />
-                    <span
-                      className="ml-3 text-sm font-medium"
-                      style={{
-                        color: activeTab === tab.id ? '#ffffff' : '#161616',
-                      }}
-                    >
-                      {tab.label}
-                    </span>
-                  </button>
-                ))}
+                    {tab.label}
+                  </h3>
+                </div>
               </div>
-            </div>
-          </div>
+            </button>
+          ))}
+        </div>
 
-          <div className="col-span-12 lg:col-span-9">
-            {activeTab === 'overview' && (
-              <OverviewMetrics
-                total={statsData.total}
-                positive={statsData.positive}
-                negative={statsData.negative}
-                positiveRate={statsData.positiveRate}
-                googleClicks={statsData.googleClicks}
-                formsCompleted={statsData.formsCompleted}
-              />
-            )}
-            {activeTab === 'distribution' && (
-              <DistributionChart
-                positive={statsData.positive}
-                negative={statsData.negative}
-                positiveRate={statsData.positiveRate}
-              />
-            )}
-            {activeTab === 'timeline' && (
-              <TimeSeriesChart data={timeSeriesData} groupBy={groupBy} />
-            )}
-            {activeTab === 'ratings' && (
-              <RatingBreakdown sessions={filteredSessions} />
-            )}
-            {activeTab === 'conversion' && (
-              <ConversionMetrics
-                total={statsData.total}
-                googleClicks={statsData.googleClicks}
-                formsCompleted={statsData.formsCompleted}
-                positive={statsData.positive}
-                negative={statsData.negative}
-              />
-            )}
-            {activeTab === 'branches' && (
-              <BranchComparison sessions={filteredSessions} branches={branches} />
-            )}
-          </div>
+        <div className="lg:col-span-3">
+          {activeTab === 'overview' && (
+            <OverviewMetrics
+              total={statsData.total}
+              positive={statsData.positive}
+              negative={statsData.negative}
+              positiveRate={statsData.positiveRate}
+              googleClicks={statsData.googleClicks}
+              formsCompleted={statsData.formsCompleted}
+            />
+          )}
+          {activeTab === 'distribution' && (
+            <DistributionChart
+              positive={statsData.positive}
+              negative={statsData.negative}
+              positiveRate={statsData.positiveRate}
+            />
+          )}
+          {activeTab === 'timeline' && (
+            <TimeSeriesChart data={timeSeriesData} groupBy={groupBy} />
+          )}
+          {activeTab === 'ratings' && (
+            <RatingBreakdown sessions={filteredSessions} />
+          )}
+          {activeTab === 'conversion' && (
+            <ConversionMetrics
+              total={statsData.total}
+              googleClicks={statsData.googleClicks}
+              formsCompleted={statsData.formsCompleted}
+              positive={statsData.positive}
+              negative={statsData.negative}
+            />
+          )}
+          {activeTab === 'branches' && (
+            <BranchComparison sessions={filteredSessions} branches={branches} />
+          )}
         </div>
       </div>
     </div>
