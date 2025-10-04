@@ -527,7 +527,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                               <div className="flex items-start space-x-2">
                                 <AlertCircle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
                                 <p className="text-xs" style={{ color: '#92400e' }}>
-                                  <strong>Advertencia:</strong> Al cambiar el slug, los códigos QR existentes dejarán de funcionar.
+                                  <strong>Advertencia:</strong> Al cambiar el slug, los códigos QR existentes dejarán de funcionar. En caso de haber impreso un PDF, será necesario volverlos a imprimir, ya que se cambió la ruta de la página de votación. 
                                 </p>
                               </div>
                             </div>
