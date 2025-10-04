@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { QrCode, Palette, FileText, Printer, Save, RotateCcw, Download, Wand2, ChevronLeft, ChevronRight } from 'lucide-react';
 import QRConfigTab from './QRConfigTab';
 import QRTemplatesTab from './QRTemplatesTab';
+import UserQRTemplatesTab from './UserQRTemplatesTab';
 import { QRConfiguration } from '../../hooks/useQRConfig';
 import { BusinessBranch } from '../../hooks/useBusiness';
+import { useAuth } from '../../hooks/useAuth';
 
 interface QRConfigPanelProps {
   config: QRConfiguration;
@@ -32,7 +34,9 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
   currentBranchSlug,
   selectedBranch
 }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'design' | 'templates' | 'content' | 'print'>('design');
+  const [templatesSubTab, setTemplatesSubTab] = useState<'system' | 'user'>('system');
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -211,66 +215,165 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'templates' ? (
-          <QRTemplatesTab
-            onApplyTemplate={(template) => {
-              const templateAsConfig = {
-                id: config.id,
-                business_id: config.business_id,
-                qr: {
-                  size: template.qr_size,
-                  foregroundColor: template.qr_foreground_color,
-                  backgroundColor: template.qr_background_color,
-                  errorCorrectionLevel: template.qr_error_correction_level,
-                  margin: template.qr_margin
-                },
-                design: {
-                  showFrame: template.show_frame,
-                  frameColor: template.frame_color,
-                  frameThickness: template.frame_thickness || 2,
-                  showLogo: template.show_logo,
-                  logoShape: template.logo_shape
-                },
-                background: {
-                  type: template.background_type,
-                  color: template.background_color,
-                  gradient: template.background_gradient_start && template.background_gradient_end ? {
-                    start: template.background_gradient_start,
-                    end: template.background_gradient_end,
-                    direction: template.background_gradient_direction || 'to-b'
-                  } : undefined,
-                  imageUrl: template.background_image_url || undefined
-                },
-                content: {
-                  ...config.content,
-                  showPhone: template.show_phone,
-                  showEmail: template.show_email
-                },
-                typography: {
-                  primaryFont: template.tipografia_principal,
-                  primaryColor: template.color_tipografia_principal,
-                  primaryFontSize: template.tamano_tipografia_principal,
-                  secondaryFont: template.tipografia_secundaria,
-                  secondaryColor: template.color_tipografia_secundaria,
-                  secondaryFontSize: template.tamano_tipografia_secundaria,
-                  titleFontSize: template.tamano_titulo,
-                  subtitleFontSize: template.tamano_subtitulo,
-                  ctaFontSize: template.tamano_cta
-                },
-                print: {
-                  format: template.print_format,
-                  orientation: template.print_orientation,
-                  qrsPerPage: template.qrs_per_page,
-                  includeInstructions: template.include_instructions
-                },
-                created_at: config.created_at,
-                updated_at: config.updated_at
-              };
-              onConfigUpdate(templateAsConfig);
-              setSaveMessage({ type: 'success', text: 'Template aplicado. Recuerda guardar los cambios.' });
-              setTimeout(() => setSaveMessage(null), 3000);
-            }}
-            currentBranchSlug={currentBranchSlug}
-          />
+          <div className="flex flex-col h-full">
+            {/* Templates Sub-Tabs */}
+            <div className="flex border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+              <button
+                onClick={() => setTemplatesSubTab('system')}
+                className="flex-1 px-4 py-3 text-sm font-medium transition-colors"
+                style={{
+                  color: templatesSubTab === 'system' ? '#075E54' : 'rgb(107, 114, 128)',
+                  borderBottom: templatesSubTab === 'system' ? '2px solid #075E54' : '2px solid transparent'
+                }}
+              >
+                Plantillas del Sistema
+              </button>
+              <button
+                onClick={() => setTemplatesSubTab('user')}
+                className="flex-1 px-4 py-3 text-sm font-medium transition-colors"
+                style={{
+                  color: templatesSubTab === 'user' ? '#075E54' : 'rgb(107, 114, 128)',
+                  borderBottom: templatesSubTab === 'user' ? '2px solid #075E54' : '2px solid transparent'
+                }}
+              >
+                Mis Plantillas
+              </button>
+            </div>
+
+            {/* Sub-Tab Content */}
+            <div className="flex-1 overflow-y-auto">
+              {templatesSubTab === 'system' ? (
+                <QRTemplatesTab
+                  onApplyTemplate={(template) => {
+                    const templateAsConfig = {
+                      id: config.id,
+                      business_id: config.business_id,
+                      qr: {
+                        size: template.qr_size,
+                        foregroundColor: template.qr_foreground_color,
+                        backgroundColor: template.qr_background_color,
+                        errorCorrectionLevel: template.qr_error_correction_level,
+                        margin: template.qr_margin
+                      },
+                      design: {
+                        showFrame: template.show_frame,
+                        frameColor: template.frame_color,
+                        frameThickness: template.frame_thickness || 2,
+                        showLogo: template.show_logo,
+                        logoShape: template.logo_shape
+                      },
+                      background: {
+                        type: template.background_type,
+                        color: template.background_color,
+                        gradient: template.background_gradient_start && template.background_gradient_end ? {
+                          start: template.background_gradient_start,
+                          end: template.background_gradient_end,
+                          direction: template.background_gradient_direction || 'to-b'
+                        } : undefined,
+                        imageUrl: template.background_image_url || undefined
+                      },
+                      content: {
+                        ...config.content,
+                        showPhone: template.show_phone,
+                        showEmail: template.show_email
+                      },
+                      typography: {
+                        primaryFont: template.tipografia_principal,
+                        primaryColor: template.color_tipografia_principal,
+                        primaryFontSize: template.tamano_tipografia_principal,
+                        secondaryFont: template.tipografia_secundaria,
+                        secondaryColor: template.color_tipografia_secundaria,
+                        secondaryFontSize: template.tamano_tipografia_secundaria,
+                        titleFontSize: template.tamano_titulo,
+                        subtitleFontSize: template.tamano_subtitulo,
+                        ctaFontSize: template.tamano_cta
+                      },
+                      print: {
+                        format: template.print_format,
+                        orientation: template.print_orientation,
+                        qrsPerPage: template.qrs_per_page,
+                        includeInstructions: template.include_instructions
+                      },
+                      created_at: config.created_at,
+                      updated_at: config.updated_at
+                    };
+                    onConfigUpdate(templateAsConfig);
+                    setSaveMessage({ type: 'success', text: 'Template aplicado. Recuerda guardar los cambios.' });
+                    setTimeout(() => setSaveMessage(null), 3000);
+                  }}
+                  currentBranchSlug={currentBranchSlug}
+                />
+              ) : (
+                <UserQRTemplatesTab
+                  onApplyTemplate={(template) => {
+                    const templateAsConfig = {
+                      id: config.id,
+                      business_id: config.business_id,
+                      qr: {
+                        size: template.qr_size,
+                        foregroundColor: template.qr_foreground_color,
+                        backgroundColor: template.qr_background_color,
+                        errorCorrectionLevel: template.qr_error_correction_level,
+                        margin: template.qr_margin
+                      },
+                      design: {
+                        showFrame: template.show_frame,
+                        frameColor: template.frame_color,
+                        frameThickness: template.frame_thickness,
+                        showLogo: template.show_logo,
+                        logoShape: template.logo_shape
+                      },
+                      background: {
+                        type: template.background_type,
+                        color: template.background_color,
+                        gradient: template.background_gradient_start && template.background_gradient_end ? {
+                          start: template.background_gradient_start,
+                          end: template.background_gradient_end,
+                          direction: template.background_gradient_direction || 'to-b'
+                        } : undefined,
+                        imageUrl: template.background_image_url || undefined
+                      },
+                      content: {
+                        showTitle: template.show_title,
+                        title: template.title,
+                        showSubtitle: template.show_subtitle,
+                        subtitle: template.subtitle,
+                        showCallToAction: template.show_call_to_action,
+                        callToAction: template.call_to_action,
+                        showPhone: template.show_phone,
+                        showEmail: template.show_email
+                      },
+                      typography: {
+                        primaryFont: template.tipografia_principal,
+                        primaryColor: template.color_tipografia_principal,
+                        primaryFontSize: template.tamano_tipografia_principal,
+                        secondaryFont: template.tipografia_secundaria,
+                        secondaryColor: template.color_tipografia_secundaria,
+                        secondaryFontSize: template.tamano_tipografia_secundaria,
+                        titleFontSize: template.tamano_titulo,
+                        subtitleFontSize: template.tamano_subtitulo,
+                        ctaFontSize: template.tamano_cta
+                      },
+                      print: {
+                        format: template.print_format,
+                        orientation: template.print_orientation,
+                        qrsPerPage: template.qrs_per_page,
+                        includeInstructions: template.include_instructions
+                      },
+                      created_at: config.created_at,
+                      updated_at: config.updated_at
+                    };
+                    onConfigUpdate(templateAsConfig);
+                    setSaveMessage({ type: 'success', text: 'Plantilla aplicada. Recuerda guardar los cambios.' });
+                    setTimeout(() => setSaveMessage(null), 3000);
+                  }}
+                  currentConfig={config}
+                  businessId={config.business_id}
+                  userId={user?.id || ''}
+                />
+              )}
+            </div>
+          </div>
         ) : (
           <QRConfigTab
             activeTab={activeTab}
