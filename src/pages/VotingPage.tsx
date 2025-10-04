@@ -609,7 +609,7 @@ const VotingPage: React.FC = () => {
         <div className="pb-6">
           <div className="max-w-md mx-auto w-full">
             <div
-              className="pt-4 mt-6 text-center text-xs"
+              className="pt-3 mt-8 text-center text-xs"
               style={{
                 borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
                 color: config.typography.secondaryColor,
@@ -767,7 +767,7 @@ const VotingPage: React.FC = () => {
 
           {/* Footer */}
           <div
-            className="pt-4 mt-6 text-center text-xs"
+            className="pt-3 mt-8 text-center text-xs"
             style={{
               borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
               color: config.typography.secondaryColor,
@@ -839,7 +839,7 @@ const VotingPage: React.FC = () => {
 
           {/* Footer */}
           <div
-            className="pt-4 mt-6 text-center text-xs"
+            className="pt-3 mt-8 text-center text-xs"
             style={{
               borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
               color: config.typography.secondaryColor,
@@ -941,7 +941,7 @@ const VotingPage: React.FC = () => {
 
           {/* Footer */}
           <div
-            className="pt-4 mt-6 text-center text-xs"
+            className="pt-3 mt-8 text-center text-xs"
             style={{
               borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
               color: config.typography.secondaryColor,
