@@ -10,7 +10,6 @@ import {
   ChevronDown,
   User,
   Send,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -20,7 +19,9 @@ import { useBusiness } from '../hooks/useBusiness';
 const RespuestasPage: React.FC = () => {
   const { sessions, loading, error, getStatistics, getTodayStatistics } = useVotingSessions();
   const { branches } = useBusiness();
-  const [filters, setFilters] = useState({
+
+  // Applied filters (los que realmente se usan para filtrar)
+  const [appliedFilters, setAppliedFilters] = useState({
     status: 'all', // all, public, private
     minStars: 1,
     branches: [] as string[],
@@ -28,12 +29,20 @@ const RespuestasPage: React.FC = () => {
     dateFrom: '',
     dateTo: ''
   });
+
+  // Temp filters (los que se modifican en el panel antes de aplicar)
+  const [tempFilters, setTempFilters] = useState({
+    status: 'all',
+    minStars: 1,
+    branches: [] as string[],
+    contact: 'all',
+    dateFrom: '',
+    dateTo: ''
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortConfig, setSortConfig] = useState<{
-    key: 'date' | 'stars' | 'customer' | 'branch';
-    direction: 'asc' | 'desc';
-  }>({ key: 'date', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState<'date-desc' | 'date-asc' | 'rating-negative' | 'rating-positive'>('date-desc');
   const [pagination, setPagination] = useState({
     currentPage: 1,
     itemsPerPage: 10
@@ -68,17 +77,37 @@ const RespuestasPage: React.FC = () => {
   // Obtener sucursales únicas
   const uniqueBranches = branches.map(branch => branch.name);
 
-  const updateFilters = (key: keyof typeof filters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const updateTempFilters = (key: keyof typeof tempFilters, value: any) => {
+    setTempFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const toggleBranch = (branch: string) => {
-    setFilters(prev => ({
+    setTempFilters(prev => ({
       ...prev,
       branches: prev.branches.includes(branch)
         ? prev.branches.filter(b => b !== branch)
         : [...prev.branches, branch]
     }));
+  };
+
+  const applyFilters = () => {
+    setAppliedFilters(tempFilters);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+    setIsFilterOpen(false);
+  };
+
+  const clearFilters = () => {
+    const emptyFilters = {
+      status: 'all',
+      minStars: 1,
+      branches: [],
+      contact: 'all',
+      dateFrom: '',
+      dateTo: ''
+    };
+    setTempFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   // Estadísticas del resumen
@@ -87,23 +116,23 @@ const RespuestasPage: React.FC = () => {
 
   const filteredResenas = resenas.filter(resena => {
     // Filtro por estado
-    const matchesStatus = 
-      filters.status === 'all' ||
-      (filters.status === 'public' && resena.type === 'public') ||
-      (filters.status === 'private' && resena.type === 'private');
+    const matchesStatus =
+      appliedFilters.status === 'all' ||
+      (appliedFilters.status === 'public' && resena.type === 'public') ||
+      (appliedFilters.status === 'private' && resena.type === 'private');
 
     // Filtro por estrellas mínimas
-    const matchesStars = resena.stars >= filters.minStars;
+    const matchesStars = resena.stars >= appliedFilters.minStars;
 
     // Filtro por sucursales
-    const matchesBranches = filters.branches.length === 0 || filters.branches.includes(resena.branch);
+    const matchesBranches = appliedFilters.branches.length === 0 || appliedFilters.branches.includes(resena.branch);
 
     // Filtro por contacto
-    const matchesContact = 
-      filters.contact === 'all' ||
-      (filters.contact === 'with-phone' && resena.phone) ||
-      (filters.contact === 'with-email' && resena.email) ||
-      (filters.contact === 'no-contact' && !resena.phone && !resena.email);
+    const matchesContact =
+      appliedFilters.contact === 'all' ||
+      (appliedFilters.contact === 'with-phone' && resena.phone) ||
+      (appliedFilters.contact === 'with-email' && resena.email) ||
+      (appliedFilters.contact === 'no-contact' && !resena.phone && !resena.email);
 
     // Filtro por búsqueda de texto
     const matchesSearch = searchQuery.trim() === '' ||
@@ -113,10 +142,10 @@ const RespuestasPage: React.FC = () => {
 
     // Filtro por rango de fechas
     const matchesDateRange = (() => {
-      if (!filters.dateFrom && !filters.dateTo) return true;
+      if (!appliedFilters.dateFrom && !appliedFilters.dateTo) return true;
       const resenaDate = new Date(resena.date);
-      const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
-      const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
+      const fromDate = appliedFilters.dateFrom ? new Date(appliedFilters.dateFrom) : null;
+      const toDate = appliedFilters.dateTo ? new Date(appliedFilters.dateTo) : null;
 
       if (fromDate && resenaDate < fromDate) return false;
       if (toDate && resenaDate > toDate) return false;
@@ -140,46 +169,22 @@ const RespuestasPage: React.FC = () => {
     window.open(mailtoUrl);
   };
 
-  // Función para ordenar
-  const handleSort = (key: 'date' | 'stars' | 'customer' | 'branch') => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
-
   // Aplicar ordenamiento
   const sortedResenas = useMemo(() => {
     const sorted = [...filteredResenas];
     sorted.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortConfig.key) {
-        case 'date':
-          aValue = new Date(a.date).getTime();
-          bValue = new Date(b.date).getTime();
-          break;
-        case 'stars':
-          aValue = a.stars;
-          bValue = b.stars;
-          break;
-        case 'customer':
-          aValue = a.customer.toLowerCase();
-          bValue = b.customer.toLowerCase();
-          break;
-        case 'branch':
-          aValue = a.branch.toLowerCase();
-          bValue = b.branch.toLowerCase();
-          break;
+      switch (sortConfig) {
+        case 'date-desc':
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case 'date-asc':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'rating-negative':
+          return a.stars - b.stars;
+        case 'rating-positive':
+          return b.stars - a.stars;
         default:
           return 0;
       }
-
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
     });
     return sorted;
   }, [filteredResenas, sortConfig]);
@@ -318,6 +323,25 @@ const RespuestasPage: React.FC = () => {
       {/* Filtros y Búsqueda */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
         <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
+          {/* Dropdown de Ordenamiento */}
+          <div className="relative">
+            <select
+              value={sortConfig}
+              onChange={(e) => setSortConfig(e.target.value as any)}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg border text-sm transition-all duration-200 min-w-[220px] cursor-pointer"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            >
+              <option value="date-desc">Fecha (más reciente)</option>
+              <option value="date-asc">Fecha (más antigua)</option>
+              <option value="rating-positive">Reseña positiva</option>
+              <option value="rating-negative">Reseña negativa</option>
+            </select>
+          </div>
+
           {/* Filtro */}
           <div className="relative">
             <button
@@ -359,8 +383,8 @@ const RespuestasPage: React.FC = () => {
                             type="radio"
                             name="status"
                             value={option.id}
-                            checked={filters.status === option.id}
-                            onChange={(e) => updateFilters('status', e.target.value)}
+                            checked={tempFilters.status === option.id}
+                            onChange={(e) => updateTempFilters('status', e.target.value)}
                             className="text-sm"
                             style={{ accentColor: '#075E54' }}
                           />
@@ -394,8 +418,8 @@ const RespuestasPage: React.FC = () => {
                         type="range"
                         min="1"
                         max="5"
-                        value={filters.minStars}
-                        onChange={(e) => updateFilters('minStars', parseInt(e.target.value))}
+                        value={tempFilters.minStars}
+                        onChange={(e) => updateTempFilters('minStars', parseInt(e.target.value))}
                         className="flex-1"
                         style={{ accentColor: '#075E54' }}
                       />
@@ -405,14 +429,14 @@ const RespuestasPage: React.FC = () => {
                             key={star}
                             size={14}
                             className={`${
-                              star <= filters.minStars
+                              star <= tempFilters.minStars
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
                             }`}
                           />
                         ))}
                         <span className="text-sm ml-2 font-medium" style={{ color: '#161616' }}>
-                          {filters.minStars}+
+                          {tempFilters.minStars}+
                         </span>
                       </div>
                     </div>
@@ -431,7 +455,7 @@ const RespuestasPage: React.FC = () => {
                         <label key={branch} className="flex items-center space-x-3 cursor-pointer group">
                           <input
                             type="checkbox"
-                            checked={filters.branches.includes(branch)}
+                            checked={tempFilters.branches.includes(branch)}
                             onChange={() => toggleBranch(branch)}
                             className="text-sm"
                             style={{ accentColor: '#075E54' }}
@@ -473,8 +497,8 @@ const RespuestasPage: React.FC = () => {
                             type="radio"
                             name="contact"
                             value={option.id}
-                            checked={filters.contact === option.id}
-                            onChange={(e) => updateFilters('contact', e.target.value)}
+                            checked={tempFilters.contact === option.id}
+                            onChange={(e) => updateTempFilters('contact', e.target.value)}
                             className="text-sm"
                             style={{ accentColor: '#075E54' }}
                           />
@@ -508,8 +532,8 @@ const RespuestasPage: React.FC = () => {
                         <label className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>Desde</label>
                         <input
                           type="date"
-                          value={filters.dateFrom}
-                          onChange={(e) => updateFilters('dateFrom', e.target.value)}
+                          value={tempFilters.dateFrom}
+                          onChange={(e) => updateTempFilters('dateFrom', e.target.value)}
                           className="w-full mt-1 px-3 py-2 rounded-lg border text-sm"
                           style={{
                             borderColor: 'rgb(209, 213, 219)',
@@ -521,8 +545,8 @@ const RespuestasPage: React.FC = () => {
                         <label className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>Hasta</label>
                         <input
                           type="date"
-                          value={filters.dateTo}
-                          onChange={(e) => updateFilters('dateTo', e.target.value)}
+                          value={tempFilters.dateTo}
+                          onChange={(e) => updateTempFilters('dateTo', e.target.value)}
                           className="w-full mt-1 px-3 py-2 rounded-lg border text-sm"
                           style={{
                             borderColor: 'rgb(209, 213, 219)',
@@ -539,16 +563,7 @@ const RespuestasPage: React.FC = () => {
                   {/* Botones de Acción */}
                   <div className="flex items-center justify-between pt-2">
                     <button
-                      onClick={() => {
-                        setFilters({
-                          status: 'all',
-                          minStars: 1,
-                          branches: [],
-                          contact: 'all',
-                          dateFrom: '',
-                          dateTo: ''
-                        });
-                      }}
+                      onClick={clearFilters}
                       className="text-xs font-medium transition-colors duration-200"
                       style={{ color: 'rgb(107, 114, 128)' }}
                       onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
@@ -557,7 +572,7 @@ const RespuestasPage: React.FC = () => {
                       Limpiar filtros
                     </button>
                     <button
-                      onClick={() => setIsFilterOpen(false)}
+                      onClick={applyFilters}
                       className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200"
                       style={{
                         backgroundColor: '#075E54',
@@ -575,42 +590,42 @@ const RespuestasPage: React.FC = () => {
           </div>
 
           {/* Indicadores de filtros activos */}
-          {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || filters.dateFrom || filters.dateTo) && (
+          {(appliedFilters.status !== 'all' || appliedFilters.minStars > 1 || appliedFilters.branches.length > 0 || appliedFilters.contact !== 'all' || appliedFilters.dateFrom || appliedFilters.dateTo) && (
             <div className="flex flex-wrap gap-2">
-              {filters.status !== 'all' && (
-                <span 
+              {appliedFilters.status !== 'all' && (
+                <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
                     backgroundColor: '#075E54' + '20',
                     color: '#075E54'
                   }}
                 >
-                  {filters.status === 'public' ? 'Enviadas a Google' : 'Retenidas'}
+                  {appliedFilters.status === 'public' ? 'Enviadas a Google' : 'Retenidas'}
                 </span>
               )}
-              {filters.minStars > 1 && (
-                <span 
+              {appliedFilters.minStars > 1 && (
+                <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
                     backgroundColor: '#f59e0b' + '20',
                     color: '#f59e0b'
                   }}
                 >
-                  {filters.minStars}+ estrellas
+                  {appliedFilters.minStars}+ estrellas
                 </span>
               )}
-              {filters.branches.length > 0 && (
-                <span 
+              {appliedFilters.branches.length > 0 && (
+                <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
                     backgroundColor: '#3b82f6' + '20',
                     color: '#3b82f6'
                   }}
                 >
-                  {filters.branches.length} sucursal{filters.branches.length > 1 ? 'es' : ''}
+                  {appliedFilters.branches.length} sucursal{appliedFilters.branches.length > 1 ? 'es' : ''}
                 </span>
               )}
-              {filters.contact !== 'all' && (
+              {appliedFilters.contact !== 'all' && (
                 <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
@@ -618,11 +633,11 @@ const RespuestasPage: React.FC = () => {
                     color: '#10b981'
                   }}
                 >
-                  {filters.contact === 'with-phone' ? 'Con teléfono' :
-                   filters.contact === 'with-email' ? 'Con email' : 'Sin contacto'}
+                  {appliedFilters.contact === 'with-phone' ? 'Con teléfono' :
+                   appliedFilters.contact === 'with-email' ? 'Con email' : 'Sin contacto'}
                 </span>
               )}
-              {(filters.dateFrom || filters.dateTo) && (
+              {(appliedFilters.dateFrom || appliedFilters.dateTo) && (
                 <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
@@ -630,11 +645,11 @@ const RespuestasPage: React.FC = () => {
                     color: '#ef4444'
                   }}
                 >
-                  {filters.dateFrom && filters.dateTo
-                    ? `${new Date(filters.dateFrom).toLocaleDateString('es-ES')} - ${new Date(filters.dateTo).toLocaleDateString('es-ES')}`
-                    : filters.dateFrom
-                    ? `Desde ${new Date(filters.dateFrom).toLocaleDateString('es-ES')}`
-                    : `Hasta ${new Date(filters.dateTo).toLocaleDateString('es-ES')}`}
+                  {appliedFilters.dateFrom && appliedFilters.dateTo
+                    ? `${new Date(appliedFilters.dateFrom).toLocaleDateString('es-ES')} - ${new Date(appliedFilters.dateTo).toLocaleDateString('es-ES')}`
+                    : appliedFilters.dateFrom
+                    ? `Desde ${new Date(appliedFilters.dateFrom).toLocaleDateString('es-ES')}`
+                    : `Hasta ${new Date(appliedFilters.dateTo).toLocaleDateString('es-ES')}`}
                 </span>
               )}
             </div>
@@ -669,17 +684,10 @@ const RespuestasPage: React.FC = () => {
             {sortedResenas.length !== resenas.length && (
               <span> (filtrado de {resenas.length} total)</span>
             )}
-            {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || filters.dateFrom || filters.dateTo || searchQuery.trim()) && sortedResenas.length !== resenas.length && (
+            {(appliedFilters.status !== 'all' || appliedFilters.minStars > 1 || appliedFilters.branches.length > 0 || appliedFilters.contact !== 'all' || appliedFilters.dateFrom || appliedFilters.dateTo || searchQuery.trim()) && sortedResenas.length !== resenas.length && (
               <button
                 onClick={() => {
-                  setFilters({
-                    status: 'all',
-                    minStars: 1,
-                    branches: [],
-                    contact: 'all',
-                    dateFrom: '',
-                    dateTo: ''
-                  });
+                  clearFilters();
                   setSearchQuery('');
                 }}
                 className="ml-2 text-xs font-medium underline transition-colors duration-200"
@@ -717,43 +725,19 @@ const RespuestasPage: React.FC = () => {
             <thead>
               <tr className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <button
-                    onClick={() => handleSort('customer')}
-                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                  >
-                    <span>Cliente</span>
-                    <ArrowUpDown size={14} className={sortConfig.key === 'customer' ? 'opacity-100' : 'opacity-40'} />
-                  </button>
+                  Cliente
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <button
-                    onClick={() => handleSort('stars')}
-                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                  >
-                    <span>Calificación</span>
-                    <ArrowUpDown size={14} className={sortConfig.key === 'stars' ? 'opacity-100' : 'opacity-40'} />
-                  </button>
+                  Calificación
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                   Comentario
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <button
-                    onClick={() => handleSort('branch')}
-                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                  >
-                    <span>Sucursal</span>
-                    <ArrowUpDown size={14} className={sortConfig.key === 'branch' ? 'opacity-100' : 'opacity-40'} />
-                  </button>
+                  Sucursal
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <button
-                    onClick={() => handleSort('date')}
-                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
-                  >
-                    <span>Fecha</span>
-                    <ArrowUpDown size={14} className={sortConfig.key === 'date' ? 'opacity-100' : 'opacity-40'} />
-                  </button>
+                  Fecha
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                   Estado
