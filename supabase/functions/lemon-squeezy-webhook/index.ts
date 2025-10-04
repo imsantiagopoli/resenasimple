@@ -124,9 +124,9 @@ Deno.serve(async (req: Request) => {
 
     // Map product_id to plan name
     const productIdToPlan: Record<string, string> = {
-      '558928': 'basico',
-      '558929': 'profesional',
-      '558930': 'empresarial',
+      '652393': 'basico',
+      '652402': 'profesional',
+      '652403': 'empresarial',
     };
 
     const planName = attributes.product_id
