@@ -9,10 +9,17 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVotingSessions } from '../hooks/useVotingSessions';
+import { useAuth } from '../hooks/useAuth';
+import { useBusiness } from '../hooks/useBusiness';
+import { useSubscription } from '../hooks/useSubscription';
+import SubscriptionModal from '../components/SubscriptionModal';
 
 const InicioPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { currentBusiness } = useBusiness();
   const { sessions, loading, getStatistics, getTodayStatistics } = useVotingSessions();
+  const { canAccessApp, loading: subscriptionLoading } = useSubscription(user?.id, currentBusiness?.id);
   
   const statistics = getStatistics();
   const todayStats = getTodayStatistics();
@@ -77,12 +84,16 @@ const InicioPage: React.FC = () => {
     }
   ];
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
       </div>
     );
+  }
+
+  if (!canAccessApp) {
+    return <SubscriptionModal />;
   }
 
   return (

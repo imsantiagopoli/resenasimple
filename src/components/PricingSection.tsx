@@ -276,7 +276,7 @@ const PricingSection: React.FC = () => {
                       }}
                     >
                       <span className="inline-block transition-transform group-hover:scale-105 mr-2">
-                        Prueba Gratuita
+                        Comenzar Ahora
                       </span>
                       <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                     </Link>
