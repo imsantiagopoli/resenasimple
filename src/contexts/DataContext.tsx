@@ -141,6 +141,7 @@ export interface QRConfigurationRecord {
   print_orientation: 'portrait' | 'landscape'
   qrs_per_page: number
   include_instructions: boolean
+  print_width: number
   background_type: 'solid' | 'gradient' | 'image'
   background_color: string
   background_gradient_start: string | null
@@ -204,6 +205,7 @@ export interface QRConfiguration {
     orientation: 'portrait' | 'landscape'
     qrsPerPage: number
     includeInstructions: boolean
+    width: number
   }
   created_at: string
   updated_at: string
@@ -557,7 +559,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         format: record.print_format,
         orientation: record.print_orientation,
         qrsPerPage: record.qrs_per_page,
-        includeInstructions: record.include_instructions
+        includeInstructions: record.include_instructions,
+        width: record.print_width || 448
       },
       created_at: record.created_at,
       updated_at: record.updated_at
@@ -604,7 +607,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       print_format: config.print.format,
       print_orientation: config.print.orientation,
       qrs_per_page: config.print.qrsPerPage,
-      include_instructions: config.print.includeInstructions
+      include_instructions: config.print.includeInstructions,
+      print_width: config.print.width
     };
   };
 

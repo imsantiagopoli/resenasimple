@@ -99,6 +99,7 @@ const PaginaQRPage: React.FC = () => {
   const handlePrint = async () => {
     if (!selectedBranch || !config) return;
 
+    const printWidth = config.print.width || 448;
     const qrURL = generateQRURL(selectedBranch.slug, config);
 
     // Convert images to base64
@@ -152,7 +153,7 @@ const PaginaQRPage: React.FC = () => {
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
     tempContainer.style.top = '0';
-    tempContainer.style.width = '448px';
+    tempContainer.style.width = `${printWidth}px`;
     tempContainer.style.background = 'white';
 
     // Build background styles

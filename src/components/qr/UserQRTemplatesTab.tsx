@@ -160,6 +160,7 @@ const UserQRTemplatesTab: React.FC<UserQRTemplatesTabProps> = ({
         print_orientation: currentConfig.print.orientation,
         qrs_per_page: currentConfig.print.qrsPerPage,
         include_instructions: currentConfig.print.includeInstructions,
+        print_width: currentConfig.print.width,
         background_type: currentConfig.background.type,
         background_color: currentConfig.background.color,
         background_gradient_start: currentConfig.background.gradient?.start || null,

@@ -104,11 +104,12 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
   const handlePrint = async () => {
     setIsGeneratingPDF(true);
+    const printWidth = config.print.width || 448;
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'fixed';
     tempContainer.style.left = '0';
     tempContainer.style.top = '0';
-    tempContainer.style.width = '448px';
+    tempContainer.style.width = `${printWidth}px`;
     tempContainer.style.height = 'auto';
     tempContainer.style.zIndex = '9999';
     tempContainer.style.visibility = 'hidden';
@@ -264,20 +265,20 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         allowTaint: false,
         backgroundColor: null,
         logging: true,
-        width: 448,
+        width: printWidth,
         height: contentDiv.scrollHeight,
         imageTimeout: 15000,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById('pdf-content');
           if (clonedElement) {
-            clonedElement.style.width = '448px';
+            clonedElement.style.width = `${printWidth}px`;
           }
         }
       });
 
       console.log('Canvas generated:', canvas.width, 'x', canvas.height);
 
-      const imgWidth = 448;
+      const imgWidth = printWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       console.log('Creating PDF with dimensions:', imgWidth, 'x', imgHeight);

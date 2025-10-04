@@ -449,6 +449,43 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
         {/* Separador */}
         <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
+        {/* Ancho de Impresión */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Ancho de Impresión
+            </h3>
+            <span className="text-sm font-medium px-2 py-1 rounded" style={{ color: '#075E54', backgroundColor: '#075E54' + '10' }}>
+              {config.print.width}px
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <input
+              type="range"
+              min="300"
+              max="800"
+              value={config.print.width}
+              onChange={(e) => updatePrint({ width: parseInt(e.target.value) })}
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, #075E54 0%, #075E54 ${((config.print.width - 300) / (800 - 300)) * 100}%, rgb(229, 231, 235) ${((config.print.width - 300) / (800 - 300)) * 100}%, rgb(229, 231, 235) 100%)`
+              }}
+            />
+            <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+              <span>300px</span>
+              <span className="font-medium" style={{ color: '#075E54' }}>Por defecto: 448px</span>
+              <span>800px</span>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgb(249, 250, 251)' }}>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              Ajusta el ancho del contenido para la impresión en PDF. Los márgenes laterales se ajustarán automáticamente.
+            </p>
+          </div>
+        </div>
+
         {/* Instrucciones */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
