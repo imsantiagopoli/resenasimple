@@ -342,23 +342,32 @@ const VotingPage: React.FC = () => {
     try {
       console.log('Updating session to positive_clicked:', currentSessionId);
 
-      // Update the session to mark that Google button was clicked
-      const { error: updateError } = await supabase
-        .from('voting_sessions')
-        .update({
-          status: 'positive_clicked',
-          google_redirect_clicked_at: new Date().toISOString()
+      // Update the session via edge function
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          updates: {
+            status: 'positive_clicked',
+            google_redirect_clicked_at: new Date().toISOString()
+          }
         })
-        .eq('id', currentSessionId);
+      });
 
-      console.log('Update response:', { error: updateError });
+      const result = await response.json();
+      console.log('Update response:', result);
 
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+      if (!response.ok || result.error) {
+        console.error('Update error:', result.error);
+        throw new Error(result.error || 'Failed to update session');
       }
 
-      console.log('Session updated successfully');
+      console.log('Session updated successfully:', result.data);
 
       // Redirect to Google or show success based on config
       if (config.logic.smartAutoRedirect && business) {
@@ -408,28 +417,37 @@ const VotingPage: React.FC = () => {
       console.log('Updating session to negative_complete:', currentSessionId);
       console.log('Form data:', formData);
 
-      // Update the existing incomplete session to mark it as complete
-      const { error: updateError } = await supabase
-        .from('voting_sessions')
-        .update({
-          customer_name: formData.name || null,
-          customer_email: formData.email || null,
-          customer_phone: formData.phone || null,
-          comment: formData.comment || null,
-          status: 'negative_complete',
-          form_submitted_at: new Date().toISOString(),
-          form_completed: true
+      // Update the session via edge function
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          updates: {
+            customer_name: formData.name || null,
+            customer_email: formData.email || null,
+            customer_phone: formData.phone || null,
+            comment: formData.comment || null,
+            status: 'negative_complete',
+            form_submitted_at: new Date().toISOString(),
+            form_completed: true
+          }
         })
-        .eq('id', currentSessionId);
+      });
 
-      console.log('Update response:', { error: updateError });
+      const result = await response.json();
+      console.log('Update response:', result);
 
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+      if (!response.ok || result.error) {
+        console.error('Update error:', result.error);
+        throw new Error(result.error || 'Failed to update session');
       }
 
-      console.log('Session updated successfully to negative_complete');
+      console.log('Session updated successfully to negative_complete:', result.data);
 
       setViewState('private-thanks');
 
