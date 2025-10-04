@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, MapPin, Check, AlertCircle } from 'lucide-react';
+import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, Pencil, Check, AlertCircle } from 'lucide-react';
 import { BusinessBranch } from '../hooks/useBusiness';
 import { checkSlugAvailability } from '../lib/supabase';
 
@@ -335,7 +335,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                         }}
                         title="Editar sucursal"
                       >
-                        <MapPin size={16} />
+                        <Pencil size={16} />
                       </button>
                     )}
                     
