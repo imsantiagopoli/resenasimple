@@ -93,7 +93,7 @@ const InicioPage: React.FC = () => {
   }
 
   if (!canAccessApp) {
-    return <SubscriptionModal />;
+    return <SubscriptionModal user={user} currentBusiness={currentBusiness} />;
   }
 
   return (

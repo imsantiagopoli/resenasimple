@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Star, Crown, Building2, Check, Loader2 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import { useBusiness } from '../hooks/useBusiness';
 
 interface Plan {
   id: string;
@@ -14,9 +12,12 @@ interface Plan {
   popular?: boolean;
 }
 
-const SubscriptionModal: React.FC = () => {
-  const { user } = useAuth();
-  const { currentBusiness } = useBusiness();
+interface SubscriptionModalProps {
+  user?: { id: string; email?: string } | null;
+  currentBusiness?: { id: string } | null;
+}
+
+const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ user, currentBusiness }) => {
   const [loading, setLoading] = useState(false);
 
   const plans: Plan[] = [
