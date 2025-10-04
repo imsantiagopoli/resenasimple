@@ -355,7 +355,7 @@ const VotingPage: React.FC = () => {
         sessionId: currentSessionId,
         updates: {
           status: 'positive_clicked',
-          google_redirect_clicked_at: new Date().toISOString()
+          google_redirect_clicked: true
         }
       })
     })
