@@ -195,6 +195,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         </div>
       `;
 
+      console.log('Content HTML:', contentHTML);
+
       tempContainer.innerHTML = `
         <div id="pdf-content" style="position: relative; overflow: hidden; width: 100%; min-height: 600px; ${backgroundStyle}">
           <div style="position: relative; z-index: 1; padding: 3rem 2rem; box-sizing: border-box; text-align: center;">
@@ -202,6 +204,8 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
           </div>
         </div>
       `;
+
+      console.log('Temp container HTML:', tempContainer.innerHTML);
 
       document.body.appendChild(tempContainer);
 
