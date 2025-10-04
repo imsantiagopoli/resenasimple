@@ -52,8 +52,8 @@ export const useSubscription = (userId?: string, businessId?: string): UseSubscr
 
       setHasFreeAccess(businessData?.free_access || false);
 
-      // Check subscription
-      const { data: subscriptionData, error: subscriptionError } = await supabase
+      // Check subscription by business_id
+      let { data: subscriptionData, error: subscriptionError } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', userId)
@@ -63,6 +63,34 @@ export const useSubscription = (userId?: string, businessId?: string): UseSubscr
 
       if (subscriptionError && subscriptionError.code !== 'PGRST116') {
         throw subscriptionError;
+      }
+
+      // Fallback: If no subscription found by business_id, check by user email
+      if (!subscriptionData) {
+        // Get user email from auth
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (!userError && user?.email) {
+          // Find most recent active subscription by email
+          const { data: emailSubscriptionData, error: emailSubscriptionError } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_email', user.email)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (emailSubscriptionError && emailSubscriptionError.code !== 'PGRST116') {
+            throw emailSubscriptionError;
+          }
+
+          subscriptionData = emailSubscriptionData;
+
+          if (subscriptionData) {
+            console.log('Subscription found by email fallback:', user.email);
+          }
+        }
       }
 
       setSubscription(subscriptionData as Subscription | null);

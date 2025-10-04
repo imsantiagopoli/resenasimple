@@ -30,6 +30,7 @@ interface LemonSqueezyWebhookEvent {
       cancels_at?: string;
       created_at?: string;
       updated_at?: string;
+      user_email?: string;
     };
   };
 }
@@ -110,6 +111,7 @@ Deno.serve(async (req: Request) => {
     // Extract user_id and business_id from custom_data
     const userId = customData.user_id;
     const businessId = customData.business_id;
+    const userEmail = attributes.user_email;
 
     if (!userId || !businessId) {
       console.error('Missing user_id or business_id in custom_data');
@@ -155,6 +157,7 @@ Deno.serve(async (req: Request) => {
             {
               user_id: userId,
               business_id: businessId,
+              user_email: userEmail,
               lemon_squeezy_subscription_id: attributes.subscription_id?.toString() || payload.data.id,
               lemon_squeezy_customer_id: attributes.customer_id?.toString(),
               lemon_squeezy_order_id: attributes.order_id?.toString(),
