@@ -260,7 +260,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       console.log('Content div dimensions:', contentDiv.scrollWidth, 'x', contentDiv.scrollHeight);
 
       const canvas = await html2canvas(contentDiv, {
-        scale: 3,
+        scale: 4,
         useCORS: true,
         allowTaint: false,
         backgroundColor: null,
@@ -268,8 +268,6 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         width: 448,
         height: contentDiv.scrollHeight,
         imageTimeout: 15000,
-        windowWidth: 448,
-        windowHeight: contentDiv.scrollHeight,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById('pdf-content');
           if (clonedElement) {
@@ -280,22 +278,18 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
 
       console.log('Canvas generated:', canvas.width, 'x', canvas.height);
 
-      const imgWidth = 210;
+      const imgWidth = 448;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      console.log('Creating PDF with dimensions:', imgWidth, 'x', imgHeight, 'mm');
+      console.log('Creating PDF with dimensions:', imgWidth, 'x', imgHeight);
 
       const pdf = new jsPDF({
         orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
+        unit: 'px',
+        format: [imgWidth, imgHeight]
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
       console.log('Saving PDF...');
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
       console.log('PDF saved successfully!');
