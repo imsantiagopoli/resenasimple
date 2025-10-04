@@ -108,13 +108,79 @@ Deno.serve(async (req: Request) => {
     const customData = payload.meta.custom_data || {};
     const attributes = payload.data.attributes;
 
-    // Extract user_id and business_id from custom_data
-    const userId = customData.user_id;
-    const businessId = customData.business_id;
+    // Extract user_id and business_id from custom_data or look up by email
+    let userId = customData.user_id;
+    let businessId = customData.business_id;
     const userEmail = attributes.user_email;
 
+    // If no custom_data, try to find user by email
+    if ((!userId || !businessId) && userEmail) {
+      console.log('Looking up user by email:', userEmail);
+
+      // First, get the user by email from auth.users
+      const { data: authUser, error: authError } = await supabase.auth.admin.listUsers();
+
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        return new Response(
+          JSON.stringify({ error: 'Error looking up user' }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const user = authUser.users.find(u => u.email === userEmail);
+
+      if (!user) {
+        console.error('User not found with email:', userEmail);
+        return new Response(
+          JSON.stringify({ error: 'User not found' }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      userId = user.id;
+
+      // Now get the business_id for this user
+      const { data: businessProfile, error: businessError } = await supabase
+        .from('business_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (businessError) {
+        console.error('Error fetching business profile:', businessError);
+        return new Response(
+          JSON.stringify({ error: 'Error looking up business' }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      if (!businessProfile) {
+        console.error('Business profile not found for user:', userId);
+        return new Response(
+          JSON.stringify({ error: 'Business profile not found' }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      businessId = businessProfile.id;
+      console.log('Found user_id:', userId, 'business_id:', businessId);
+    }
+
     if (!userId || !businessId) {
-      console.error('Missing user_id or business_id in custom_data');
+      console.error('Missing user_id or business_id');
       return new Response(
         JSON.stringify({ error: 'Missing user_id or business_id' }),
         {
@@ -126,9 +192,9 @@ Deno.serve(async (req: Request) => {
 
     // Map product_id to plan name
     const productIdToPlan: Record<string, string> = {
-      '652393': 'basico',
-      '652402': 'profesional',
-      '652403': 'empresarial',
+      '652469': 'basico',
+      '652470': 'profesional',
+      '652471': 'empresarial',
     };
 
     const planName = attributes.product_id
