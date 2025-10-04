@@ -85,14 +85,12 @@ const SubscriptionModal: React.FC = () => {
       return;
     }
 
-    setLoading(true);
-
     const checkoutUrl = new URL(plan.checkoutUrl);
     checkoutUrl.searchParams.set('checkout[email]', user.email || '');
     checkoutUrl.searchParams.set('checkout[custom][user_id]', user.id);
     checkoutUrl.searchParams.set('checkout[custom][business_id]', currentBusiness.id);
 
-    window.location.href = checkoutUrl.toString();
+    window.open(checkoutUrl.toString(), '_blank');
   };
 
   return (
@@ -112,7 +110,7 @@ const SubscriptionModal: React.FC = () => {
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative border rounded-lg p-6 transition-all duration-300 hover:shadow-lg ${
+                className={`relative border rounded-lg p-6 transition-all duration-300 hover:shadow-lg flex flex-col ${
                   plan.popular ? 'border-2' : ''
                 }`}
                 style={{
@@ -164,7 +162,7 @@ const SubscriptionModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-6 flex-1">
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-start space-x-2">
                       <Check
@@ -182,7 +180,7 @@ const SubscriptionModal: React.FC = () => {
                 <button
                   onClick={() => handleSelectPlan(plan)}
                   disabled={loading}
-                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 mt-auto"
                   style={{
                     backgroundColor: plan.popular ? '#075E54' : 'white',
                     color: plan.popular ? 'white' : '#161616',
