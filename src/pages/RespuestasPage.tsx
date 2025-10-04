@@ -323,25 +323,6 @@ const RespuestasPage: React.FC = () => {
       {/* Filtros y Búsqueda */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
         <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
-          {/* Dropdown de Ordenamiento */}
-          <div className="relative">
-            <select
-              value={sortConfig}
-              onChange={(e) => setSortConfig(e.target.value as any)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg border text-sm transition-all duration-200 min-w-[220px] cursor-pointer"
-              style={{
-                borderColor: 'rgb(209, 213, 219)',
-                color: '#161616',
-                backgroundColor: 'white'
-              }}
-            >
-              <option value="date-desc">Fecha (más reciente)</option>
-              <option value="date-asc">Fecha (más antigua)</option>
-              <option value="rating-positive">Reseña positiva</option>
-              <option value="rating-negative">Reseña negativa</option>
-            </select>
-          </div>
-
           {/* Filtro */}
           <div className="relative">
             <button
@@ -654,6 +635,28 @@ const RespuestasPage: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* Dropdown de Ordenamiento */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium whitespace-nowrap" style={{ color: 'rgb(107, 114, 128)' }}>
+              Ordenar por:
+            </label>
+            <select
+              value={sortConfig}
+              onChange={(e) => setSortConfig(e.target.value as any)}
+              className="px-4 py-2 rounded-lg border text-sm transition-all duration-200 cursor-pointer"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616',
+                backgroundColor: 'white'
+              }}
+            >
+              <option value="date-desc">Fecha (más reciente)</option>
+              <option value="date-asc">Fecha (más antigua)</option>
+              <option value="rating-positive">Reseña positiva</option>
+              <option value="rating-negative">Reseña negativa</option>
+            </select>
+          </div>
 
           {/* Búsqueda */}
           <div className="flex-1 relative">
