@@ -67,17 +67,12 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({ sessions, branches })
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Main Metrics Grid */}
+    <div className="bg-white rounded-lg border p-8" style={{ borderColor: 'rgb(229, 231, 235)' }}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
           return (
-            <div
-              key={index}
-              className="bg-white rounded-lg border p-6"
-              style={{ borderColor: 'rgb(229, 231, 235)' }}
-            >
+            <div key={index} className="p-6 rounded-lg border" style={{ borderColor: 'rgb(229, 231, 235)' }}>
               <div className="flex items-center justify-between mb-4">
                 <div
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
@@ -97,60 +92,6 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({ sessions, branches })
             </div>
           );
         })}
-      </div>
-
-      {/* Additional Stats */}
-      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <h3 className="text-lg font-semibold mb-4" style={{ color: '#161616' }}>
-          Estadísticas Adicionales
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Reseñas retenidas internamente
-              </span>
-              <span className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {privateSessions}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Con comentarios
-              </span>
-              <span className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {withComments} ({commentRate}%)
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Sin comentarios
-              </span>
-              <span className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {totalSessions - withComments}
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Sucursales activas
-              </span>
-              <span className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {branches.length}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                Tasa de conversión a Google
-              </span>
-              <span className="text-lg font-semibold" style={{ color: '#161616' }}>
-                {totalSessions > 0 ? ((publicSessions / totalSessions) * 100).toFixed(1) : '0'}%
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

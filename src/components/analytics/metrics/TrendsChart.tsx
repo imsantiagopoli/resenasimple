@@ -76,111 +76,43 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ sessions, timeGrouping }) => 
   const trend = calculateTrend();
 
   return (
-    <div className="space-y-6">
-      {/* Trend Summary */}
-      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold mb-2" style={{ color: '#161616' }}>
-              Tendencia General
-            </h3>
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Comparando períodos recientes
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            {trend.type === 'up' && (
-              <>
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-                  <TrendingUp size={24} className="text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">
-                    +{trend.percentage.toFixed(1)}%
-                  </p>
-                  <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                    En aumento
-                  </p>
-                </div>
-              </>
-            )}
-            {trend.type === 'down' && (
-              <>
-                <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
-                  <TrendingDown size={24} className="text-red-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-red-600">
-                    -{trend.percentage.toFixed(1)}%
-                  </p>
-                  <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                    En descenso
-                  </p>
-                </div>
-              </>
-            )}
-            {trend.type === 'neutral' && (
-              <>
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <Minus size={24} className="text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold" style={{ color: '#161616' }}>
-                    {trend.percentage.toFixed(1)}%
-                  </p>
-                  <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                    Estable
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
+    <div className="bg-white rounded-lg border p-8" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+      {trendData.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+            No hay datos para mostrar en el rango seleccionado
+          </p>
         </div>
-      </div>
-
-      {/* Timeline Chart */}
-      <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-        <h3 className="text-lg font-semibold mb-6" style={{ color: '#161616' }}>
-          Reseñas en el Tiempo
-        </h3>
-
-        {trendData.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              No hay datos para mostrar en el rango seleccionado
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {trendData.map((data, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium" style={{ color: '#161616' }}>
-                    {formatDate(data.date)}
+      ) : (
+        <div className="space-y-3">
+          {trendData.map((data, index) => (
+            <div key={index} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium" style={{ color: '#161616' }}>
+                  {formatDate(data.date)}
+                </span>
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    {data.count} reseña{data.count !== 1 ? 's' : ''}
                   </span>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                      {data.count} reseña{data.count !== 1 ? 's' : ''}
-                    </span>
-                    <span className="text-sm font-medium" style={{ color: '#161616' }}>
-                      ⭐ {data.avgRating}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${(data.count / maxCount) * 100}%`,
-                      backgroundColor: '#075E54'
-                    }}
-                  />
+                  <span className="text-sm font-medium" style={{ color: '#161616' }}>
+                    ⭐ {data.avgRating}
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${(data.count / maxCount) * 100}%`,
+                    backgroundColor: '#075E54'
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
