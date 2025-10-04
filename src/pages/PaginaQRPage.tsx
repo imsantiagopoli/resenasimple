@@ -204,6 +204,9 @@ const PaginaQRPage: React.FC = () => {
             </div>
           </div>
         ` : ''}
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); text-align: center; font-size: 12px; color: ${config.typography.primaryColor}; font-family: ${config.typography.primaryFont}, sans-serif;">
+          Creado con Reseña Simple
+        </div>
       </div>
     `;
 
