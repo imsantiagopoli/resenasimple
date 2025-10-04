@@ -21,6 +21,7 @@ import SettingsPage from './pages/SettingsPage';
 import PoliticasPrivacidadPage from './pages/PoliticasPrivacidadPage';
 import TerminosCondicionesPage from './pages/TerminosCondicionesPage';
 import GoogleCallbackPage from './pages/GoogleCallbackPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -103,6 +104,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <DashboardLayout activePage="respuestas">
                 <RespuestasPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/analisis"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout activePage="analisis">
+                <AnalyticsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
