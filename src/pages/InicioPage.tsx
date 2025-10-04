@@ -17,9 +17,9 @@ import SubscriptionModal from '../components/SubscriptionModal';
 const InicioPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { currentBusiness } = useBusiness();
+  const { profile } = useBusiness();
   const { sessions, loading, getStatistics, getTodayStatistics } = useVotingSessions();
-  const { canAccessApp, loading: subscriptionLoading } = useSubscription(user?.id, currentBusiness?.id);
+  const { canAccessApp, loading: subscriptionLoading } = useSubscription(user?.id, profile?.id);
   
   const statistics = getStatistics();
   const todayStats = getTodayStatistics();
@@ -93,7 +93,7 @@ const InicioPage: React.FC = () => {
   }
 
   if (!canAccessApp) {
-    return <SubscriptionModal user={user} currentBusiness={currentBusiness} />;
+    return <SubscriptionModal user={user} currentBusiness={profile} />;
   }
 
   return (
