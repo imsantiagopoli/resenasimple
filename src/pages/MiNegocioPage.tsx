@@ -161,6 +161,7 @@ const MiNegocioPage: React.FC = () => {
       <BranchesSection
         branches={branches}
         subscription={subscription}
+        hasFreeAccess={profile?.free_access || false}
         upsertBranch={upsertBranch}
         deleteBranch={deleteBranch}
         generateSlug={generateSlug}

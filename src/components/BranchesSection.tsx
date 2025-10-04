@@ -11,6 +11,7 @@ interface Subscription {
 interface BranchesSectionProps {
   branches: BusinessBranch[];
   subscription: Subscription | null;
+  hasFreeAccess: boolean;
   upsertBranch: (branch: Partial<BusinessBranch>) => Promise<{ data: any; error: string | null }>;
   deleteBranch: (branchId: string) => Promise<{ error: string | null }>;
   generateSlug: (name: string) => string;
@@ -20,6 +21,7 @@ interface BranchesSectionProps {
 const BranchesSection: React.FC<BranchesSectionProps> = ({
   branches,
   subscription,
+  hasFreeAccess,
   upsertBranch,
   deleteBranch,
   generateSlug,
@@ -44,6 +46,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
 
   // Get branch limits based on subscription plan
   const getBranchLimit = () => {
+    if (hasFreeAccess) return Infinity;
     if (!subscription || subscription.status !== 'active') return 1;
 
     const limits: Record<string, number> = {
@@ -56,8 +59,9 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   };
 
   const branchLimit = getBranchLimit();
-  const remainingBranches = branchLimit - branchesData.length;
-  const canAddBranch = branchesData.length < branchLimit;
+  const hasUnlimitedBranches = hasFreeAccess;
+  const remainingBranches = hasUnlimitedBranches ? Infinity : branchLimit - branchesData.length;
+  const canAddBranch = hasUnlimitedBranches || branchesData.length < branchLimit;
 
   // Initialize branches data
   useEffect(() => {
@@ -274,7 +278,11 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
               Sucursales
             </h2>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              {canAddBranch ? (
+              {hasUnlimitedBranches ? (
+                <span className="font-medium" style={{ color: '#075E54' }}>
+                  Sucursales ilimitadas
+                </span>
+              ) : canAddBranch ? (
                 <>
                   <span className="font-medium" style={{ color: '#075E54' }}>
                     {remainingBranches} {remainingBranches === 1 ? 'sucursal disponible' : 'sucursales disponibles'}
