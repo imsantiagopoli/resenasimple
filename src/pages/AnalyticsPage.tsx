@@ -2,7 +2,21 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useBusiness } from '../hooks/useBusiness';
 import { supabase } from '../lib/supabase';
-import { TrendingUp, TrendingDown, Calendar, Filter, PieChart, BarChart3, Download } from 'lucide-react';
+import {
+  LayoutDashboard,
+  PieChart,
+  TrendingUp,
+  Star,
+  Target,
+  MapPin,
+} from 'lucide-react';
+import AnalyticsFilters from '../components/analytics/AnalyticsFilters';
+import OverviewMetrics from '../components/analytics/OverviewMetrics';
+import DistributionChart from '../components/analytics/DistributionChart';
+import TimeSeriesChart from '../components/analytics/TimeSeriesChart';
+import RatingBreakdown from '../components/analytics/RatingBreakdown';
+import ConversionMetrics from '../components/analytics/ConversionMetrics';
+import BranchComparison from '../components/analytics/BranchComparison';
 
 interface VotingSession {
   id: string;
@@ -25,6 +39,7 @@ interface BranchInfo {
 }
 
 type DateGrouping = 'day' | 'week' | 'month';
+type AnalyticsTab = 'overview' | 'distribution' | 'timeline' | 'ratings' | 'conversion' | 'branches';
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
@@ -36,6 +51,7 @@ const AnalyticsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
   const [groupBy, setGroupBy] = useState<DateGrouping>('day');
+  const [activeTab, setActiveTab] = useState<AnalyticsTab>('overview');
 
   useEffect(() => {
     if (businessProfile?.id) {
@@ -107,7 +123,6 @@ const AnalyticsPage: React.FC = () => {
     const negative = filteredSessions.filter(s => s.rating < 4).length;
     const total = filteredSessions.length;
     const positiveRate = total > 0 ? (positive / total) * 100 : 0;
-
     const googleClicks = filteredSessions.filter(s => s.google_redirect_clicked).length;
     const formsCompleted = filteredSessions.filter(s => s.form_completed).length;
 
@@ -159,20 +174,14 @@ const AnalyticsPage: React.FC = () => {
       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
   }, [filteredSessions, groupBy]);
 
-  const maxValue = useMemo(() => {
-    return Math.max(...timeSeriesData.map(d => d.positive + d.negative), 1);
-  }, [timeSeriesData]);
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    if (groupBy === 'day') {
-      return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-    } else if (groupBy === 'week') {
-      return `Sem ${date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}`;
-    } else {
-      return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-    }
-  };
+  const tabs = [
+    { id: 'overview', label: 'Vista General', icon: LayoutDashboard },
+    { id: 'distribution', label: 'Distribución', icon: PieChart },
+    { id: 'timeline', label: 'Evolución', icon: TrendingUp },
+    { id: 'ratings', label: 'Calificaciones', icon: Star },
+    { id: 'conversion', label: 'Conversión', icon: Target },
+    { id: 'branches', label: 'Sucursales', icon: MapPin },
+  ];
 
   if (loading) {
     return (
@@ -199,260 +208,96 @@ const AnalyticsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="mb-6 p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-          <div className="flex items-center mb-4">
-            <Filter size={20} style={{ color: '#075E54' }} className="mr-2" />
-            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>Filtros</h2>
-          </div>
+        <AnalyticsFilters
+          branches={branches}
+          selectedBranch={selectedBranch}
+          setSelectedBranch={setSelectedBranch}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+        />
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                Sucursal
-              </label>
-              <select
-                value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: '#d1d5db',
-                  backgroundColor: 'white',
-                  color: '#161616',
-                }}
-              >
-                <option value="all">Todas las sucursales</option>
-                {branches.map(branch => (
-                  <option key={branch.id} value={branch.id}>{branch.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                Fecha inicio
-              </label>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: '#d1d5db',
-                  backgroundColor: 'white',
-                  color: '#161616',
-                }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                Fecha fin
-              </label>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: '#d1d5db',
-                  backgroundColor: 'white',
-                  color: '#161616',
-                }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                Agrupar por
-              </label>
-              <select
-                value={groupBy}
-                onChange={(e) => setGroupBy(e.target.value as DateGrouping)}
-                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: '#d1d5db',
-                  backgroundColor: 'white',
-                  color: '#161616',
-                }}
-              >
-                <option value="day">Día</option>
-                <option value="week">Semana</option>
-                <option value="month">Mes</option>
-              </select>
-            </div>
-          </div>
-
-          {(dateRange.start || dateRange.end || selectedBranch !== 'all') && (
-            <button
-              onClick={() => {
-                setDateRange({ start: '', end: '' });
-                setSelectedBranch('all');
-              }}
-              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                color: '#075E54',
-                backgroundColor: '#f0fdfa',
-                border: '1px solid #99f6e4',
-              }}
-            >
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: '#6b7280' }}>Total Respuestas</p>
-              <BarChart3 size={20} style={{ color: '#075E54' }} />
-            </div>
-            <p className="text-3xl font-bold" style={{ color: '#161616' }}>{statsData.total}</p>
-          </div>
-
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: '#6b7280' }}>Positivas</p>
-              <TrendingUp size={20} style={{ color: '#10b981' }} />
-            </div>
-            <p className="text-3xl font-bold" style={{ color: '#10b981' }}>{statsData.positive}</p>
-            <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
-              {statsData.positiveRate.toFixed(1)}% del total
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: '#6b7280' }}>Negativas</p>
-              <TrendingDown size={20} style={{ color: '#ef4444' }} />
-            </div>
-            <p className="text-3xl font-bold" style={{ color: '#ef4444' }}>{statsData.negative}</p>
-            <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
-              {(100 - statsData.positiveRate).toFixed(1)}% del total
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium" style={{ color: '#6b7280' }}>Clicks a Google</p>
-              <Calendar size={20} style={{ color: '#075E54' }} />
-            </div>
-            <p className="text-3xl font-bold" style={{ color: '#161616' }}>{statsData.googleClicks}</p>
-            <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
-              {statsData.formsCompleted} formularios completados
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center mb-6">
-              <PieChart size={20} style={{ color: '#075E54' }} className="mr-2" />
-              <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-                Distribución Positivas/Negativas
-              </h2>
-            </div>
-
-            <div className="flex items-center justify-center">
-              <div className="relative w-64 h-64">
-                <svg viewBox="0 0 200 200" className="transform -rotate-90">
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#ef4444"
-                    strokeWidth="40"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="40"
-                    strokeDasharray={`${(statsData.positiveRate / 100) * 502.4} 502.4`}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <p className="text-4xl font-bold" style={{ color: '#161616' }}>
-                    {statsData.positiveRate.toFixed(0)}%
-                  </p>
-                  <p className="text-sm" style={{ color: '#6b7280' }}>Positivas</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#10b981' }}></div>
-                  <span className="text-sm" style={{ color: '#374151' }}>Positivas (4-5 estrellas)</span>
-                </div>
-                <span className="text-sm font-medium" style={{ color: '#161616' }}>{statsData.positive}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: '#ef4444' }}></div>
-                  <span className="text-sm" style={{ color: '#374151' }}>Negativas (1-3 estrellas)</span>
-                </div>
-                <span className="text-sm font-medium" style={{ color: '#161616' }}>{statsData.negative}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-lg bg-white shadow-sm" style={{ borderColor: '#e5e7eb', border: '1px solid' }}>
-            <div className="flex items-center mb-6">
-              <BarChart3 size={20} style={{ color: '#075E54' }} className="mr-2" />
-              <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-                Evolución en el Tiempo
-              </h2>
-            </div>
-
-            {timeSeriesData.length === 0 ? (
-              <div className="flex items-center justify-center h-64">
-                <p style={{ color: '#6b7280' }}>No hay datos para mostrar</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {timeSeriesData.map((item, index) => (
-                  <div key={index}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium" style={{ color: '#6b7280' }}>
-                        {formatDate(item.date)}
-                      </span>
-                      <span className="text-xs font-medium" style={{ color: '#6b7280' }}>
-                        {item.positive + item.negative}
-                      </span>
-                    </div>
-                    <div className="flex h-8 rounded overflow-hidden" style={{ backgroundColor: '#f3f4f6' }}>
-                      {item.positive > 0 && (
-                        <div
-                          className="flex items-center justify-center text-xs font-medium text-white"
-                          style={{
-                            width: `${(item.positive / (item.positive + item.negative)) * 100}%`,
-                            backgroundColor: '#10b981',
-                            minWidth: item.positive > 0 ? '20px' : '0',
-                          }}
-                        >
-                          {item.positive}
-                        </div>
-                      )}
-                      {item.negative > 0 && (
-                        <div
-                          className="flex items-center justify-center text-xs font-medium text-white"
-                          style={{
-                            width: `${(item.negative / (item.positive + item.negative)) * 100}%`,
-                            backgroundColor: '#ef4444',
-                            minWidth: item.negative > 0 ? '20px' : '0',
-                          }}
-                        >
-                          {item.negative}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-3">
+            <div className="p-4 rounded-lg bg-white shadow-sm" style={{ border: '1px solid #e5e7eb' }}>
+              <div className="space-y-1">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as AnalyticsTab)}
+                    className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-all ${
+                      activeTab === tab.id ? 'shadow-sm' : ''
+                    }`}
+                    style={{
+                      backgroundColor: activeTab === tab.id ? '#075E54' : 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeTab !== tab.id) {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeTab !== tab.id) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <tab.icon
+                      size={18}
+                      style={{
+                        color: activeTab === tab.id ? '#ffffff' : '#6b7280',
+                      }}
+                    />
+                    <span
+                      className="ml-3 text-sm font-medium"
+                      style={{
+                        color: activeTab === tab.id ? '#ffffff' : '#161616',
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                  </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          <div className="col-span-12 lg:col-span-9">
+            {activeTab === 'overview' && (
+              <OverviewMetrics
+                total={statsData.total}
+                positive={statsData.positive}
+                negative={statsData.negative}
+                positiveRate={statsData.positiveRate}
+                googleClicks={statsData.googleClicks}
+                formsCompleted={statsData.formsCompleted}
+              />
+            )}
+            {activeTab === 'distribution' && (
+              <DistributionChart
+                positive={statsData.positive}
+                negative={statsData.negative}
+                positiveRate={statsData.positiveRate}
+              />
+            )}
+            {activeTab === 'timeline' && (
+              <TimeSeriesChart data={timeSeriesData} groupBy={groupBy} />
+            )}
+            {activeTab === 'ratings' && (
+              <RatingBreakdown sessions={filteredSessions} />
+            )}
+            {activeTab === 'conversion' && (
+              <ConversionMetrics
+                total={statsData.total}
+                googleClicks={statsData.googleClicks}
+                formsCompleted={statsData.formsCompleted}
+                positive={statsData.positive}
+                negative={statsData.negative}
+              />
+            )}
+            {activeTab === 'branches' && (
+              <BranchComparison sessions={filteredSessions} branches={branches} />
             )}
           </div>
         </div>
