@@ -239,7 +239,10 @@ const VotingPage: React.FC = () => {
       });
 
       if (session) {
+        console.log('Negative incomplete session created with ID:', session.id);
         setCurrentSessionId(session.id);
+      } else {
+        console.error('No session data returned for negative incomplete');
       }
     } catch (err) {
       console.error('Error submitting negative incomplete session:', err);
@@ -305,7 +308,10 @@ const VotingPage: React.FC = () => {
       });
 
       if (session) {
+        console.log('Session created with ID:', session.id);
         setCurrentSessionId(session.id);
+      } else {
+        console.error('No session data returned');
       }
     } catch (err) {
       console.error('Error submitting public voting session:', err);
@@ -314,11 +320,23 @@ const VotingPage: React.FC = () => {
   };
   // Handle public review submission
   const handlePublicReview = async () => {
-    if (!config || !currentSessionId) return;
+    console.log('handlePublicReview called, currentSessionId:', currentSessionId);
+
+    if (!config) {
+      console.error('No config available');
+      return;
+    }
+
+    if (!currentSessionId) {
+      console.error('No currentSessionId available');
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
+      console.log('Updating session to positive_clicked:', currentSessionId);
+
       // Update the session to mark that Google button was clicked
       const { error: updateError } = await supabase
         .from('voting_sessions')
@@ -329,8 +347,11 @@ const VotingPage: React.FC = () => {
         .eq('id', currentSessionId);
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw updateError;
       }
+
+      console.log('Session updated successfully');
 
       // Redirect to Google or show success based on config
       if (config.logic.smartAutoRedirect && business) {
@@ -350,7 +371,17 @@ const VotingPage: React.FC = () => {
   // Handle private feedback submission
   const handlePrivateFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config || !currentSessionId) return;
+    console.log('handlePrivateFeedback called, currentSessionId:', currentSessionId);
+
+    if (!config) {
+      console.error('No config available');
+      return;
+    }
+
+    if (!currentSessionId) {
+      console.error('No currentSessionId available');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -367,6 +398,9 @@ const VotingPage: React.FC = () => {
         throw new Error('El teléfono es requerido');
       }
 
+      console.log('Updating session to negative_complete:', currentSessionId);
+      console.log('Form data:', formData);
+
       // Update the existing incomplete session to mark it as complete
       const { error: updateError } = await supabase
         .from('voting_sessions')
@@ -382,12 +416,16 @@ const VotingPage: React.FC = () => {
         .eq('id', currentSessionId);
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw updateError;
       }
+
+      console.log('Session updated successfully to negative_complete');
 
       setViewState('private-thanks');
 
     } catch (err: any) {
+      console.error('Error in handlePrivateFeedback:', err);
       setError(err.message || 'Error al enviar tu feedback. Por favor intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
