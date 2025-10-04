@@ -1338,12 +1338,12 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-8"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', padding: '2rem' }}
         onClick={() => setShowGalleryModal(false)}
       >
         <div
-          className="bg-white rounded-2xl shadow-2xl flex flex-col"
+          className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           style={{ width: '1000px', height: '700px', maxHeight: '100%' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -1445,7 +1445,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             {mainTab === 'gallery' ? (
               <>
                 {/* Sidebar with filters */}
-                <div className="w-48 border-r py-6 px-4 overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)', backgroundColor: 'rgb(249, 250, 251)' }}>
+                <div className="w-48 border-r py-6 px-4 overflow-y-auto" style={{ borderColor: 'rgb(229, 231, 235)', backgroundColor: 'rgb(249, 250, 251)', borderBottomLeftRadius: '1rem' }}>
                   <p className="text-xs font-semibold uppercase tracking-wide mb-3 px-2" style={{ color: 'rgb(107, 114, 128)' }}>
                     Filtrar
                   </p>
