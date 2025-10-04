@@ -69,6 +69,64 @@ const VotingPage: React.FC = () => {
     console.log('currentSessionId changed to:', currentSessionId);
   }, [currentSessionId]);
 
+  // Check subscription access
+  const checkSubscriptionAccess = async (businessId: string, userId: string): Promise<boolean> => {
+    try {
+      // Check if business has free_access
+      const { data: businessData, error: businessError } = await supabase
+        .from('business_profiles')
+        .select('free_access')
+        .eq('id', businessId)
+        .single();
+
+      if (businessError) {
+        console.error('Error checking free_access:', businessError);
+        return false;
+      }
+
+      if (businessData?.free_access === true) {
+        return true;
+      }
+
+      // Check if there's an active subscription for this business
+      const { data: businessSubscription, error: businessSubError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('business_id', businessId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (businessSubError) {
+        console.error('Error checking business subscription:', businessSubError);
+      }
+
+      if (businessSubscription) {
+        return true;
+      }
+
+      // Check if the business owner (user) has an active subscription without business_id
+      const { data: userSubscription, error: userSubError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (userSubError) {
+        console.error('Error checking user subscription:', userSubError);
+      }
+
+      if (userSubscription) {
+        return true;
+      }
+
+      return false;
+    } catch (err) {
+      console.error('Error in checkSubscriptionAccess:', err);
+      return false;
+    }
+  };
+
   // Load branch, business and config data
   useEffect(() => {
     const loadData = async () => {
@@ -105,6 +163,15 @@ const VotingPage: React.FC = () => {
         }
 
         setBusiness(businessData);
+
+        // Check subscription access
+        const hasAccess = await checkSubscriptionAccess(branchData.business_id, businessData.user_id);
+
+        if (!hasAccess) {
+          setViewState('error');
+          setError('subscription-required');
+          return;
+        }
 
         // Get voting configuration
         const { data: configData, error: configError } = await supabase
@@ -575,14 +642,18 @@ const VotingPage: React.FC = () => {
 
   // Error state
   if (viewState === 'error') {
+    const isSubscriptionError = error === 'subscription-required';
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold mb-4" style={{ color: '#161616' }}>
-            Página no encontrada
+            {isSubscriptionError ? 'Suscripción Requerida' : 'Página no encontrada'}
           </h1>
           <p className="text-base mb-6" style={{ color: 'rgb(107, 114, 128)' }}>
-            La página de votación que buscas no existe o no está disponible.
+            {isSubscriptionError
+              ? 'Este negocio no tiene una suscripción activa. Por favor contacta al negocio para más información.'
+              : 'La página de votación que buscas no existe o no está disponible.'}
           </p>
           <button
             onClick={() => navigate('/')}
