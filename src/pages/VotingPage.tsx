@@ -62,6 +62,12 @@ const VotingPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Debug: Log whenever currentSessionId changes
+  useEffect(() => {
+    console.log('currentSessionId changed to:', currentSessionId);
+  }, [currentSessionId]);
 
   // Load branch, business and config data
   useEffect(() => {
@@ -209,7 +215,7 @@ const VotingPage: React.FC = () => {
   }, [slug]);
 
   // Handle star selection
-  const handleStarClick = (stars: number) => {
+  const handleStarClick = async (stars: number) => {
     setSelectedStars(stars);
 
     if (!config) return;
@@ -218,12 +224,12 @@ const VotingPage: React.FC = () => {
     if (stars >= config.logic.threshold) {
       // High rating - show public review flow
       // Register voting session immediately when reaching public review page
-      submitPublicVotingSession(stars);
+      await submitPublicVotingSession(stars);
       setViewState('public-review');
     } else {
       // Low rating - show private feedback flow
       // Create incomplete negative session immediately
-      submitNegativeIncompleteSession(stars);
+      await submitNegativeIncompleteSession(stars);
       setViewState('private-feedback');
     }
   };
@@ -241,6 +247,7 @@ const VotingPage: React.FC = () => {
       if (session) {
         console.log('Negative incomplete session created with ID:', session.id);
         setCurrentSessionId(session.id);
+        console.log('currentSessionId set to:', session.id);
       } else {
         console.error('No session data returned for negative incomplete');
       }
@@ -294,9 +301,6 @@ const VotingPage: React.FC = () => {
     }
   };
 
-  // State to store current session ID
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-
   // Submit public voting session when reaching thank you page
   const submitPublicVotingSession = async (stars: number) => {
     try {
@@ -310,6 +314,7 @@ const VotingPage: React.FC = () => {
       if (session) {
         console.log('Session created with ID:', session.id);
         setCurrentSessionId(session.id);
+        console.log('currentSessionId set to:', session.id);
       } else {
         console.error('No session data returned');
       }
