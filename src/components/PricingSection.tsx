@@ -15,7 +15,7 @@ const PricingSection: React.FC = () => {
     {
       name: 'Básico',
       icon: Star,
-      price: 14,
+      price: 25000,
       period: 'mes',
       description: 'Perfecto para negocios pequeños',
       popular: false,
@@ -32,7 +32,7 @@ const PricingSection: React.FC = () => {
     {
       name: 'Profesional',
       icon: Crown,
-      price: 19,
+      price: 35000,
       period: 'mes',
       description: 'El más popular para negocios en crecimiento',
       popular: true,
@@ -51,12 +51,12 @@ const PricingSection: React.FC = () => {
     {
       name: 'Empresarial',
       icon: Building2,
-      price: 29,
+      price: 70000,
       period: 'mes',
       description: 'Para negocios con múltiples ubicaciones',
       popular: false,
       features: [
-        'Múltiples ubicaciones',
+        'Hasta 3 sucursales',
         'Reseñas ilimitadas',
         'Códigos QR ilimitados',
         'Panel administrativo central',
@@ -196,9 +196,9 @@ const PricingSection: React.FC = () => {
                     {plan.price ? (
                       <div className="flex items-baseline justify-center space-x-2">
                         <span className="text-4xl lg:text-5xl font-bold" style={{ color: '#161616' }}>
-                          ${plan.price}
+                          ${plan.price.toLocaleString('es-AR')}
                         </span>
-                        <span 
+                        <span
                           className="text-sm"
                           style={{ color: 'rgb(107, 114, 128)' }}
                         >
@@ -210,7 +210,7 @@ const PricingSection: React.FC = () => {
                         <span className="text-3xl lg:text-4xl font-bold" style={{ color: '#161616' }}>
                           Hablemos
                         </span>
-                        <p 
+                        <p
                           className="text-sm mt-2"
                           style={{ color: 'rgb(107, 114, 128)' }}
                         >
