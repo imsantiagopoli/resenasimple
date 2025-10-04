@@ -46,8 +46,10 @@ export interface VotingSession {
   rating: number;
   comment: string | null;
   is_public: boolean;
-  google_redirect_clicked: boolean | null;
-  google_redirect_attempted_at: string | null;
+  status: 'positive_viewed' | 'positive_clicked' | 'negative_incomplete' | 'negative_complete';
+  google_redirect_clicked_at: string | null;
+  form_submitted_at: string | null;
+  form_completed: boolean;
   created_at: string;
   branch_name?: string;
   branch_slug?: string;
@@ -1227,8 +1229,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         rating: session.rating,
         comment: session.comment,
         is_public: session.is_public,
-        google_redirect_clicked: session.google_redirect_clicked,
-        google_redirect_attempted_at: session.google_redirect_attempted_at,
+        status: session.status,
+        google_redirect_clicked_at: session.google_redirect_clicked_at,
+        form_submitted_at: session.form_submitted_at,
+        form_completed: session.form_completed,
         created_at: session.created_at,
         branch_name: session.business_branches?.name,
         branch_slug: session.business_branches?.slug
@@ -1512,8 +1516,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
                 rating: newSession.rating,
                 comment: newSession.comment,
                 is_public: newSession.is_public,
-                google_redirect_clicked: newSession.google_redirect_clicked,
-                google_redirect_attempted_at: newSession.google_redirect_attempted_at,
+                status: newSession.status,
+                google_redirect_clicked_at: newSession.google_redirect_clicked_at,
+                form_submitted_at: newSession.form_submitted_at,
+                form_completed: newSession.form_completed,
                 created_at: newSession.created_at,
                 branch_name: newSession.business_branches?.name,
                 branch_slug: newSession.business_branches?.slug
@@ -1547,8 +1553,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
                 rating: updatedSession.rating,
                 comment: updatedSession.comment,
                 is_public: updatedSession.is_public,
-                google_redirect_clicked: updatedSession.google_redirect_clicked,
-                google_redirect_attempted_at: updatedSession.google_redirect_attempted_at,
+                status: updatedSession.status,
+                google_redirect_clicked_at: updatedSession.google_redirect_clicked_at,
+                form_submitted_at: updatedSession.form_submitted_at,
+                form_completed: updatedSession.form_completed,
                 created_at: updatedSession.created_at,
                 branch_name: updatedSession.business_branches?.name,
                 branch_slug: updatedSession.business_branches?.slug

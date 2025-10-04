@@ -42,9 +42,13 @@ const RespuestasPage: React.FC = () => {
       }),
       branch: session.branch_name || 'Sucursal desconocida',
       type: session.is_public ? 'public' : 'private',
-      status: session.is_public 
-        ? (session.google_redirect_clicked ? 'sent_to_google' : 'reached_google_page')
-        : 'retained_internally'
+      status: session.status === 'positive_clicked'
+        ? 'sent_to_google'
+        : session.status === 'positive_viewed'
+        ? 'reached_google_page'
+        : session.status === 'negative_complete'
+        ? 'retained_complete'
+        : 'retained_incomplete'
     }));
   }, [sessions]);
 
@@ -646,20 +650,24 @@ const RespuestasPage: React.FC = () => {
 
                   {/* Estado */}
                   <td className="py-4 px-4">
-                    <span 
+                    <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         resena.status === 'sent_to_google'
                           ? 'bg-green-100 text-green-800'
                           : resena.status === 'reached_google_page'
                           ? 'bg-blue-100 text-blue-800'
-                          : 'bg-orange-100 text-orange-800'
+                          : resena.status === 'retained_complete'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-yellow-100 text-yellow-800'
                       }`}
                     >
-                      {resena.status === 'sent_to_google' 
-                        ? 'Enviado a Google' 
+                      {resena.status === 'sent_to_google'
+                        ? 'Enviado a Google'
                         : resena.status === 'reached_google_page'
                         ? 'Vio página de Google'
-                        : 'Retenido'
+                        : resena.status === 'retained_complete'
+                        ? 'Retenido (Completo)'
+                        : 'Retenido (Incompleto)'
                       }
                     </span>
                   </td>
