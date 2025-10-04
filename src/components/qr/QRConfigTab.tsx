@@ -39,6 +39,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [userBackgrounds, setUserBackgrounds] = useState<BackgroundImage[]>([]);
   const [uploadingBackground, setUploadingBackground] = useState(false);
+  const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
 
   // Load background images from database
   useEffect(() => {
@@ -861,7 +862,10 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     </div>
                     {backgroundImages.length > 6 && (
                       <button
-                        onClick={() => setShowGalleryModal(true)}
+                        onClick={() => {
+                          setSelectedBackground(config.background.imageUrl || null);
+                          setShowGalleryModal(true);
+                        }}
                         className="w-full mt-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border"
                         style={{
                           backgroundColor: 'white',
@@ -1338,13 +1342,22 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
-        onClick={() => setShowGalleryModal(false)}
+        className="fixed z-[9999] flex items-center justify-center"
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)'
+        }}
+        onClick={() => {
+          setShowGalleryModal(false);
+          setSelectedBackground(null);
+        }}
       >
         <div
           className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          style={{ width: '1000px', height: '700px', maxHeight: 'calc(100vh - 4rem)', margin: '2rem' }}
+          style={{ width: '1000px', height: '700px', maxHeight: 'calc(100vh - 4rem)' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -1496,22 +1509,21 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                         <button
                           key={bg.id}
                           onClick={() => {
-                            updateBackground({ imageUrl: bg.image_url });
-                            setShowGalleryModal(false);
+                            setSelectedBackground(bg.image_url);
                           }}
                           className="relative group rounded-xl overflow-hidden border-2 transition-all duration-200"
                           style={{
-                            borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                            borderColor: selectedBackground === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
                             aspectRatio: '16/10'
                           }}
                           onMouseEnter={(e) => {
-                            if (config.background.imageUrl !== bg.image_url) {
+                            if (selectedBackground !== bg.image_url) {
                               e.currentTarget.style.borderColor = '#075E54';
                               e.currentTarget.style.transform = 'scale(1.02)';
                             }
                           }}
                           onMouseLeave={(e) => {
-                            if (config.background.imageUrl !== bg.image_url) {
+                            if (selectedBackground !== bg.image_url) {
                               e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
                               e.currentTarget.style.transform = 'scale(1)';
                             }
@@ -1522,7 +1534,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                             alt={bg.name}
                             className="w-full h-full object-cover"
                           />
-                          {config.background.imageUrl === bg.image_url && (
+                          {selectedBackground === bg.image_url && (
                             <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(7, 94, 84, 0.7)' }}>
                               <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
                                 <Check size={20} color="white" strokeWidth={3} />
@@ -1551,22 +1563,21 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                       <button
                         key={bg.id}
                         onClick={() => {
-                          updateBackground({ imageUrl: bg.image_url });
-                          setShowGalleryModal(false);
+                          setSelectedBackground(bg.image_url);
                         }}
                         className="relative group rounded-xl overflow-hidden border-2 transition-all duration-200"
                         style={{
-                          borderColor: config.background.imageUrl === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
+                          borderColor: selectedBackground === bg.image_url ? '#075E54' : 'rgb(229, 231, 235)',
                           aspectRatio: '16/10'
                         }}
                         onMouseEnter={(e) => {
-                          if (config.background.imageUrl !== bg.image_url) {
+                          if (selectedBackground !== bg.image_url) {
                             e.currentTarget.style.borderColor = '#075E54';
                             e.currentTarget.style.transform = 'scale(1.02)';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (config.background.imageUrl !== bg.image_url) {
+                          if (selectedBackground !== bg.image_url) {
                             e.currentTarget.style.borderColor = 'rgb(229, 231, 235)';
                             e.currentTarget.style.transform = 'scale(1)';
                           }
@@ -1577,7 +1588,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                           alt={bg.name}
                           className="w-full h-full object-cover"
                         />
-                        {config.background.imageUrl === bg.image_url && (
+                        {selectedBackground === bg.image_url && (
                           <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(7, 94, 84, 0.7)' }}>
                             <div className="rounded-full p-2" style={{ backgroundColor: '#075E54' }}>
                               <Check size={20} color="white" strokeWidth={3} />
@@ -1604,6 +1615,54 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                 )}
               </div>
             )}
+          </div>
+
+          {/* Footer with action buttons */}
+          <div className="flex items-center justify-end gap-3 px-8 py-4 border-t" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+            <button
+              onClick={() => {
+                setShowGalleryModal(false);
+                setSelectedBackground(null);
+              }}
+              className="px-4 py-2 rounded-lg font-medium text-sm transition-all border"
+              style={{
+                borderColor: 'rgb(229, 231, 235)',
+                color: 'rgb(55, 65, 81)',
+                backgroundColor: 'white'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                if (selectedBackground) {
+                  updateBackground({ imageUrl: selectedBackground });
+                }
+                setShowGalleryModal(false);
+                setSelectedBackground(null);
+              }}
+              disabled={!selectedBackground}
+              className="px-4 py-2 rounded-lg font-medium text-sm transition-all"
+              style={{
+                backgroundColor: selectedBackground ? '#075E54' : 'rgb(229, 231, 235)',
+                color: selectedBackground ? 'white' : 'rgb(156, 163, 175)',
+                cursor: selectedBackground ? 'pointer' : 'not-allowed'
+              }}
+              onMouseEnter={(e) => {
+                if (selectedBackground) {
+                  e.currentTarget.style.backgroundColor = '#064c43';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedBackground) {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }
+              }}
+            >
+              Confirmar
+            </button>
           </div>
         </div>
       </div>
