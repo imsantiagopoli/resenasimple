@@ -80,17 +80,26 @@ const SubscriptionModal: React.FC = () => {
   ];
 
   const handleSelectPlan = (plan: Plan) => {
+    console.log('handleSelectPlan called', { user, currentBusiness, plan });
+
     if (!user || !currentBusiness) {
-      console.error('User or business not found');
+      console.error('User or business not found', { user, currentBusiness });
+      alert('Error: No se pudo obtener la información del usuario o negocio. Por favor, recarga la página.');
       return;
     }
 
-    const checkoutUrl = new URL(plan.checkoutUrl);
-    checkoutUrl.searchParams.set('checkout[email]', user.email || '');
-    checkoutUrl.searchParams.set('checkout[custom][user_id]', user.id);
-    checkoutUrl.searchParams.set('checkout[custom][business_id]', currentBusiness.id);
+    try {
+      const checkoutUrl = new URL(plan.checkoutUrl);
+      checkoutUrl.searchParams.set('checkout[email]', user.email || '');
+      checkoutUrl.searchParams.set('checkout[custom][user_id]', user.id);
+      checkoutUrl.searchParams.set('checkout[custom][business_id]', currentBusiness.id);
 
-    window.open(checkoutUrl.toString(), '_blank');
+      console.log('Opening checkout URL:', checkoutUrl.toString());
+      window.open(checkoutUrl.toString(), '_blank');
+    } catch (error) {
+      console.error('Error opening checkout:', error);
+      alert('Error al abrir el checkout. Por favor, intenta de nuevo.');
+    }
   };
 
   return (
