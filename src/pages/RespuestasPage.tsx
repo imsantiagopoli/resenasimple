@@ -9,7 +9,10 @@ import {
   Mail,
   ChevronDown,
   User,
-  Send
+  Send,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useVotingSessions } from '../hooks/useVotingSessions';
 import { useBusiness } from '../hooks/useBusiness';
@@ -21,10 +24,20 @@ const RespuestasPage: React.FC = () => {
     status: 'all', // all, public, private
     minStars: 1,
     branches: [] as string[],
-    contact: 'all' // all, with-phone, with-email, no-contact
+    contact: 'all', // all, with-phone, with-email, no-contact
+    dateFrom: '',
+    dateTo: ''
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{
+    key: 'date' | 'stars' | 'customer' | 'branch';
+    direction: 'asc' | 'desc';
+  }>({ key: 'date', direction: 'desc' });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    itemsPerPage: 10
+  });
 
   // Transform sessions data for display
   const resenas = useMemo(() => {
@@ -98,7 +111,19 @@ const RespuestasPage: React.FC = () => {
       resena.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
       resena.branch.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesStatus && matchesStars && matchesBranches && matchesContact && matchesSearch;
+    // Filtro por rango de fechas
+    const matchesDateRange = (() => {
+      if (!filters.dateFrom && !filters.dateTo) return true;
+      const resenaDate = new Date(resena.date);
+      const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
+      const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
+
+      if (fromDate && resenaDate < fromDate) return false;
+      if (toDate && resenaDate > toDate) return false;
+      return true;
+    })();
+
+    return matchesStatus && matchesStars && matchesBranches && matchesContact && matchesSearch && matchesDateRange;
   });
 
   const handleWhatsApp = (phone: string, customerName: string) => {
@@ -110,9 +135,70 @@ const RespuestasPage: React.FC = () => {
   const handleEmail = (email: string, customerName: string) => {
     const subject = 'Seguimiento a tu experiencia en Pizzería Napolitana';
     const body = `Hola ${customerName},\n\nGracias por tomarte el tiempo de compartir tu experiencia con nosotros. Tu opinión es muy valiosa y nos ayuda a mejorar.\n\n¿Podrías contarnos un poco más sobre tu visita para poder brindarte un mejor servicio?\n\nSaludos,\nEquipo de Pizzería Napolitana`;
-    
+
     const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl);
+  };
+
+  // Función para ordenar
+  const handleSort = (key: 'date' | 'stars' | 'customer' | 'branch') => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  // Aplicar ordenamiento
+  const sortedResenas = useMemo(() => {
+    const sorted = [...filteredResenas];
+    sorted.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortConfig.key) {
+        case 'date':
+          aValue = new Date(a.date).getTime();
+          bValue = new Date(b.date).getTime();
+          break;
+        case 'stars':
+          aValue = a.stars;
+          bValue = b.stars;
+          break;
+        case 'customer':
+          aValue = a.customer.toLowerCase();
+          bValue = b.customer.toLowerCase();
+          break;
+        case 'branch':
+          aValue = a.branch.toLowerCase();
+          bValue = b.branch.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredResenas, sortConfig]);
+
+  // Aplicar paginación
+  const paginatedResenas = useMemo(() => {
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    return sortedResenas.slice(startIndex, endIndex);
+  }, [sortedResenas, pagination]);
+
+  const totalPages = Math.ceil(sortedResenas.length / pagination.itemsPerPage);
+
+  const handleItemsPerPageChange = (value: number) => {
+    setPagination({ currentPage: 1, itemsPerPage: value });
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   // Loading state
@@ -412,6 +498,44 @@ const RespuestasPage: React.FC = () => {
                   {/* Separador */}
                   <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
 
+                  {/* Rango de Fechas */}
+                  <div>
+                    <h4 className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Rango de Fechas
+                    </h4>
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>Desde</label>
+                        <input
+                          type="date"
+                          value={filters.dateFrom}
+                          onChange={(e) => updateFilters('dateFrom', e.target.value)}
+                          className="w-full mt-1 px-3 py-2 rounded-lg border text-sm"
+                          style={{
+                            borderColor: 'rgb(209, 213, 219)',
+                            color: '#161616'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>Hasta</label>
+                        <input
+                          type="date"
+                          value={filters.dateTo}
+                          onChange={(e) => updateFilters('dateTo', e.target.value)}
+                          className="w-full mt-1 px-3 py-2 rounded-lg border text-sm"
+                          style={{
+                            borderColor: 'rgb(209, 213, 219)',
+                            color: '#161616'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Separador */}
+                  <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
                   {/* Botones de Acción */}
                   <div className="flex items-center justify-between pt-2">
                     <button
@@ -420,7 +544,9 @@ const RespuestasPage: React.FC = () => {
                           status: 'all',
                           minStars: 1,
                           branches: [],
-                          contact: 'all'
+                          contact: 'all',
+                          dateFrom: '',
+                          dateTo: ''
                         });
                       }}
                       className="text-xs font-medium transition-colors duration-200"
@@ -449,7 +575,7 @@ const RespuestasPage: React.FC = () => {
           </div>
 
           {/* Indicadores de filtros activos */}
-          {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all') && (
+          {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || filters.dateFrom || filters.dateTo) && (
             <div className="flex flex-wrap gap-2">
               {filters.status !== 'all' && (
                 <span 
@@ -485,15 +611,30 @@ const RespuestasPage: React.FC = () => {
                 </span>
               )}
               {filters.contact !== 'all' && (
-                <span 
+                <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={{
                     backgroundColor: '#10b981' + '20',
                     color: '#10b981'
                   }}
                 >
-                  {filters.contact === 'with-phone' ? 'Con teléfono' : 
+                  {filters.contact === 'with-phone' ? 'Con teléfono' :
                    filters.contact === 'with-email' ? 'Con email' : 'Sin contacto'}
+                </span>
+              )}
+              {(filters.dateFrom || filters.dateTo) && (
+                <span
+                  className="px-2 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: '#ef4444' + '20',
+                    color: '#ef4444'
+                  }}
+                >
+                  {filters.dateFrom && filters.dateTo
+                    ? `${new Date(filters.dateFrom).toLocaleDateString('es-ES')} - ${new Date(filters.dateTo).toLocaleDateString('es-ES')}`
+                    : filters.dateFrom
+                    ? `Desde ${new Date(filters.dateFrom).toLocaleDateString('es-ES')}`
+                    : `Hasta ${new Date(filters.dateTo).toLocaleDateString('es-ES')}`}
                 </span>
               )}
             </div>
@@ -521,18 +662,23 @@ const RespuestasPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Contador de resultados */}
-        <div className="mb-4">
+        {/* Contador de resultados y selector de items por página */}
+        <div className="mb-4 flex items-center justify-between">
           <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-            Mostrando {filteredResenas.length} de {resenas.length} reseñas
-            {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || searchQuery.trim()) && filteredResenas.length !== resenas.length && (
+            Mostrando {paginatedResenas.length > 0 ? ((pagination.currentPage - 1) * pagination.itemsPerPage + 1) : 0} - {Math.min(pagination.currentPage * pagination.itemsPerPage, sortedResenas.length)} de {sortedResenas.length} reseñas
+            {sortedResenas.length !== resenas.length && (
+              <span> (filtrado de {resenas.length} total)</span>
+            )}
+            {(filters.status !== 'all' || filters.minStars > 1 || filters.branches.length > 0 || filters.contact !== 'all' || filters.dateFrom || filters.dateTo || searchQuery.trim()) && sortedResenas.length !== resenas.length && (
               <button
                 onClick={() => {
                   setFilters({
                     status: 'all',
                     minStars: 1,
                     branches: [],
-                    contact: 'all'
+                    contact: 'all',
+                    dateFrom: '',
+                    dateTo: ''
                   });
                   setSearchQuery('');
                 }}
@@ -545,6 +691,24 @@ const RespuestasPage: React.FC = () => {
               </button>
             )}
           </p>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Por página:</span>
+            <select
+              value={pagination.itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="px-3 py-1 rounded-lg border text-sm"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: '#161616'
+              }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
         </div>
 
         {/* Tabla de Reseñas */}
@@ -553,19 +717,43 @@ const RespuestasPage: React.FC = () => {
             <thead>
               <tr className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Cliente
+                  <button
+                    onClick={() => handleSort('customer')}
+                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                  >
+                    <span>Cliente</span>
+                    <ArrowUpDown size={14} className={sortConfig.key === 'customer' ? 'opacity-100' : 'opacity-40'} />
+                  </button>
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Calificación
+                  <button
+                    onClick={() => handleSort('stars')}
+                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                  >
+                    <span>Calificación</span>
+                    <ArrowUpDown size={14} className={sortConfig.key === 'stars' ? 'opacity-100' : 'opacity-40'} />
+                  </button>
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                   Comentario
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Sucursal
+                  <button
+                    onClick={() => handleSort('branch')}
+                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                  >
+                    <span>Sucursal</span>
+                    <ArrowUpDown size={14} className={sortConfig.key === 'branch' ? 'opacity-100' : 'opacity-40'} />
+                  </button>
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                  Fecha
+                  <button
+                    onClick={() => handleSort('date')}
+                    className="flex items-center space-x-1 hover:text-gray-900 transition-colors"
+                  >
+                    <span>Fecha</span>
+                    <ArrowUpDown size={14} className={sortConfig.key === 'date' ? 'opacity-100' : 'opacity-40'} />
+                  </button>
                 </th>
                 <th className="text-left py-3 px-4 font-medium text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                   Estado
@@ -576,7 +764,7 @@ const RespuestasPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredResenas.map((resena) => (
+              {paginatedResenas.map((resena) => (
                 <tr 
                   key={resena.id} 
                   className="border-b hover:bg-gray-50 transition-colors duration-150"
@@ -725,8 +913,74 @@ const RespuestasPage: React.FC = () => {
           </table>
         </div>
 
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: pagination.currentPage === 1 ? 'rgb(156, 163, 175)' : '#075E54',
+                backgroundColor: 'white'
+              }}
+            >
+              <ChevronLeft size={16} />
+              <span>Anterior</span>
+            </button>
+
+            <div className="flex items-center space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  if (totalPages <= 7) return true;
+                  if (page === 1 || page === totalPages) return true;
+                  if (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1) return true;
+                  return false;
+                })
+                .map((page, index, array) => {
+                  const prevPage = array[index - 1];
+                  const showDots = prevPage && page - prevPage > 1;
+
+                  return (
+                    <React.Fragment key={page}>
+                      {showDots && (
+                        <span className="text-sm" style={{ color: 'rgb(156, 163, 175)' }}>...</span>
+                      )}
+                      <button
+                        onClick={() => handlePageChange(page)}
+                        className="w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200"
+                        style={{
+                          backgroundColor: pagination.currentPage === page ? '#075E54' : 'white',
+                          color: pagination.currentPage === page ? 'white' : '#161616',
+                          border: pagination.currentPage === page ? 'none' : '1px solid rgb(209, 213, 219)'
+                        }}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === totalPages}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                borderColor: 'rgb(209, 213, 219)',
+                color: pagination.currentPage === totalPages ? 'rgb(156, 163, 175)' : '#075E54',
+                backgroundColor: 'white'
+              }}
+            >
+              <span>Siguiente</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+
         {/* Empty State cuando no hay datos filtrados */}
-        {filteredResenas.length === 0 && resenas.length > 0 && (
+        {sortedResenas.length === 0 && resenas.length > 0 && (
           <div className="text-center py-12">
             <MessageCircle size={48} className="mx-auto mb-4" style={{ color: 'rgb(156, 163, 175)' }} />
             <h3 className="text-lg font-medium mb-2" style={{ color: '#161616' }}>
