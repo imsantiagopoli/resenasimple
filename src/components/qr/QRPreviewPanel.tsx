@@ -190,6 +190,9 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
             </ol>
           </div>
         ` : ''}
+        <div style="margin-top: 2rem; padding-top: 1rem; text-align: center; font-size: 0.75rem; color: ${config.typography.primaryColor}; font-family: ${config.typography.primaryFont}, sans-serif;">
+          Creado con Reseña Simple
+        </div>
       `;
 
       tempContainer.innerHTML = `
