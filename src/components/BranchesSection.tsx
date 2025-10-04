@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, Pencil, Check, AlertCircle } from 'lucide-react';
+import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, Pencil, Check, AlertCircle, Crown } from 'lucide-react';
 import { BusinessBranch } from '../hooks/useBusiness';
 import { checkSlugAvailability } from '../lib/supabase';
 
+interface Subscription {
+  plan_name: 'basico' | 'profesional' | 'empresarial';
+  status: string;
+}
+
 interface BranchesSectionProps {
   branches: BusinessBranch[];
+  subscription: Subscription | null;
   upsertBranch: (branch: Partial<BusinessBranch>) => Promise<{ data: any; error: string | null }>;
   deleteBranch: (branchId: string) => Promise<{ error: string | null }>;
   generateSlug: (name: string) => string;
@@ -13,6 +19,7 @@ interface BranchesSectionProps {
 
 const BranchesSection: React.FC<BranchesSectionProps> = ({
   branches,
+  subscription,
   upsertBranch,
   deleteBranch,
   generateSlug,
@@ -35,6 +42,23 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   }>({ checking: false, available: null });
   const [slugCheckTimeout, setSlugCheckTimeout] = useState<NodeJS.Timeout | null>(null);
 
+  // Get branch limits based on subscription plan
+  const getBranchLimit = () => {
+    if (!subscription || subscription.status !== 'active') return 1;
+
+    const limits: Record<string, number> = {
+      basico: 1,
+      profesional: 1,
+      empresarial: 3,
+    };
+
+    return limits[subscription.plan_name] || 1;
+  };
+
+  const branchLimit = getBranchLimit();
+  const remainingBranches = branchLimit - branchesData.length;
+  const canAddBranch = branchesData.length < branchLimit;
+
   // Initialize branches data
   useEffect(() => {
     if (branches) {
@@ -52,6 +76,10 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   }, [branches]);
 
   const handleAddBranch = () => {
+    if (!canAddBranch) {
+      showMessage('error', 'Has alcanzado el límite de sucursales para tu plan');
+      return;
+    }
     setConfirmAction({ type: 'create' });
     setShowConfirmDialog(true);
   };
@@ -241,16 +269,36 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       {/* Branches */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: 'rgb(229, 231, 235)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
-            Sucursales
-          </h2>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Sucursales
+            </h2>
+            <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+              {canAddBranch ? (
+                <>
+                  <span className="font-medium" style={{ color: '#075E54' }}>
+                    {remainingBranches} {remainingBranches === 1 ? 'sucursal disponible' : 'sucursales disponibles'}
+                  </span>
+                  {' '}de {branchLimit}
+                </>
+              ) : (
+                <>
+                  <span className="font-medium" style={{ color: '#ef4444' }}>
+                    Límite de sucursales alcanzado
+                  </span>
+                  {' '}({branchesData.length}/{branchLimit})
+                </>
+              )}
+            </p>
+          </div>
           <button
             onClick={handleAddBranch}
-            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none"
+            disabled={!canAddBranch}
+            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor: '#075E54' + '20',
-              color: '#075E54',
-              border: '1px solid #075E54' + '30'
+              backgroundColor: canAddBranch ? '#075E54' + '20' : 'rgb(229, 231, 235)',
+              color: canAddBranch ? '#075E54' : 'rgb(107, 114, 128)',
+              border: canAddBranch ? '1px solid #075E54' + '30' : '1px solid rgb(209, 213, 219)'
             }}
           >
             <Plus size={14} />

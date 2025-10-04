@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Upload, Camera, Facebook, Instagram, Globe, Phone, Mail, MapPin, Save, X, Plus, Trash2, ExternalLink, Music, AlertCircle, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import { useBusiness } from '../hooks/useBusiness';
+import { useSubscription } from '../hooks/useSubscription';
 import { supabase } from '../lib/supabase';
 import BranchesSection from '../components/BranchesSection';
 import LogoSection from '../components/LogoSection';
@@ -9,16 +11,18 @@ import SocialMediaSection from '../components/SocialMediaSection';
 import GoogleMyBusinessSection from '../components/GoogleMyBusinessSection';
 
 const MiNegocioPage: React.FC = () => {
-  const { 
-    profile, 
-    branches, 
-    loading, 
+  const { user } = useAuth();
+  const {
+    profile,
+    branches,
+    loading,
     error,
     updateBusinessProfile,
     upsertBranch,
     deleteBranch,
     generateSlug
   } = useBusiness();
+  const { subscription, loading: subscriptionLoading } = useSubscription(user?.id, profile?.id);
 
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -59,7 +63,7 @@ const MiNegocioPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
@@ -156,6 +160,7 @@ const MiNegocioPage: React.FC = () => {
       {/* Branches Section */}
       <BranchesSection
         branches={branches}
+        subscription={subscription}
         upsertBranch={upsertBranch}
         deleteBranch={deleteBranch}
         generateSlug={generateSlug}
