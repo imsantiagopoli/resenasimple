@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useUpload } from './UploadContext';
 import { FileText, Receipt, Scale, Clock, User, Star } from 'lucide-react';
 import Sidebar from './Sidebar';
+import { useAuth } from '../hooks/useAuth';
+import { useBusiness } from '../hooks/useBusiness';
+import { useSubscription } from '../hooks/useSubscription';
+import SubscriptionModal from './SubscriptionModal';
 
 import DashboardContent from './DashboardContent';
 
@@ -10,11 +14,26 @@ interface DashboardLayoutProps {
   activePage?: string;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({  
-  children,  
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  children,
   activePage: initialActivePage = 'inicio'
 }) => {
   const { openUploadModal } = useUpload();
+  const { user } = useAuth();
+  const { profile } = useBusiness();
+  const { canAccessApp, loading: subscriptionLoading } = useSubscription(user?.id, profile?.id);
+
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#075E54' }}></div>
+      </div>
+    );
+  }
+
+  if (!canAccessApp) {
+    return <SubscriptionModal user={user} currentBusiness={profile} />;
+  }
 
   return (
     // CAMBIO 1: Añadido fondo gris al contenedor principal.
