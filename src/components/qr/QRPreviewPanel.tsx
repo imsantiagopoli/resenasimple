@@ -260,13 +260,14 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       console.log('Content div dimensions:', contentDiv.scrollWidth, 'x', contentDiv.scrollHeight);
 
       const canvas = await html2canvas(contentDiv, {
-        scale: 2,
+        scale: 4,
         useCORS: true,
         allowTaint: false,
         backgroundColor: null,
         logging: true,
         width: 448,
         height: contentDiv.scrollHeight,
+        imageTimeout: 15000,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById('pdf-content');
           if (clonedElement) {
@@ -288,7 +289,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
         format: [imgWidth, imgHeight]
       });
 
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
       console.log('Saving PDF...');
       pdf.save(`qr-${selectedBranch.slug}.pdf`);
       console.log('PDF saved successfully!');
