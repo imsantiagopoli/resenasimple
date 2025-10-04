@@ -512,15 +512,15 @@ const VotingPage: React.FC = () => {
   if (viewState === 'voting') {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <div className="flex-1 flex flex-col justify-center px-6 py-12">
+        <div className="flex-1 flex flex-col px-6 py-12">
           <div className="max-w-md mx-auto w-full">
             {renderLogo()}
 
             {/* Message */}
             <div className="text-center mb-8 space-y-3">
-              <h1 
-                className="text-2xl font-bold leading-tight" 
-                style={{ 
+              <h1
+                className="text-2xl font-bold leading-tight"
+                style={{
                   color: '#161616',
                   fontFamily: config.typography.primaryFont
                 }}
@@ -609,10 +609,9 @@ const VotingPage: React.FC = () => {
         <div className="pb-6">
           <div className="max-w-md mx-auto w-full">
             <div
-              className="pt-4 mt-6 text-center text-xs"
+              className="pt-4 text-center text-xs"
               style={{
-                borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
-                color: config.typography.secondaryColor,
+                color: 'rgb(107, 114, 128)',
                 fontFamily: config.typography.secondaryFont,
                 fontWeight: 400
               }}
@@ -769,8 +768,7 @@ const VotingPage: React.FC = () => {
           <div
             className="pt-4 mt-6 text-center text-xs"
             style={{
-              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
-              color: config.typography.secondaryColor,
+              color: 'rgb(107, 114, 128)',
               fontFamily: config.typography.secondaryFont,
               fontWeight: 400
             }}
@@ -841,8 +839,7 @@ const VotingPage: React.FC = () => {
           <div
             className="pt-4 mt-6 text-center text-xs"
             style={{
-              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
-              color: config.typography.secondaryColor,
+              color: 'rgb(107, 114, 128)',
               fontFamily: config.typography.secondaryFont,
               fontWeight: 400
             }}
@@ -943,8 +940,7 @@ const VotingPage: React.FC = () => {
           <div
             className="pt-4 mt-6 text-center text-xs"
             style={{
-              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
-              color: config.typography.secondaryColor,
+              color: 'rgb(107, 114, 128)',
               fontFamily: config.typography.secondaryFont,
               fontWeight: 400
             }}
