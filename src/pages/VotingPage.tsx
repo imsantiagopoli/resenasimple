@@ -337,51 +337,35 @@ const VotingPage: React.FC = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      console.log('Updating session to positive_clicked:', currentSessionId);
-
-      // Update the session via edge function
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          sessionId: currentSessionId,
-          updates: {
-            status: 'positive_clicked',
-            google_redirect_clicked_at: new Date().toISOString()
-          }
-        })
-      });
-
-      const result = await response.json();
-      console.log('Update response:', result);
-
-      if (!response.ok || result.error) {
-        console.error('Update error:', result.error);
-        throw new Error(result.error || 'Failed to update session');
-      }
-
-      console.log('Session updated successfully:', result.data);
-
-      // Redirect to Google or show success based on config
-      if (config.logic.smartAutoRedirect && business) {
-        // Try to redirect to Google My Business
-        const googleUrl = `https://search.google.com/local/writereview?placeid=${business.name}`;
-        window.open(googleUrl, '_blank');
-      }
-
-    } catch (err) {
-      console.error('Error updating Google redirect click:', err);
-      setError('Error al procesar tu calificación. Por favor intenta de nuevo.');
-    } finally {
-      setIsSubmitting(false);
+    // Redirect to Google IMMEDIATELY for better UX
+    if (config.logic.smartAutoRedirect && business) {
+      const googleUrl = `https://search.google.com/local/writereview?placeid=${business.name}`;
+      window.open(googleUrl, '_blank');
     }
+
+    // Update the session in the background (no await)
+    const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        sessionId: currentSessionId,
+        updates: {
+          status: 'positive_clicked',
+          google_redirect_clicked_at: new Date().toISOString()
+        }
+      })
+    })
+      .then(response => response.json())
+      .then(result => {
+        console.log('Session updated in background:', result);
+      })
+      .catch(err => {
+        console.error('Background update error (non-critical):', err);
+      });
   };
 
   // Handle private feedback submission
