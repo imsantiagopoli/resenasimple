@@ -1465,6 +1465,119 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [businessProfile, businessBranches, sessionsLoaded]);
 
+  // Setup realtime subscription for voting_sessions
+  useEffect(() => {
+    if (!user || !businessProfile || businessBranches.length === 0) {
+      return;
+    }
+
+    const branchIds = businessBranches.map(branch => branch.id);
+
+    // Subscribe to changes in voting_sessions for all branches
+    const subscription = supabase
+      .channel('voting_sessions_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'voting_sessions',
+          filter: `branch_id=in.(${branchIds.join(',')})`
+        },
+        async (payload) => {
+          console.log('Realtime voting session change:', payload);
+
+          // Handle INSERT
+          if (payload.eventType === 'INSERT') {
+            // Fetch the full record with branch data
+            const { data: newSession, error } = await supabase
+              .from('voting_sessions')
+              .select(`
+                *,
+                business_branches!inner(
+                  name,
+                  slug
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (!error && newSession) {
+              const mappedSession: VotingSession = {
+                id: newSession.id,
+                branch_id: newSession.branch_id,
+                customer_name: newSession.customer_name,
+                customer_email: newSession.customer_email,
+                customer_phone: newSession.customer_phone,
+                rating: newSession.rating,
+                comment: newSession.comment,
+                is_public: newSession.is_public,
+                google_redirect_clicked: newSession.google_redirect_clicked,
+                google_redirect_attempted_at: newSession.google_redirect_attempted_at,
+                created_at: newSession.created_at,
+                branch_name: newSession.business_branches?.name,
+                branch_slug: newSession.business_branches?.slug
+              };
+
+              setVotingSessions(prev => [mappedSession, ...prev]);
+            }
+          }
+
+          // Handle UPDATE
+          if (payload.eventType === 'UPDATE') {
+            const { data: updatedSession, error } = await supabase
+              .from('voting_sessions')
+              .select(`
+                *,
+                business_branches!inner(
+                  name,
+                  slug
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (!error && updatedSession) {
+              const mappedSession: VotingSession = {
+                id: updatedSession.id,
+                branch_id: updatedSession.branch_id,
+                customer_name: updatedSession.customer_name,
+                customer_email: updatedSession.customer_email,
+                customer_phone: updatedSession.customer_phone,
+                rating: updatedSession.rating,
+                comment: updatedSession.comment,
+                is_public: updatedSession.is_public,
+                google_redirect_clicked: updatedSession.google_redirect_clicked,
+                google_redirect_attempted_at: updatedSession.google_redirect_attempted_at,
+                created_at: updatedSession.created_at,
+                branch_name: updatedSession.business_branches?.name,
+                branch_slug: updatedSession.business_branches?.slug
+              };
+
+              setVotingSessions(prev =>
+                prev.map(session =>
+                  session.id === mappedSession.id ? mappedSession : session
+                )
+              );
+            }
+          }
+
+          // Handle DELETE
+          if (payload.eventType === 'DELETE') {
+            setVotingSessions(prev =>
+              prev.filter(session => session.id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user, businessProfile, businessBranches]);
+
   useEffect(() => {
     if (businessProfile?.id && !configLoaded) {
       fetchVotingConfig();
