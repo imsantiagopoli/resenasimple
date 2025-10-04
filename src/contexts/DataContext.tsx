@@ -134,6 +134,9 @@ export interface QRConfigurationRecord {
   tipografia_secundaria: string
   color_tipografia_secundaria: string
   tamano_tipografia_secundaria: number
+  tamano_titulo: number
+  tamano_subtitulo: number
+  tamano_cta: number
   print_format: 'A4' | 'Letter' | 'Custom'
   print_orientation: 'portrait' | 'landscape'
   qrs_per_page: number
@@ -192,6 +195,9 @@ export interface QRConfiguration {
     secondaryFont: string
     secondaryColor: string
     secondaryFontSize: number
+    titleFontSize: number
+    subtitleFontSize: number
+    ctaFontSize: number
   }
   print: {
     format: 'A4' | 'Letter' | 'Custom'
@@ -542,7 +548,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         primaryFontSize: record.tamano_tipografia_principal || 24,
         secondaryFont: record.tipografia_secundaria,
         secondaryColor: record.color_tipografia_secundaria,
-        secondaryFontSize: record.tamano_tipografia_secundaria || 16
+        secondaryFontSize: record.tamano_tipografia_secundaria || 16,
+        titleFontSize: record.tamano_titulo || 24,
+        subtitleFontSize: record.tamano_subtitulo || 16,
+        ctaFontSize: record.tamano_cta || 20
       },
       print: {
         format: record.print_format,
@@ -589,6 +598,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       tipografia_secundaria: config.typography.secondaryFont,
       color_tipografia_secundaria: config.typography.secondaryColor,
       tamano_tipografia_secundaria: config.typography.secondaryFontSize,
+      tamano_titulo: config.typography.titleFontSize,
+      tamano_subtitulo: config.typography.subtitleFontSize,
+      tamano_cta: config.typography.ctaFontSize,
       print_format: config.print.format,
       print_orientation: config.print.orientation,
       qrs_per_page: config.print.qrsPerPage,

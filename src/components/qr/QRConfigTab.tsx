@@ -1118,13 +1118,115 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
         {/* Tipografía */}
         <div className="space-y-8">
+          {/* Tamaño de fuente del Título */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Título
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Tamaño de Fuente
+                </label>
+                <span className="text-sm font-medium px-2 py-1 rounded" style={{
+                  backgroundColor: '#075E54' + '20',
+                  color: '#075E54'
+                }}>
+                  {config.typography.titleFontSize}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="12"
+                max="48"
+                value={config.typography.titleFontSize}
+                onChange={(e) => updateTypography({ titleFontSize: parseInt(e.target.value) })}
+                className="w-full"
+                style={{ accentColor: '#075E54' }}
+              />
+              <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                <span>12px</span>
+                <span>48px</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tamaño de fuente del Subtítulo */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Subtítulo
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Tamaño de Fuente
+                </label>
+                <span className="text-sm font-medium px-2 py-1 rounded" style={{
+                  backgroundColor: '#075E54' + '20',
+                  color: '#075E54'
+                }}>
+                  {config.typography.subtitleFontSize}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="32"
+                value={config.typography.subtitleFontSize}
+                onChange={(e) => updateTypography({ subtitleFontSize: parseInt(e.target.value) })}
+                className="w-full"
+                style={{ accentColor: '#075E54' }}
+              />
+              <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                <span>10px</span>
+                <span>32px</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tamaño de fuente de Llamada a la Acción */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+              Llamada a la Acción
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium" style={{ color: '#161616' }}>
+                  Tamaño de Fuente
+                </label>
+                <span className="text-sm font-medium px-2 py-1 rounded" style={{
+                  backgroundColor: '#075E54' + '20',
+                  color: '#075E54'
+                }}>
+                  {config.typography.ctaFontSize}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="12"
+                max="40"
+                value={config.typography.ctaFontSize}
+                onChange={(e) => updateTypography({ ctaFontSize: parseInt(e.target.value) })}
+                className="w-full"
+                style={{ accentColor: '#075E54' }}
+              />
+              <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                <span>12px</span>
+                <span>40px</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Separador */}
+          <div className="border-b" style={{ borderColor: 'rgb(229, 231, 235)' }} />
+
           {/* Tipografía Principal */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-              Tipografía Principal
+              Fuente Principal
             </h3>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Para títulos y llamadas a la acción
+              Aplica a título y llamada a la acción
             </p>
 
             <div className="grid grid-cols-1 gap-4">
@@ -1148,33 +1250,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Tamaño de Fuente
-                  </label>
-                  <span className="text-sm font-medium px-2 py-1 rounded" style={{
-                    backgroundColor: '#075E54' + '20',
-                    color: '#075E54'
-                  }}>
-                    {config.typography.primaryFontSize}px
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="12"
-                  max="48"
-                  value={config.typography.primaryFontSize}
-                  onChange={(e) => updateTypography({ primaryFontSize: parseInt(e.target.value) })}
-                  className="w-full"
-                  style={{ accentColor: '#075E54' }}
-                />
-                <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <span>12px</span>
-                  <span>48px</span>
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -1209,10 +1284,10 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
           {/* Tipografía Secundaria */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
-              Tipografía Secundaria
+              Fuente Secundaria
             </h3>
             <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-              Para subtítulos y texto descriptivo
+              Aplica a subtítulo
             </p>
 
             <div className="grid grid-cols-1 gap-4">
@@ -1236,33 +1311,6 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium" style={{ color: '#161616' }}>
-                    Tamaño de Fuente
-                  </label>
-                  <span className="text-sm font-medium px-2 py-1 rounded" style={{
-                    backgroundColor: '#075E54' + '20',
-                    color: '#075E54'
-                  }}>
-                    {config.typography.secondaryFontSize}px
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="32"
-                  value={config.typography.secondaryFontSize}
-                  onChange={(e) => updateTypography({ secondaryFontSize: parseInt(e.target.value) })}
-                  className="w-full"
-                  style={{ accentColor: '#075E54' }}
-                />
-                <div className="flex justify-between text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                  <span>10px</span>
-                  <span>32px</span>
-                </div>
               </div>
 
               <div className="space-y-2">

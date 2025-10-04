@@ -164,14 +164,14 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
       // --- Construcción del contenido HTML ---
       const contentHTML = `
         ${config.design.showLogo && logoSrc ? `<div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><img src="${logoSrc}" alt="Logo" style="width: 80px; height: 80px; object-fit: cover; border-radius: ${config.design.logoShape === 'circular' ? '50%' : '8px'};" /></div>` : ''}
-        ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.primaryFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
-        ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.secondaryFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
+        ${config.content.showTitle ? `<h1 style="font-size: ${config.typography.titleFontSize}px; font-weight: bold; margin-bottom: 1rem; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor};">${config.content.title}</h1>` : ''}
+        ${config.content.showSubtitle ? `<p style="font-size: ${config.typography.subtitleFontSize}px; margin-bottom: 2rem; font-family: ${config.typography.secondaryFont}, sans-serif; color: ${config.typography.secondaryColor};">${config.content.subtitle}</p>` : ''}
         <div style="display: inline-block; margin-bottom: 1.5rem;">
           <div style="padding: 1rem; border-radius: 0.5rem; background-color: ${config.qr.backgroundColor}; ${config.design.showFrame ? `border: ${config.design.frameThickness}px solid ${config.design.frameColor};` : ''}">
             <img src="${qrSrc}" alt="Código QR" style="display: block; width: ${config.qr.size}px; height: ${config.qr.size}px;" />
           </div>
         </div>
-        ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.primaryFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
+        ${config.content.showCallToAction ? `<p style="font-size: ${config.typography.ctaFontSize}px; font-weight: 600; font-family: ${config.typography.primaryFont}, sans-serif; color: ${config.typography.primaryColor}; margin-bottom: 0;">${config.content.callToAction}</p>` : ''}
         ${(config.content.showPhone && selectedBranch.phone) || (config.content.showEmail && selectedBranch.email) ? `
           <div style="margin-top: 1.5rem; text-align: center; font-family: ${config.typography.secondaryFont}, sans-serif; font-size: ${config.typography.secondaryFontSize}px; color: ${config.typography.secondaryColor}; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
             ${config.content.showPhone && selectedBranch.phone ? `<div style="display: inline-flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 500;">Teléfono:</span> <span>${selectedBranch.phone}</span></div>` : ''}
@@ -437,7 +437,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 style={{
                   color: config.typography.primaryColor,
                   fontFamily: config.typography.primaryFont,
-                  fontSize: `${config.typography.primaryFontSize}px`
+                  fontSize: `${config.typography.titleFontSize}px`
                 }}
               >
                 {config.content.title}
@@ -451,7 +451,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 style={{
                   color: config.typography.secondaryColor,
                   fontFamily: config.typography.secondaryFont,
-                  fontSize: `${config.typography.secondaryFontSize}px`
+                  fontSize: `${config.typography.subtitleFontSize}px`
                 }}
               >
                 {config.content.subtitle}
@@ -495,7 +495,7 @@ const QRPreviewPanel: React.FC<QRPreviewPanelProps> = ({ qrData }) => {
                 style={{
                   color: config.typography.primaryColor,
                   fontFamily: config.typography.primaryFont,
-                  fontSize: `${config.typography.primaryFontSize}px`
+                  fontSize: `${config.typography.ctaFontSize}px`
                 }}
               >
                 {config.content.callToAction}
