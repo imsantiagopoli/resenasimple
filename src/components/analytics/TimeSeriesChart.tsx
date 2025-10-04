@@ -43,57 +43,59 @@ const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({ data, groupBy }) => {
       ) : (
         <div className="relative">
           <div className="flex gap-2">
-            <div className="flex flex-col justify-between py-2" style={{ width: '60px' }}>
+            <div className="flex flex-col justify-between" style={{ width: '60px', height: '240px' }}>
               <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>{maxTotal}</span>
               <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>{Math.floor(maxTotal / 2)}</span>
               <span className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>0</span>
             </div>
 
             <div className="flex-1">
-              <div className="relative h-64 flex items-end gap-2 border-l border-b" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+              <div className="relative flex items-end gap-2 border-l border-b" style={{ borderColor: 'rgb(229, 231, 235)', height: '240px' }}>
                 {data.map((item, index) => {
                   const total = item.positive + item.negative;
                   const heightPercentage = (total / maxTotal) * 100;
                   const positivePercentage = total > 0 ? (item.positive / total) * 100 : 0;
 
                   return (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div className="w-full flex flex-col-reverse" style={{ height: '240px' }}>
-                        <div
-                          className="w-full rounded-t overflow-hidden"
-                          style={{ height: `${heightPercentage}%` }}
-                        >
-                          {item.negative > 0 && (
-                            <div
-                              className="w-full"
-                              style={{
-                                height: `${100 - positivePercentage}%`,
-                                backgroundColor: '#ef4444',
-                              }}
-                            />
-                          )}
-                          {item.positive > 0 && (
-                            <div
-                              className="w-full"
-                              style={{
-                                height: `${positivePercentage}%`,
-                                backgroundColor: '#10b981',
-                              }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <div className="text-xs font-medium mb-1" style={{ color: '#161616' }}>
-                          {total}
-                        </div>
-                        <div className="text-xs whitespace-nowrap" style={{ color: 'rgb(107, 114, 128)' }}>
-                          {formatDate(item.date)}
-                        </div>
+                    <div key={index} className="flex-1 flex flex-col items-center h-full justify-end">
+                      <div
+                        className="w-full rounded-t overflow-hidden flex flex-col"
+                        style={{ height: `${heightPercentage}%` }}
+                      >
+                        {item.negative > 0 && (
+                          <div
+                            className="w-full"
+                            style={{
+                              height: `${100 - positivePercentage}%`,
+                              backgroundColor: '#ef4444',
+                            }}
+                          />
+                        )}
+                        {item.positive > 0 && (
+                          <div
+                            className="w-full"
+                            style={{
+                              height: `${positivePercentage}%`,
+                              backgroundColor: '#10b981',
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                   );
                 })}
+              </div>
+              <div className="flex gap-2 mt-2">
+                {data.map((item, index) => (
+                  <div key={index} className="flex-1 text-center">
+                    <div className="text-xs font-medium mb-1" style={{ color: '#161616' }}>
+                      {item.positive + item.negative}
+                    </div>
+                    <div className="text-xs whitespace-nowrap" style={{ color: 'rgb(107, 114, 128)' }}>
+                      {formatDate(item.date)}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
