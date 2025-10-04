@@ -235,11 +235,15 @@ const SettingsPage: React.FC = () => {
   const getPlanAmount = () => {
     if (!subscription) return 0;
     const amounts: Record<string, number> = {
-      basico: 9,
-      profesional: 39,
-      empresarial: 99,
+      basico: 25000,
+      profesional: 35000,
+      empresarial: 70000,
     };
     return amounts[subscription.plan_name] || 0;
+  };
+
+  const formatPrice = (amount: number) => {
+    return `$${amount.toLocaleString('es-AR')}`;
   };
 
   const getStatusLabel = () => {
@@ -513,7 +517,7 @@ const SettingsPage: React.FC = () => {
                 </h3>
                 {subscription ? (
                   <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
-                    ${getPlanAmount()}/mes
+                    {formatPrice(getPlanAmount())}/mes
                   </p>
                 ) : (
                   <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
@@ -559,7 +563,7 @@ const SettingsPage: React.FC = () => {
                 <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
                   {subscription.cancel_at_period_end ?
                     'La suscripción terminará en esta fecha' :
-                    `Se cobrará $${getPlanAmount()}`
+                    `Se cobrará ${formatPrice(getPlanAmount())}`
                   }
                 </p>
               </>
