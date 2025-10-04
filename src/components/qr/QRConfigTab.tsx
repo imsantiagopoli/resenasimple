@@ -245,6 +245,7 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
 
   if (activeTab === 'design') {
     return (
+      <>
       <div className="p-6 space-y-8">
         {/* Tamaño del QR */}
         <div className="space-y-4">
@@ -921,10 +922,11 @@ const QRConfigTab: React.FC<QRConfigTabProps> = ({
             </div>
           </>
         )}
-
-        {/* Background Gallery Modal */}
-        {showGalleryModal && <BackgroundGalleryModal />}
       </div>
+
+      {/* Background Gallery Modal - Outside space-y-8 container */}
+      {showGalleryModal && <BackgroundGalleryModal />}
+    </>
     );
   }
 
