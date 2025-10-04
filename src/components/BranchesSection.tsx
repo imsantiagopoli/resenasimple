@@ -21,11 +21,13 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   const [branchesData, setBranchesData] = useState<any[]>([]);
   const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
   const [tempBranchData, setTempBranchData] = useState<any>(null);
+  const [originalSlug, setOriginalSlug] = useState<string>('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'create' | 'delete';
+    type: 'create' | 'delete' | 'slug-change';
     branchId?: string;
     branchName?: string;
+    branchIndex?: number;
   } | null>(null);
   const [slugAvailability, setSlugAvailability] = useState<{
     checking: boolean;
@@ -112,6 +114,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     const branch = branchesData[index];
     setEditingBranchId(branch.id || `new-${index}`);
     setTempBranchData({ ...branch });
+    setOriginalSlug(branch.slug || '');
 
     // Check current slug availability
     if (branch.slug) {
@@ -127,6 +130,25 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       showMessage('error', 'El slug no está disponible. Por favor elige otro.');
       return;
     }
+
+    // Check if slug has changed and show warning
+    const slugHasChanged = originalSlug && tempBranchData.slug && originalSlug !== tempBranchData.slug;
+    if (slugHasChanged) {
+      setConfirmAction({
+        type: 'slug-change',
+        branchName: tempBranchData.name,
+        branchIndex: index
+      });
+      setShowConfirmDialog(true);
+      return;
+    }
+
+    // If slug hasn't changed, save directly
+    await saveBranchData(index);
+  };
+
+  const saveBranchData = async (index: number) => {
+    if (!tempBranchData) return;
 
     try {
       const branchToSave = {
@@ -152,6 +174,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
 
       setEditingBranchId(null);
       setTempBranchData(null);
+      setOriginalSlug('');
       setSlugAvailability({ checking: false, available: null });
       showMessage('success', 'Sucursal guardada correctamente');
     } catch (err: any) {
@@ -163,6 +186,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
   const handleCancelEditBranch = () => {
     setEditingBranchId(null);
     setTempBranchData(null);
+    setOriginalSlug('');
     setSlugAvailability({ checking: false, available: null });
   };
 
@@ -482,20 +506,32 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                         </div>
                       </div>
                       {isEditing && currentData.slug && (
-                        <div className="flex items-center space-x-1">
-                          {slugAvailability.checking ? (
-                            <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
-                              Verificando disponibilidad...
-                            </p>
-                          ) : slugAvailability.available === true ? (
-                            <p className="text-xs" style={{ color: '#075E54' }}>
-                              ✓ Disponible
-                            </p>
-                          ) : slugAvailability.available === false ? (
-                            <p className="text-xs" style={{ color: 'rgb(239, 68, 68)' }}>
-                              ✗ No disponible
-                            </p>
-                          ) : null}
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-1">
+                            {slugAvailability.checking ? (
+                              <p className="text-xs" style={{ color: 'rgb(107, 114, 128)' }}>
+                                Verificando disponibilidad...
+                              </p>
+                            ) : slugAvailability.available === true ? (
+                              <p className="text-xs" style={{ color: '#075E54' }}>
+                                ✓ Disponible
+                              </p>
+                            ) : slugAvailability.available === false ? (
+                              <p className="text-xs" style={{ color: 'rgb(239, 68, 68)' }}>
+                                ✗ No disponible
+                              </p>
+                            ) : null}
+                          </div>
+                          {originalSlug && currentData.slug !== originalSlug && (
+                            <div className="bg-amber-50 border border-amber-200 rounded p-2">
+                              <div className="flex items-start space-x-2">
+                                <AlertCircle size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                                <p className="text-xs" style={{ color: '#92400e' }}>
+                                  <strong>Advertencia:</strong> Al cambiar el slug, los códigos QR existentes dejarán de funcionar.
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                       {!isEditing && currentData.slug && (
@@ -516,17 +552,49 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       {showConfirmDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#161616' }}>
-              {confirmAction?.type === 'create' ? 'Confirmar Creación' : 'Confirmar Eliminación'}
-            </h3>
-            
-            <p className="text-sm mb-6" style={{ color: 'rgb(107, 114, 128)' }}>
-              {confirmAction?.type === 'create' 
-                ? '¿Estás seguro que deseas agregar una nueva sucursal?' 
-                : `¿Estás seguro que deseas eliminar la sucursal "${confirmAction?.branchName}"? Esta acción no se puede deshacer.`
-              }
-            </p>
-            
+            <div className="flex items-start space-x-3 mb-4">
+              {confirmAction?.type === 'slug-change' && (
+                <AlertCircle size={24} className="text-amber-500 flex-shrink-0 mt-0.5" />
+              )}
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#161616' }}>
+                  {confirmAction?.type === 'create'
+                    ? 'Confirmar Creación'
+                    : confirmAction?.type === 'slug-change'
+                    ? 'Advertencia: Cambio de URL'
+                    : 'Confirmar Eliminación'}
+                </h3>
+
+                {confirmAction?.type === 'slug-change' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                      Estás a punto de cambiar la URL (slug) de la sucursal <strong>"{confirmAction?.branchName}"</strong>.
+                    </p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      <p className="text-sm font-medium mb-2" style={{ color: '#92400e' }}>
+                        ⚠️ Impacto importante:
+                      </p>
+                      <ul className="text-sm space-y-1" style={{ color: '#92400e' }}>
+                        <li>• Todos los códigos QR impresos dejarán de funcionar</li>
+                        <li>• Será necesario reimprimir los códigos QR con la nueva URL</li>
+                        <li>• Los enlaces compartidos anteriormente quedarán inválidos</li>
+                      </ul>
+                    </div>
+                    <p className="text-sm font-medium" style={{ color: '#161616' }}>
+                      ¿Estás seguro de que deseas continuar?
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                    {confirmAction?.type === 'create'
+                      ? '¿Estás seguro que deseas agregar una nueva sucursal?'
+                      : `¿Estás seguro que deseas eliminar la sucursal "${confirmAction?.branchName}"? Esta acción no se puede deshacer.`
+                    }
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="flex items-center space-x-3 justify-end">
               <button
                 onClick={() => {
@@ -548,30 +616,50 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
               >
                 Cancelar
               </button>
-              
+
               <button
-                onClick={confirmAction?.type === 'create' ? confirmAddBranch : confirmRemoveBranch}
+                onClick={() => {
+                  if (confirmAction?.type === 'create') {
+                    confirmAddBranch();
+                  } else if (confirmAction?.type === 'slug-change') {
+                    saveBranchData(confirmAction.branchIndex!);
+                    setShowConfirmDialog(false);
+                    setConfirmAction(null);
+                  } else {
+                    confirmRemoveBranch();
+                  }
+                }}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
                 style={{
-                  backgroundColor: confirmAction?.type === 'create' ? '#075E54' : '#ef4444',
+                  backgroundColor: confirmAction?.type === 'delete' ? '#ef4444' :
+                                  confirmAction?.type === 'slug-change' ? '#d97706' :
+                                  '#075E54',
                   color: 'white'
                 }}
                 onMouseEnter={(e) => {
-                  if (confirmAction?.type === 'create') {
-                    e.currentTarget.style.backgroundColor = '#064e45';
-                  } else {
+                  if (confirmAction?.type === 'delete') {
                     e.currentTarget.style.backgroundColor = '#dc2626';
+                  } else if (confirmAction?.type === 'slug-change') {
+                    e.currentTarget.style.backgroundColor = '#b45309';
+                  } else {
+                    e.currentTarget.style.backgroundColor = '#064e45';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (confirmAction?.type === 'create') {
-                    e.currentTarget.style.backgroundColor = '#075E54';
-                  } else {
+                  if (confirmAction?.type === 'delete') {
                     e.currentTarget.style.backgroundColor = '#ef4444';
+                  } else if (confirmAction?.type === 'slug-change') {
+                    e.currentTarget.style.backgroundColor = '#d97706';
+                  } else {
+                    e.currentTarget.style.backgroundColor = '#075E54';
                   }
                 }}
               >
-                {confirmAction?.type === 'create' ? 'Crear Sucursal' : 'Eliminar'}
+                {confirmAction?.type === 'create'
+                  ? 'Crear Sucursal'
+                  : confirmAction?.type === 'slug-change'
+                  ? 'Sí, Cambiar URL'
+                  : 'Eliminar'}
               </button>
             </div>
           </div>
