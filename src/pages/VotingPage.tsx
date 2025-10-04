@@ -622,7 +622,7 @@ const VotingPage: React.FC = () => {
   // Voting page
   if (viewState === 'voting') {
     return (
-      <div className="min-h-screen bg-white px-6 py-12">
+      <div className="min-h-screen bg-white flex items-center justify-center px-6 py-12">
         <div className="max-w-md mx-auto w-full">
           {renderLogo()}
 
