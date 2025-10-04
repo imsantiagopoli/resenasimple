@@ -418,26 +418,30 @@ const VotingPage: React.FC = () => {
 
     if (activeSocials.length === 0) return null;
 
+    const socialLinks = activeSocials.map(([platform]) => {
+      const Icon = socialIcons[platform as keyof typeof socialIcons];
+      const url = getSocialUrl(platform);
+      if (!Icon || url === '#') return null;
+
+      return (
+        <a
+          key={platform}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-14 h-14 rounded-lg flex items-center justify-center transition-transform duration-200 hover:scale-110"
+          style={{ backgroundColor: 'rgb(243, 244, 246)' }}
+        >
+          <Icon size={18} style={{ color: 'rgb(107, 114, 128)' }} />
+        </a>
+      );
+    }).filter(Boolean);
+
+    if (socialLinks.length === 0) return null;
+
     return (
       <div className="flex items-center justify-center space-x-4 pt-6">
-        {activeSocials.map(([platform]) => {
-          const Icon = socialIcons[platform as keyof typeof socialIcons];
-          const url = getSocialUrl(platform);
-          if (!Icon || url === '#') return null;
-
-          return (
-            <a
-              key={platform}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-14 h-14 rounded-lg flex items-center justify-center transition-transform duration-200 hover:scale-110"
-              style={{ backgroundColor: 'rgb(243, 244, 246)' }}
-            >
-              <Icon size={18} style={{ color: 'rgb(107, 114, 128)' }} />
-            </a>
-          );
-        })}
+        {socialLinks}
       </div>
     );
   };
@@ -511,113 +515,109 @@ const VotingPage: React.FC = () => {
   // Voting page
   if (viewState === 'voting') {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="flex-1 flex flex-col px-6 py-12">
-          <div className="max-w-md mx-auto w-full">
-            {renderLogo()}
+      <div className="min-h-screen bg-white flex flex-col justify-between px-6 py-12">
+        <div className="max-w-md mx-auto w-full">
+          {renderLogo()}
 
-            {/* Message */}
-            <div className="text-center mb-8 space-y-3">
-              <h1
-                className="text-2xl font-bold leading-tight"
-                style={{
-                  color: '#161616',
-                  fontFamily: config.typography.primaryFont
-                }}
-              >
-                {config.design.message.headline}
-              </h1>
-              <p
-                className="text-base leading-relaxed"
-                style={{
-                  color: 'rgb(107, 114, 128)',
-                  fontFamily: config.typography.secondaryFont
-                }}
-              >
-                {config.design.message.body}
+          {/* Message */}
+          <div className="text-center mb-8 space-y-3">
+            <h1
+              className="text-2xl font-bold leading-tight"
+              style={{
+                color: '#161616',
+                fontFamily: config.typography.primaryFont
+              }}
+            >
+              {config.design.message.headline}
+            </h1>
+            <p
+              className="text-base leading-relaxed"
+              style={{
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont
+              }}
+            >
+              {config.design.message.body}
+            </p>
+          </div>
+
+          {/* Stars */}
+          <div className="flex justify-center mb-6 relative">
+            <div className="flex items-center space-x-3 relative">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <div key={star} className="relative">
+                  <button
+                    onMouseEnter={() => setHoveredStars(star)}
+                    onMouseLeave={() => setHoveredStars(0)}
+                    onClick={() => handleStarClick(star)}
+                    className="p-3 transition-transform duration-200 hover:scale-110"
+                    disabled={isSubmitting}
+                  >
+                    <Star
+                      size={32}
+                      className={`transition-colors duration-200 ${
+                        star <= (hoveredStars || selectedStars)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+
+                  {config.design.starLabels.enabled && hoveredStars === star && (
+                    <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 z-10">
+                      <div
+                        className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg border"
+                        style={{
+                          backgroundColor: '#161616',
+                          color: 'white',
+                          borderColor: 'rgb(75, 85, 99)'
+                        }}
+                      >
+                        {config.design.starLabels.labels[star as keyof typeof config.design.starLabels.labels]}
+                        <div
+                          className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
+                          style={{ borderTopColor: '#161616' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Special Offer */}
+          {config.design.specialOffer.enabled && (
+            <div
+              className="p-8 rounded-lg border text-center mb-6"
+              style={{
+                backgroundColor: config.design.specialOffer.color + '08',
+                borderColor: config.design.specialOffer.color + '30'
+              }}
+            >
+              <h3 className="font-bold mb-2" style={{ color: config.design.specialOffer.color }}>
+                {config.design.specialOffer.headline}
+              </h3>
+              <p className="text-sm" style={{ color: config.design.specialOffer.color }}>
+                {config.design.specialOffer.body}
               </p>
             </div>
+          )}
 
-            {/* Stars */}
-            <div className="flex justify-center mb-6 relative">
-              <div className="flex items-center space-x-3 relative">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <div key={star} className="relative">
-                    <button
-                      onMouseEnter={() => setHoveredStars(star)}
-                      onMouseLeave={() => setHoveredStars(0)}
-                      onClick={() => handleStarClick(star)}
-                      className="p-3 transition-transform duration-200 hover:scale-110"
-                      disabled={isSubmitting}
-                    >
-                      <Star
-                        size={32}
-                        className={`transition-colors duration-200 ${
-                          star <= (hoveredStars || selectedStars)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    </button>
-
-                    {config.design.starLabels.enabled && hoveredStars === star && (
-                      <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 z-10">
-                        <div
-                          className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap shadow-lg border"
-                          style={{
-                            backgroundColor: '#161616',
-                            color: 'white',
-                            borderColor: 'rgb(75, 85, 99)'
-                          }}
-                        >
-                          {config.design.starLabels.labels[star as keyof typeof config.design.starLabels.labels]}
-                          <div
-                            className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
-                            style={{ borderTopColor: '#161616' }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Special Offer */}
-            {config.design.specialOffer.enabled && (
-              <div
-                className="p-8 rounded-lg border text-center mb-6"
-                style={{
-                  backgroundColor: config.design.specialOffer.color + '08',
-                  borderColor: config.design.specialOffer.color + '30'
-                }}
-              >
-                <h3 className="font-bold mb-2" style={{ color: config.design.specialOffer.color }}>
-                  {config.design.specialOffer.headline}
-                </h3>
-                <p className="text-sm" style={{ color: config.design.specialOffer.color }}>
-                  {config.design.specialOffer.body}
-                </p>
-              </div>
-            )}
-
-            {renderSocialIcons()}
-          </div>
+          {renderSocialIcons()}
         </div>
 
         {/* Footer */}
-        <div className="pb-6">
-          <div className="max-w-md mx-auto w-full">
-            <div
-              className="pt-4 text-center text-xs"
-              style={{
-                color: 'rgb(107, 114, 128)',
-                fontFamily: config.typography.secondaryFont,
-                fontWeight: 400
-              }}
-            >
-              Creado con Reseña Simple
-            </div>
+        <div className="max-w-md mx-auto w-full pt-12">
+          <div
+            className="text-center text-xs"
+            style={{
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont,
+              fontWeight: 400
+            }}
+          >
+            Creado con Reseña Simple
           </div>
         </div>
       </div>
