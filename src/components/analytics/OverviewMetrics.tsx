@@ -19,120 +19,52 @@ const OverviewMetrics: React.FC<OverviewMetricsProps> = ({
   formsCompleted,
 }) => {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
-                <TrendingUp size={20} style={{ color: '#16a34a' }} />
-              </div>
-              <h3 className="ml-3 text-lg font-semibold" style={{ color: '#161616' }}>
-                Respuestas Positivas
-              </h3>
-            </div>
-          </div>
-          <div className="mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#16a34a' }}>
-              {positive}
-            </p>
-            <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              {positiveRate.toFixed(1)}% del total de respuestas
-            </p>
-          </div>
-          <div className="pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
-            <p className="text-sm font-medium" style={{ color: '#374151' }}>
-              Calificaciones de 4 y 5 estrellas
-            </p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-white rounded-lg border p-6 transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="mb-4">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#075E54' + '20' }}>
+            <Users size={20} style={{ color: '#075E54' }} />
           </div>
         </div>
+        <div className="space-y-1">
+          <p className="text-2xl font-bold" style={{ color: '#161616' }}>{total}</p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Total</p>
+        </div>
+      </div>
 
-        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#fef2f2' }}>
-                <TrendingDown size={20} style={{ color: '#dc2626' }} />
-              </div>
-              <h3 className="ml-3 text-lg font-semibold" style={{ color: '#161616' }}>
-                Respuestas Negativas
-              </h3>
-            </div>
-          </div>
-          <div className="mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#dc2626' }}>
-              {negative}
-            </p>
-            <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              {(100 - positiveRate).toFixed(1)}% del total de respuestas
-            </p>
-          </div>
-          <div className="pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
-            <p className="text-sm font-medium" style={{ color: '#374151' }}>
-              Calificaciones de 1, 2 y 3 estrellas
-            </p>
+      <div className="bg-white rounded-lg border p-6 transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="mb-4">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#10b981' + '20' }}>
+            <TrendingUp size={20} style={{ color: '#10b981' }} />
           </div>
         </div>
+        <div className="space-y-1">
+          <p className="text-2xl font-bold" style={{ color: '#161616' }}>{positive}</p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Positivas</p>
+        </div>
+      </div>
 
-        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f0fdfa' }}>
-                <Users size={20} style={{ color: '#075E54' }} />
-              </div>
-              <h3 className="ml-3 text-lg font-semibold" style={{ color: '#161616' }}>
-                Total de Respuestas
-              </h3>
-            </div>
-          </div>
-          <div className="mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#161616' }}>
-              {total}
-            </p>
-            <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              Todas las calificaciones recibidas
-            </p>
-          </div>
-          <div className="pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium" style={{ color: '#374151' }}>
-                Promedio de calificación
-              </p>
-              <p className="text-sm font-bold" style={{ color: '#161616' }}>
-                {total > 0 ? ((positive * 5 + negative * 2.5) / total).toFixed(1) : '0.0'} ⭐
-              </p>
-            </div>
+      <div className="bg-white rounded-lg border p-6 transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="mb-4">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#ef4444' + '20' }}>
+            <TrendingDown size={20} style={{ color: '#ef4444' }} />
           </div>
         </div>
+        <div className="space-y-1">
+          <p className="text-2xl font-bold" style={{ color: '#161616' }}>{negative}</p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Negativas</p>
+        </div>
+      </div>
 
-        <div className="p-6 rounded-lg bg-white border transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#eff6ff' }}>
-                <MousePointerClick size={20} style={{ color: '#2563eb' }} />
-              </div>
-              <h3 className="ml-3 text-lg font-semibold" style={{ color: '#161616' }}>
-                Interacciones
-              </h3>
-            </div>
+      <div className="bg-white rounded-lg border p-6 transition-all duration-200 hover:shadow-md" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+        <div className="mb-4">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#075E54' + '20' }}>
+            <MousePointerClick size={20} style={{ color: '#075E54' }} />
           </div>
-          <div className="mb-4">
-            <p className="text-4xl font-bold" style={{ color: '#2563eb' }}>
-              {googleClicks}
-            </p>
-            <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              Clicks a Google
-            </p>
-          </div>
-          <div className="pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium" style={{ color: '#374151' }}>
-                Formularios completados
-              </p>
-              <p className="text-sm font-bold" style={{ color: '#161616' }}>
-                {formsCompleted}
-              </p>
-            </div>
-          </div>
+        </div>
+        <div className="space-y-1">
+          <p className="text-2xl font-bold" style={{ color: '#161616' }}>{googleClicks}</p>
+          <p className="text-sm" style={{ color: 'rgb(107, 114, 128)' }}>Clicks Google</p>
         </div>
       </div>
     </div>
