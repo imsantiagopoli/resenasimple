@@ -292,7 +292,8 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
                         format: template.print_format,
                         orientation: template.print_orientation,
                         qrsPerPage: template.qrs_per_page,
-                        includeInstructions: template.include_instructions
+                        includeInstructions: template.include_instructions,
+                        width: template.print_width || 448
                       },
                       created_at: config.created_at,
                       updated_at: config.updated_at
@@ -358,7 +359,8 @@ const QRConfigPanel: React.FC<QRConfigPanelProps> = ({
                         format: template.print_format,
                         orientation: template.print_orientation,
                         qrsPerPage: template.qrs_per_page,
-                        includeInstructions: template.include_instructions
+                        includeInstructions: template.include_instructions,
+                        width: template.print_width || 448
                       },
                       created_at: config.created_at,
                       updated_at: config.updated_at
