@@ -604,6 +604,23 @@ const VotingPage: React.FC = () => {
             {renderSocialIcons()}
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="pb-6">
+          <div className="max-w-md mx-auto w-full">
+            <div
+              className="pt-4 mt-6 text-center text-xs"
+              style={{
+                borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
+                color: config.typography.secondaryColor,
+                fontFamily: config.typography.secondaryFont,
+                fontWeight: 400
+              }}
+            >
+              Creado con Reseña Simple
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -747,6 +764,19 @@ const VotingPage: React.FC = () => {
               </button>
             </form>
           </div>
+
+          {/* Footer */}
+          <div
+            className="pt-4 mt-6 text-center text-xs"
+            style={{
+              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
+              color: config.typography.secondaryColor,
+              fontFamily: config.typography.secondaryFont,
+              fontWeight: 400
+            }}
+          >
+            Creado con Reseña Simple
+          </div>
         </div>
       </div>
     );
@@ -806,6 +836,19 @@ const VotingPage: React.FC = () => {
           >
             {isSubmitting ? 'Redirigiendo...' : config.logic.publicWorkflow.buttonText}
           </button>
+
+          {/* Footer */}
+          <div
+            className="pt-4 mt-6 text-center text-xs"
+            style={{
+              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
+              color: config.typography.secondaryColor,
+              fontFamily: config.typography.secondaryFont,
+              fontWeight: 400
+            }}
+          >
+            Creado con Reseña Simple
+          </div>
         </div>
       </div>
     );
@@ -894,6 +937,19 @@ const VotingPage: React.FC = () => {
                 <span>{config.logic.privateWorkflow.emailButtonText}</span>
               </button>
             )}
+          </div>
+
+          {/* Footer */}
+          <div
+            className="pt-4 mt-6 text-center text-xs"
+            style={{
+              borderTop: `0.5px solid ${config.typography.secondaryColor}80`,
+              color: config.typography.secondaryColor,
+              fontFamily: config.typography.secondaryFont,
+              fontWeight: 400
+            }}
+          >
+            Creado con Reseña Simple
           </div>
         </div>
       </div>
