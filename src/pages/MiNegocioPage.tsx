@@ -148,10 +148,10 @@ const MiNegocioPage: React.FC = () => {
         showMessage={showMessage}
       />
 
-      {/* Google My Business */}
-      <GoogleMyBusinessSection
+      {/* Google My Business - Feature coming soon */}
+      {/* <GoogleMyBusinessSection
         showMessage={showMessage}
-      />
+      /> */}
 
       {/* Branches Section */}
       <BranchesSection
