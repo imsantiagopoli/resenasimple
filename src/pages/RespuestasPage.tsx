@@ -8,7 +8,8 @@ import {
   Search,
   Mail,
   ChevronDown,
-  User
+  User,
+  Send
 } from 'lucide-react';
 import { useVotingSessions } from '../hooks/useVotingSessions';
 import { useBusiness } from '../hooks/useBusiness';
