@@ -42,7 +42,7 @@ interface VotingSession {
   form_completed: boolean;
 }
 
-type ViewState = 'loading' | 'voting' | 'private-feedback' | 'public-review' | 'private-thanks' | 'error';
+type ViewState = 'loading' | 'voting' | 'private-feedback' | 'public-review' | 'public-thanks' | 'private-thanks' | 'error';
 
 const VotingPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -293,12 +293,14 @@ const VotingPage: React.FC = () => {
       // Register voting session immediately when reaching public review page
       await submitPublicVotingSession(stars);
 
-      // If smart auto-redirect is enabled, redirect immediately
+      // If smart auto-redirect is enabled, redirect immediately and show thanks page
       if (config.logic.smartAutoRedirect && branch?.google_maps_link) {
         window.open(branch.google_maps_link, '_blank');
+        setViewState('public-thanks');
+      } else {
+        // Otherwise show the review request page with button
+        setViewState('public-review');
       }
-
-      setViewState('public-review');
     } else {
       // Low rating - show private feedback flow
       // Create incomplete negative session immediately
@@ -416,8 +418,11 @@ const VotingPage: React.FC = () => {
       return;
     }
 
-    // Redirect to Google Maps link
+    // Redirect to Google Maps link in new tab
     window.open(branch.google_maps_link, '_blank');
+
+    // Show thank you page in current tab
+    setViewState('public-thanks');
 
     // Update the session in the background (no await)
     const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
@@ -1105,6 +1110,65 @@ const VotingPage: React.FC = () => {
                 <span>{config.logic.privateWorkflow.emailButtonText}</span>
               </button>
             )}
+          </div>
+
+          {/* Footer */}
+          <div
+            className="pt-4 mt-6 text-center text-xs"
+            style={{
+              color: 'rgb(107, 114, 128)',
+              fontFamily: config.typography.secondaryFont,
+              fontWeight: 400
+            }}
+          >
+            Creado con Reseña Simple
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Public thanks page
+  if (viewState === 'public-thanks') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col justify-center px-6 py-12">
+        <div className="max-w-md mx-auto w-full text-center space-y-6">
+          {renderLogo()}
+
+          <div className="flex justify-center space-x-1 mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={24}
+                className={`${
+                  star <= selectedStars
+                    ? 'text-yellow-400 fill-current'
+                    : 'text-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <h2
+              className="text-2xl font-bold"
+              style={{
+                color: '#161616',
+                fontFamily: config.typography.primaryFont
+              }}
+            >
+              {config.logic.publicWorkflow.title}
+            </h2>
+
+            <p
+              className="text-base"
+              style={{
+                color: 'rgb(107, 114, 128)',
+                fontFamily: config.typography.secondaryFont
+              }}
+            >
+              {config.logic.publicWorkflow.thankYouMessage}
+            </p>
           </div>
 
           {/* Footer */}
