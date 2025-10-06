@@ -745,7 +745,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
       {/* Google Maps Help Modal */}
       {showGoogleMapsHelp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto mx-4">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between" style={{ borderColor: 'rgb(229, 231, 235)' }}>
               <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
                 ¿Cómo obtener tu enlace de Google Maps?
