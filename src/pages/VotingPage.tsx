@@ -292,6 +292,12 @@ const VotingPage: React.FC = () => {
       // High rating - show public review flow
       // Register voting session immediately when reaching public review page
       await submitPublicVotingSession(stars);
+
+      // If smart auto-redirect is enabled, redirect immediately
+      if (config.logic.smartAutoRedirect && branch?.google_maps_link) {
+        window.open(branch.google_maps_link, '_blank');
+      }
+
       setViewState('public-review');
     } else {
       // Low rating - show private feedback flow
@@ -404,11 +410,14 @@ const VotingPage: React.FC = () => {
       return;
     }
 
-    // Redirect to Google IMMEDIATELY for better UX
-    if (config.logic.smartAutoRedirect && business) {
-      const googleUrl = `https://search.google.com/local/writereview?placeid=${business.name}`;
-      window.open(googleUrl, '_blank');
+    if (!branch?.google_maps_link) {
+      console.error('No Google Maps link available');
+      setError('No se ha configurado el enlace de Google Maps para esta sucursal.');
+      return;
     }
+
+    // Redirect to Google Maps link
+    window.open(branch.google_maps_link, '_blank');
 
     // Update the session in the background (no await)
     const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-voting-session`;
