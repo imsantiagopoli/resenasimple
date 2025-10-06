@@ -19,7 +19,7 @@ const VotingPreviewPanel: React.FC<VotingPreviewPanelProps> = ({ config, busines
     { id: 'voting' as const, label: 'Página de votación' },
     { id: 'public-review' as const, label: 'Solicitud de reseña pública' },
     { id: 'private-feedback' as const, label: 'Solicitud de feedback privado' },
-    { id: 'private-thanks' as const, label: 'Página de agradecimiento de feedback privado' }
+    { id: 'private-thanks' as const, label: 'Página de agradecimiento' }
   ];
 
   const selectedOption = viewOptions.find(option => option.id === selectedView);
