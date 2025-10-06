@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, Pencil, Check, AlertCircle, Crown } from 'lucide-react';
+import { Building2, ChevronDown, CheckCircle, X, Plus, Trash2, ExternalLink, Pencil, Check, AlertCircle, Crown, HelpCircle } from 'lucide-react';
 import { BusinessBranch } from '../hooks/useBusiness';
 import { checkSlugAvailability } from '../lib/supabase';
 
@@ -43,6 +43,7 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
     available: boolean | null;
   }>({ checking: false, available: null });
   const [slugCheckTimeout, setSlugCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showGoogleMapsHelp, setShowGoogleMapsHelp] = useState(false);
 
   // Get branch limits based on subscription plan
   const getBranchLimit = () => {
@@ -490,9 +491,28 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
-                      Link de Google Maps
-                    </label>
+                    <div className="flex items-center space-x-1">
+                      <label className="block text-xs font-medium" style={{ color: 'rgb(107, 114, 128)' }}>
+                        Link de Google Maps
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowGoogleMapsHelp(true)}
+                        className="p-0.5 rounded transition-colors duration-200"
+                        style={{ color: 'rgb(107, 114, 128)' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                          e.currentTarget.style.color = '#075E54';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = 'rgb(107, 114, 128)';
+                        }}
+                        title="¿Cómo obtener el enlace de Google Maps?"
+                      >
+                        <HelpCircle size={14} />
+                      </button>
+                    </div>
                     <div className="flex items-center space-x-2">
                       <input
                         type="url"
@@ -716,6 +736,123 @@ const BranchesSection: React.FC<BranchesSectionProps> = ({
                   : confirmAction?.type === 'slug-change'
                   ? 'Sí, Cambiar URL'
                   : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google Maps Help Modal */}
+      {showGoogleMapsHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+              <h3 className="text-lg font-semibold" style={{ color: '#161616' }}>
+                ¿Cómo obtener tu enlace de Google Maps?
+              </h3>
+              <button
+                onClick={() => setShowGoogleMapsHelp(false)}
+                className="p-1 rounded-lg transition-colors duration-200"
+                style={{ color: 'rgb(107, 114, 128)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+                  e.currentTarget.style.color = '#161616';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgb(107, 114, 128)';
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Método Principal */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-base" style={{ color: '#075E54' }}>
+                  Método más directo (Recomendado)
+                </h4>
+                <ol className="space-y-2 text-sm" style={{ color: 'rgb(107, 114, 128)' }}>
+                  <li className="flex items-start space-x-2">
+                    <span className="font-semibold text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: '#075E54', color: 'white' }}>1</span>
+                    <span>Inicia sesión en tu cuenta de Google con la que administras tu Perfil de Empresa.</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="font-semibold text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: '#075E54', color: 'white' }}>2</span>
+                    <span>Busca tu empresa en Google escribiendo el nombre de tu negocio.</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="font-semibold text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: '#075E54', color: 'white' }}>3</span>
+                    <span>Localiza el panel de tu empresa y haz clic en "Solicitar reseñas" o "Conseguir más reseñas".</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="font-semibold text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: '#075E54', color: 'white' }}>4</span>
+                    <span>Se abrirá una ventana con un enlace corto. Cópialo y pégalo aquí.</span>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Métodos Alternativos */}
+              <div className="space-y-4 pt-4 border-t" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+                <h4 className="font-semibold text-base" style={{ color: '#075E54' }}>
+                  Métodos alternativos
+                </h4>
+
+                {/* Desde el Administrador */}
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm" style={{ color: '#161616' }}>
+                    Desde el Administrador del Perfil de Empresa
+                  </h5>
+                  <ol className="space-y-2 text-sm pl-4" style={{ color: 'rgb(107, 114, 128)' }}>
+                    <li>• Accede a tu Perfil de Empresa de Google</li>
+                    <li>• Busca la sección "Obtener más reseñas"</li>
+                    <li>• Haz clic en "Compartir formulario de reseñas"</li>
+                  </ol>
+                </div>
+
+                {/* Desde Google Maps Móvil */}
+                <div className="space-y-2">
+                  <h5 className="font-medium text-sm" style={{ color: '#161616' }}>
+                    A través de Google Maps en móvil
+                  </h5>
+                  <ol className="space-y-2 text-sm pl-4" style={{ color: 'rgb(107, 114, 128)' }}>
+                    <li>• Abre la app de Google Maps en tu móvil</li>
+                    <li>• Inicia sesión con la cuenta que gestiona tu perfil</li>
+                    <li>• Busca tu empresa</li>
+                    <li>• Desplázate hasta "Conseguir más reseñas"</li>
+                    <li>• Pulsa en "Compartir perfil"</li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Nota Importante */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm" style={{ color: '#1e40af' }}>
+                    <strong>Importante:</strong> Este enlace redirige directamente a la página de Google donde tus clientes pueden dejar una reseña de tu negocio.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t px-6 py-4" style={{ borderColor: 'rgb(229, 231, 235)' }}>
+              <button
+                onClick={() => setShowGoogleMapsHelp(false)}
+                className="w-full py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  backgroundColor: '#075E54',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#064e45';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#075E54';
+                }}
+              >
+                Entendido
               </button>
             </div>
           </div>
