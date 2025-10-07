@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
+import { Calendar, ArrowLeft, Share2, User, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -23,12 +23,35 @@ const BlogArticlePage: React.FC = () => {
   const [article, setArticle] = useState<BlogArticle | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [relatedArticles, setRelatedArticles] = useState<BlogArticle[]>([]);
+  const [showPromoPopup, setShowPromoPopup] = useState(false);
+  const [hasShownPopup, setHasShownPopup] = useState(false);
+  const articleContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (slug) {
       loadArticle();
     }
   }, [slug]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (hasShownPopup || !articleContentRef.current) return;
+
+      const scrollPosition = window.scrollY;
+      const contentTop = articleContentRef.current.offsetTop;
+      const contentHeight = articleContentRef.current.offsetHeight;
+      const scrollThreshold = contentTop + contentHeight * 0.35;
+
+      if (scrollPosition >= scrollThreshold) {
+        setShowPromoPopup(true);
+        setHasShownPopup(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasShownPopup]);
 
   const loadArticle = async () => {
     try {
@@ -45,12 +68,33 @@ const BlogArticlePage: React.FC = () => {
         setNotFound(true);
       } else {
         setArticle(data);
+        loadRelatedArticles(data.id);
       }
     } catch (err) {
       console.error('Error loading article:', err);
       setNotFound(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRelatedArticles = async (currentArticleId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .select('*')
+        .eq('published', true)
+        .neq('id', currentArticleId)
+        .order('published_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+
+      if (data) {
+        setRelatedArticles(data);
+      }
+    } catch (err) {
+      console.error('Error loading related articles:', err);
     }
   };
 
@@ -165,14 +209,60 @@ const BlogArticlePage: React.FC = () => {
           <p className="text-xl text-gray-600 mt-6 leading-relaxed">
             {article.excerpt}
           </p>
+
+          <div className="flex items-center mt-6 pt-6 border-t border-gray-200">
+            <User size={20} className="text-gray-600 mr-2" />
+            <span className="text-gray-600">Por </span>
+            <a
+              href="https://www.linkedin.com/in/geronimoherscovich/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 text-[#075E54] hover:text-[#064740] font-medium transition-colors duration-200"
+            >
+              Gerónimo Herscovich
+            </a>
+          </div>
         </header>
 
-        <div className="border-t border-gray-200 pt-8">
+        <div className="border-t border-gray-200 pt-8" ref={articleContentRef}>
           <div
             className="prose prose-lg max-w-none prose-headings:text-[#161616] prose-a:text-[#075E54] prose-a:no-underline hover:prose-a:underline prose-strong:text-[#161616] prose-img:rounded-xl"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </div>
+
+        {relatedArticles.length > 0 && (
+          <div className="border-t border-gray-200 mt-12 pt-12">
+            <h2 className="text-3xl font-bold text-[#161616] mb-8">
+              Artículos relacionados
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {relatedArticles.map((relatedArticle) => (
+                <div
+                  key={relatedArticle.id}
+                  onClick={() => navigate(`/blog/${relatedArticle.slug}`)}
+                  className="cursor-pointer group"
+                >
+                  {relatedArticle.featured_image_url && (
+                    <div className="aspect-video w-full rounded-xl overflow-hidden mb-4 bg-gray-100">
+                      <img
+                        src={relatedArticle.featured_image_url}
+                        alt={relatedArticle.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-[#161616] mb-2 group-hover:text-[#075E54] transition-colors duration-200">
+                    {relatedArticle.title}
+                  </h3>
+                  <p className="text-gray-600 line-clamp-2">
+                    {relatedArticle.excerpt}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="border-t border-gray-200 mt-12 pt-8">
           <button
@@ -184,6 +274,47 @@ const BlogArticlePage: React.FC = () => {
           </button>
         </div>
       </article>
+
+      {showPromoPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 relative animate-fade-in">
+            <button
+              onClick={() => setShowPromoPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="text-center">
+              <div className="mb-6">
+                <h3 className="text-3xl font-bold text-[#161616] mb-4">
+                  ¿Te gustó este artículo?
+                </h3>
+                <p className="text-lg text-gray-600">
+                  Descubre cómo Reseña Simple puede ayudarte a conseguir más reseñas para tu negocio
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  navigate('/auth?mode=register');
+                  setShowPromoPopup(false);
+                }}
+                className="w-full bg-[#075E54] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#064740] transition-colors duration-200 mb-4"
+              >
+                Empezar prueba gratuita
+              </button>
+
+              <button
+                onClick={() => setShowPromoPopup(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Continuar leyendo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
