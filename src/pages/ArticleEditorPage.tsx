@@ -231,7 +231,7 @@ const ArticleEditorPage: React.FC = () => {
       const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('blog_images')
+        .from('blog-images')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
@@ -240,7 +240,7 @@ const ArticleEditorPage: React.FC = () => {
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('blog_images')
+        .from('blog-images')
         .getPublicUrl(fileName);
 
       setFormData(prev => ({

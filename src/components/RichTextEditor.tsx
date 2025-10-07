@@ -13,17 +13,24 @@ interface RichTextEditorProps {
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const isUpdating = useRef(false);
+  const lastContent = useRef<string>('');
 
   useEffect(() => {
-    if (editorRef.current && !isUpdating.current && editorRef.current.innerHTML !== content) {
-      editorRef.current.innerHTML = content;
+    if (editorRef.current && !isUpdating.current) {
+      const currentHTML = editorRef.current.innerHTML;
+      if (currentHTML !== content && lastContent.current !== content) {
+        editorRef.current.innerHTML = content;
+        lastContent.current = content;
+      }
     }
   }, [content]);
 
   const handleInput = () => {
     if (editorRef.current) {
       isUpdating.current = true;
-      onChange(editorRef.current.innerHTML);
+      const newContent = editorRef.current.innerHTML;
+      lastContent.current = newContent;
+      onChange(newContent);
       setTimeout(() => {
         isUpdating.current = false;
       }, 0);
@@ -201,10 +208,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onBlur={handleInput}
         className="p-4 min-h-[500px] focus:outline-none prose prose-lg max-w-none"
         style={{
           fontFamily: 'system-ui, -apple-system, sans-serif'
         }}
+        suppressContentEditableWarning
       />
     </div>
   );
