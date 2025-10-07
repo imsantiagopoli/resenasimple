@@ -22,6 +22,10 @@ import PoliticasPrivacidadPage from './pages/PoliticasPrivacidadPage';
 import TerminosCondicionesPage from './pages/TerminosCondicionesPage';
 import GoogleCallbackPage from './pages/GoogleCallbackPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import BlogPage from './pages/BlogPage';
+import BlogArticlePage from './pages/BlogArticlePage';
+import ArticlesPage from './pages/ArticlesPage';
+import ArticleEditorPage from './pages/ArticleEditorPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -38,6 +42,8 @@ const AppContent: React.FC = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/google/callback" element={<GoogleCallbackPage />} />
         <Route path="/v/:slug" element={<VotingPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogArticlePage />} />
         <Route path="/politicas-de-privacidad" element={<PoliticasPrivacidadPage />} />
         <Route path="/terminos-y-condiciones" element={<TerminosCondicionesPage />} />
         <Route
@@ -135,6 +141,22 @@ const AppContent: React.FC = () => {
               <DashboardLayout activePage="configuracion">
                 <SettingsPage />
               </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/article"
+          element={
+            <ProtectedRoute>
+              <ArticlesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/article/:slug"
+          element={
+            <ProtectedRoute>
+              <ArticleEditorPage />
             </ProtectedRoute>
           }
         />

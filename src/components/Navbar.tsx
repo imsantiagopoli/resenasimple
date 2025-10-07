@@ -55,6 +55,15 @@ const Navbar: React.FC = () => {
             >
               Precios
             </a>
+            <Link
+              to="/blog"
+              className="text-sm font-medium transition-colors duration-200 py-2"
+              style={{ color: 'rgb(107, 114, 128)' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#075E54'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(107, 114, 128)'}
+            >
+              Blog
+            </Link>
             <Link 
               to="/auth"
               className="px-6 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
@@ -101,7 +110,7 @@ const Navbar: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t" style={{ borderColor: 'rgb(229, 231, 235)' }}>
             <div className="flex flex-col space-y-4">
-              <a 
+              <a
                 href={isHomePage ? "#features" : "/#features"}
                 className="text-sm font-medium transition-colors duration-200"
                 style={{ color: 'rgb(107, 114, 128)' }}
@@ -109,7 +118,7 @@ const Navbar: React.FC = () => {
               >
                 Características
               </a>
-              <a 
+              <a
                 href={isHomePage ? "#features" : "/#features"}
                 className="text-sm font-medium transition-colors duration-200"
                 style={{ color: 'rgb(107, 114, 128)' }}
@@ -117,7 +126,7 @@ const Navbar: React.FC = () => {
               >
                 Cómo Funciona
               </a>
-              <a 
+              <a
                 href={isHomePage ? "#pricing" : "/#pricing"}
                 className="text-sm font-medium transition-colors duration-200"
                 style={{ color: 'rgb(107, 114, 128)' }}
@@ -125,7 +134,15 @@ const Navbar: React.FC = () => {
               >
                 Precios
               </a>
-              <Link 
+              <Link
+                to="/blog"
+                className="text-sm font-medium transition-colors duration-200"
+                style={{ color: 'rgb(107, 114, 128)' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
+              </Link>
+              <Link
                 to="/auth"
                 className="px-6 py-2 rounded-lg text-sm font-medium border transition-all duration-200 text-center"
                 style={{
