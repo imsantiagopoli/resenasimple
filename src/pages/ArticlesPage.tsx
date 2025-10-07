@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, FileText, Edit2, Trash2, Eye, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Plus, FileText, Edit2, Trash2, Eye, Calendar, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../hooks/useAuth';
 
 interface BlogArticle {
@@ -115,8 +114,26 @@ const ArticlesPage: React.FC = () => {
   });
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/app/inicio"
+                className="inline-flex items-center text-gray-600 hover:text-[#075E54] transition-colors duration-200"
+              >
+                <ArrowLeft size={20} className="mr-2" />
+                Dashboard
+              </Link>
+              <div className="h-6 w-px bg-gray-300"></div>
+              <h1 className="text-xl font-bold text-[#161616]">Gestión de Blog</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#161616]">Artículos del Blog</h1>
@@ -265,7 +282,7 @@ const ArticlesPage: React.FC = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
