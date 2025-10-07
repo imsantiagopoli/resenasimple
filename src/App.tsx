@@ -26,6 +26,7 @@ import BlogPage from './pages/BlogPage';
 import BlogArticlePage from './pages/BlogArticlePage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleEditorPage from './pages/ArticleEditorPage';
+import SitemapPage from './pages/SitemapPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -44,6 +45,7 @@ const AppContent: React.FC = () => {
         <Route path="/v/:slug" element={<VotingPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogArticlePage />} />
+        <Route path="/sitemap" element={<SitemapPage />} />
         <Route path="/politicas-de-privacidad" element={<PoliticasPrivacidadPage />} />
         <Route path="/terminos-y-condiciones" element={<TerminosCondicionesPage />} />
         <Route
