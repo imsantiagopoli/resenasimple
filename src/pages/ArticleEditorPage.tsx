@@ -18,7 +18,6 @@ const ArticleEditorPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isNew = slug === 'new';
 
   const [formData, setFormData] = useState<ArticleForm>({
     title: '',
@@ -28,15 +27,15 @@ const ArticleEditorPage: React.FC = () => {
     featured_image_url: '',
     published: false
   });
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [articleId, setArticleId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isNew && slug && user) {
+    if (slug && user) {
       loadArticle();
     }
-  }, [slug, user, isNew]);
+  }, [slug, user]);
 
   const loadArticle = async () => {
     if (!user || !slug) return;
@@ -87,8 +86,7 @@ const ArticleEditorPage: React.FC = () => {
   const handleTitleChange = (title: string) => {
     setFormData(prev => ({
       ...prev,
-      title,
-      slug: isNew ? generateSlug(title) : prev.slug
+      title
     }));
   };
 
@@ -119,7 +117,6 @@ const ArticleEditorPage: React.FC = () => {
 
     try {
       const articleData = {
-        user_id: user.id,
         title: formData.title,
         slug: formData.slug,
         excerpt: formData.excerpt,
@@ -129,30 +126,17 @@ const ArticleEditorPage: React.FC = () => {
         published_at: publish ? new Date().toISOString() : null
       };
 
-      if (isNew) {
-        const { data, error } = await supabase
-          .from('blog_articles')
-          .insert([articleData])
-          .select()
-          .single();
+      const { error } = await supabase
+        .from('blog_articles')
+        .update(articleData)
+        .eq('id', articleId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        alert(publish ? 'Artículo publicado exitosamente' : 'Borrador guardado exitosamente');
-        navigate(`/article/${data.slug}`);
-      } else {
-        const { error } = await supabase
-          .from('blog_articles')
-          .update(articleData)
-          .eq('id', articleId);
+      alert(publish ? 'Artículo publicado exitosamente' : 'Cambios guardados exitosamente');
 
-        if (error) throw error;
-
-        alert(publish ? 'Artículo publicado exitosamente' : 'Cambios guardados exitosamente');
-
-        if (formData.slug !== slug) {
-          navigate(`/article/${formData.slug}`);
-        }
+      if (formData.slug !== slug) {
+        navigate(`/article/${formData.slug}`);
       }
     } catch (err: any) {
       console.error('Error saving article:', err);
@@ -212,7 +196,7 @@ const ArticleEditorPage: React.FC = () => {
           </button>
 
           <div className="flex items-center space-x-3">
-            {!isNew && formData.published && (
+            {formData.published && (
               <button
                 onClick={() => window.open(`/blog/${formData.slug}`, '_blank')}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -221,15 +205,13 @@ const ArticleEditorPage: React.FC = () => {
                 Ver Publicado
               </button>
             )}
-            {!isNew && (
-              <button
-                onClick={handleDelete}
-                className="inline-flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors duration-200"
-              >
-                <Trash2 size={18} className="mr-2" />
-                Eliminar
-              </button>
-            )}
+            <button
+              onClick={handleDelete}
+              className="inline-flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors duration-200"
+            >
+              <Trash2 size={18} className="mr-2" />
+              Eliminar
+            </button>
             <button
               onClick={() => handleSave(false)}
               disabled={saving}
@@ -250,7 +232,7 @@ const ArticleEditorPage: React.FC = () => {
 
         <div className="bg-white rounded-xl border border-gray-200 p-8">
           <h1 className="text-3xl font-bold text-[#161616] mb-8">
-            {isNew ? 'Nuevo Artículo' : 'Editar Artículo'}
+            Editar Artículo
           </h1>
 
           <div className="space-y-6">

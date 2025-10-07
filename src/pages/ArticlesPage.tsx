@@ -49,6 +49,36 @@ const ArticlesPage: React.FC = () => {
     }
   };
 
+  const handleCreateNew = async () => {
+    if (!user) return;
+
+    try {
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 7);
+      const slug = `nuevo-articulo-${timestamp}-${randomId}`;
+
+      const { data, error } = await supabase
+        .from('blog_articles')
+        .insert([{
+          user_id: user.id,
+          title: 'Nuevo Artículo',
+          slug: slug,
+          excerpt: 'Agrega una breve descripción de tu artículo aquí...',
+          content: '<p>Escribe el contenido de tu artículo aquí...</p>',
+          published: false
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      navigate(`/article/${data.slug}`);
+    } catch (err) {
+      console.error('Error creating article:', err);
+      alert('Error al crear el artículo');
+    }
+  };
+
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`¿Estás seguro de que deseas eliminar "${title}"?`)) {
       return;
@@ -95,7 +125,7 @@ const ArticlesPage: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate('/article/new')}
+            onClick={handleCreateNew}
             className="flex items-center px-6 py-3 bg-[#075E54] text-white rounded-lg hover:bg-[#064740] transition-colors duration-200"
           >
             <Plus size={20} className="mr-2" />
@@ -155,7 +185,7 @@ const ArticlesPage: React.FC = () => {
                 {filter === 'all' && 'Comienza creando tu primer artículo'}
               </p>
               <button
-                onClick={() => navigate('/article/new')}
+                onClick={handleCreateNew}
                 className="inline-flex items-center px-6 py-3 bg-[#075E54] text-white rounded-lg hover:bg-[#064740] transition-colors duration-200"
               >
                 <Plus size={20} className="mr-2" />
