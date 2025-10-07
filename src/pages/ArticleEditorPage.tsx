@@ -52,6 +52,8 @@ const ArticleEditorPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [articleId, setArticleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'preview'>('content');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (slug && user) {
@@ -208,6 +210,57 @@ const ArticleEditorPage: React.FC = () => {
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona un archivo de imagen válido');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('blog_images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('blog_images')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({
+        ...prev,
+        featured_image_url: publicUrl,
+        og_image_url: prev.og_image_url || publicUrl
+      }));
+
+      alert('Imagen subida exitosamente');
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert('Error al subir la imagen');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const autoFillSEO = () => {
     setFormData(prev => ({
       ...prev,
@@ -360,34 +413,62 @@ const ArticleEditorPage: React.FC = () => {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Imagen Destacada (URL)
+                        Imagen Destacada
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="url"
                           value={formData.featured_image_url}
                           onChange={(e) => setFormData({ ...formData, featured_image_url: e.target.value })}
-                          placeholder="https://ejemplo.com/imagen.jpg"
+                          placeholder="https://ejemplo.com/imagen.jpg o sube una imagen"
                           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] focus:border-transparent"
+                        />
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
                         />
                         <button
                           type="button"
-                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingImage}
+                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Subir imagen"
                         >
-                          <Image size={18} />
+                          {uploadingImage ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#075E54]"></div>
+                          ) : (
+                            <Image size={18} />
+                          )}
                         </button>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Sube una imagen (máx 5MB) o pega una URL. Formato: JPG, PNG, GIF, WebP
+                      </p>
                       {formData.featured_image_url && (
-                        <div className="mt-3 aspect-video w-full rounded-lg overflow-hidden bg-gray-100">
-                          <img
-                            src={formData.featured_image_url}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
+                        <div className="mt-3">
+                          <div className="aspect-video w-full rounded-lg overflow-hidden bg-gray-100 mb-2">
+                            <img
+                              src={formData.featured_image_url}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                          <input
+                            type="text"
+                            value={formData.featured_image_alt}
+                            onChange={(e) => setFormData({ ...formData, featured_image_alt: e.target.value })}
+                            placeholder="Texto alternativo de la imagen (Alt text para SEO)"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#075E54] focus:border-transparent"
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Describe la imagen para SEO y accesibilidad. Ej: "Persona trabajando en computadora portátil"
+                          </p>
                         </div>
                       )}
                     </div>
