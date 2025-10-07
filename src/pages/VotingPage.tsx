@@ -291,15 +291,27 @@ const VotingPage: React.FC = () => {
     // Determine next view based on rating and threshold
     if (stars >= config.logic.threshold) {
       // High rating - show public review flow
-      // Register voting session immediately when reaching public review page
-      await submitPublicVotingSession(stars);
 
-      // If smart auto-redirect is enabled, redirect immediately and show thanks page
+      // If smart auto-redirect is enabled, open link immediately (before async operations)
+      // This is critical for mobile browsers which block popups not opened synchronously
       if (config.logic.smartAutoRedirect && branch?.google_maps_link) {
-        window.open(branch.google_maps_link, '_blank');
+        // Try to open in new tab first (works on desktop)
+        const newWindow = window.open(branch.google_maps_link, '_blank');
+
+        // If blocked (common on mobile), redirect in same tab
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          window.location.href = branch.google_maps_link;
+          return;
+        }
+
         setViewState('public-thanks');
+
+        // Register voting session in background (after opening link)
+        submitPublicVotingSession(stars);
       } else {
-        // Otherwise show the review request page with button
+        // Register voting session before showing review page
+        await submitPublicVotingSession(stars);
+        // Show the review request page with button
         setViewState('public-review');
       }
     } else {
