@@ -287,6 +287,11 @@ const BlogArticlePage: React.FC = () => {
 
             <div className="text-center">
               <div className="mb-6">
+                <img
+                  src="https://qxylsmbtngtvoinoozsh.supabase.co/storage/v1/object/public/assets/resenasimple.png"
+                  alt="Reseña Simple"
+                  className="h-12 mx-auto mb-6"
+                />
                 <h3 className="text-3xl font-bold text-[#161616] mb-4">
                   ¿Te gustó este artículo?
                 </h3>
