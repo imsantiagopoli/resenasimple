@@ -53,7 +53,9 @@ const ArticleEditorPage: React.FC = () => {
   const [articleId, setArticleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'preview'>('content');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const autoSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (slug && user) {
@@ -64,6 +66,30 @@ const ArticleEditorPage: React.FC = () => {
   useEffect(() => {
     calculateReadingTime();
   }, [formData.content]);
+
+  useEffect(() => {
+    if (articleId && formData.title) {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+
+      autoSaveTimerRef.current = setTimeout(() => {
+        autoSave();
+      }, 3000);
+    }
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [formData, articleId]);
+
+  useEffect(() => {
+    if (articleId) {
+      localStorage.setItem(`article-draft-${articleId}`, JSON.stringify(formData));
+    }
+  }, [formData, articleId]);
 
   const loadArticle = async () => {
     if (!user || !slug) return;
@@ -85,12 +111,17 @@ const ArticleEditorPage: React.FC = () => {
       }
 
       setArticleId(data.id);
-      setFormData({
+
+      const draftKey = `article-draft-${data.id}`;
+      const savedDraft = localStorage.getItem(draftKey);
+
+      let dataToLoad = {
         title: data.title,
         slug: data.slug,
         excerpt: data.excerpt,
         content: data.content,
         featured_image_url: data.featured_image_url || '',
+        featured_image_alt: data.featured_image_alt || '',
         published: data.published,
         meta_title: data.meta_title || '',
         meta_description: data.meta_description || '',
@@ -101,7 +132,27 @@ const ArticleEditorPage: React.FC = () => {
         canonical_url: data.canonical_url || '',
         focus_keyword: data.focus_keyword || '',
         reading_time: data.reading_time || 0
-      });
+      };
+
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          const hasDraftChanges = JSON.stringify(draft) !== JSON.stringify(dataToLoad);
+
+          if (hasDraftChanges) {
+            const useDraft = confirm('Se encontraron cambios no guardados. ¿Deseas recuperarlos?');
+            if (useDraft) {
+              dataToLoad = draft;
+            } else {
+              localStorage.removeItem(draftKey);
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing draft:', e);
+        }
+      }
+
+      setFormData(dataToLoad);
     } catch (err) {
       console.error('Error loading article:', err);
       alert('Error al cargar el artículo');
@@ -116,6 +167,43 @@ const ArticleEditorPage: React.FC = () => {
     const words = text.split(/\s+/).filter(word => word.length > 0).length;
     const minutes = Math.ceil(words / 200);
     setFormData(prev => ({ ...prev, reading_time: minutes }));
+  };
+
+  const autoSave = async () => {
+    if (!user || !articleId || !formData.title.trim()) return;
+
+    try {
+      const articleData = {
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        featured_image_url: formData.featured_image_url || null,
+        featured_image_alt: formData.featured_image_alt || null,
+        meta_title: formData.meta_title || null,
+        meta_description: formData.meta_description || null,
+        meta_keywords: formData.meta_keywords || null,
+        og_title: formData.og_title || null,
+        og_description: formData.og_description || null,
+        og_image_url: formData.og_image_url || formData.featured_image_url || null,
+        canonical_url: formData.canonical_url || null,
+        focus_keyword: formData.focus_keyword || null,
+        reading_time: formData.reading_time
+      };
+
+      await supabase
+        .from('blog_articles')
+        .update(articleData)
+        .eq('id', articleId);
+
+      setLastSaved(new Date());
+
+      if (articleId) {
+        localStorage.removeItem(`article-draft-${articleId}`);
+      }
+    } catch (err) {
+      console.error('Auto-save error:', err);
+    }
   };
 
   const handleSave = async (publish: boolean = false) => {
@@ -169,6 +257,12 @@ const ArticleEditorPage: React.FC = () => {
         .eq('id', articleId);
 
       if (error) throw error;
+
+      setLastSaved(new Date());
+
+      if (articleId) {
+        localStorage.removeItem(`article-draft-${articleId}`);
+      }
 
       alert(publish ? 'Artículo publicado exitosamente' : 'Cambios guardados exitosamente');
 
@@ -294,7 +388,14 @@ const ArticleEditorPage: React.FC = () => {
                 Volver
               </button>
               <div className="h-6 w-px bg-gray-300"></div>
-              <h1 className="text-xl font-bold text-[#161616]">Editor de Artículo</h1>
+              <div>
+                <h1 className="text-xl font-bold text-[#161616]">Editor de Artículo</h1>
+                {lastSaved && (
+                  <p className="text-xs text-gray-500">
+                    Guardado automáticamente {new Date(lastSaved).toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center space-x-3">
