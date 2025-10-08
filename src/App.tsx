@@ -27,6 +27,7 @@ import BlogArticlePage from './pages/BlogArticlePage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleEditorPage from './pages/ArticleEditorPage';
 import SitemapPage from './pages/SitemapPage';
+import DemoPage from './pages/DemoPage';
 
 const AppContent: React.FC = () => {
   const { isUploadModalOpen, closeUploadModal } = useUpload();
@@ -41,6 +42,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/demo" element={<DemoPage />} />
         <Route path="/google/callback" element={<GoogleCallbackPage />} />
         <Route path="/v/:slug" element={<VotingPage />} />
         <Route path="/blog" element={<BlogPage />} />

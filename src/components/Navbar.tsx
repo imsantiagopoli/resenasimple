@@ -64,11 +64,28 @@ const Navbar: React.FC = () => {
             >
               Blog
             </Link>
-            <Link 
+            <Link
+              to="/demo"
+              className="px-6 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
+              style={{
+                backgroundColor: 'white',
+                color: '#075E54',
+                borderColor: '#075E54'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgb(243, 244, 246)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              Agendar demo
+            </Link>
+            <Link
               to="/auth"
               className="px-6 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
               style={{
-                backgroundColor: '#075E54', 
+                backgroundColor: '#075E54',
                 color: 'white',
                 borderColor: '#075E54'
               }}
@@ -141,6 +158,18 @@ const Navbar: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Blog
+              </Link>
+              <Link
+                to="/demo"
+                className="px-6 py-2 rounded-lg text-sm font-medium border transition-all duration-200 text-center"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#075E54',
+                  borderColor: '#075E54'
+                }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Agendar demo
               </Link>
               <Link
                 to="/auth"
