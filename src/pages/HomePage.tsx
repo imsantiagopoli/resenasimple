@@ -9,6 +9,7 @@ import CompanyMetricsSection from '../components/CompanyMetricsSection';
 import PricingSection from '../components/PricingSection';
 import FAQSection from '../components/FAQSection';
 import Footer from '../components/Footer';
+import SEOHead from '../components/SEOHead';
 
 const HomePage: React.FC = () => {
   const location = useLocation();
@@ -30,6 +31,11 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
+      <SEOHead
+        title="Reseña Simple - Gestiona las Reseñas de tu Restaurante"
+        description="Gestiona y mejora las reseñas de tu restaurante con Reseña Simple. Aumenta tu reputación online y atrae más clientes."
+        url="https://resenasimple.com"
+      />
       <AnnouncementBanner />
       <Navbar />
       <HeroSection />

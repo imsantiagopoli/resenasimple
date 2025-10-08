@@ -4,6 +4,7 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import SEOHead from '../components/SEOHead';
 
 interface BlogArticle {
   id: string;
@@ -64,6 +65,11 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead
+        title="Blog - Reseña Simple | Consejos para Gestionar Reseñas"
+        description="Descubre consejos y estrategias para mejorar la gestión de reseñas de tu restaurante y aumentar tu reputación online."
+        url="https://resenasimple.com/blog"
+      />
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

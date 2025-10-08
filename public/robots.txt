@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /google/callback
+Disallow: /article
+
+Sitemap: https://resenasimple.com/sitemap.xml

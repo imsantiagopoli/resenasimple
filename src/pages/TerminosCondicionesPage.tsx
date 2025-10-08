@@ -1,12 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 
 const TerminosCondicionesPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead
+        title="Términos y Condiciones - Reseña Simple"
+        description="Lee los términos y condiciones de uso de Reseña Simple. Conoce tus derechos y obligaciones al usar nuestra plataforma."
+        url="https://resenasimple.com/terminos-y-condiciones"
+      />
       <div className="max-w-4xl mx-auto px-6 py-12">
         <button
           onClick={() => navigate('/')}

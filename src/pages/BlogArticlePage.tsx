@@ -4,6 +4,7 @@ import { Calendar, ArrowLeft, Share2, User, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import SEOHead from '../components/SEOHead';
 
 interface BlogArticle {
   id: string;
@@ -15,6 +16,8 @@ interface BlogArticle {
   published_at: string;
   created_at: string;
   updated_at: string;
+  meta_title?: string;
+  meta_description?: string;
 }
 
 const BlogArticlePage: React.FC = () => {
@@ -163,6 +166,13 @@ const BlogArticlePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead
+        title={article.meta_title || article.title}
+        description={article.meta_description || article.excerpt}
+        image={article.featured_image_url || undefined}
+        url={`https://resenasimple.com/blog/${article.slug}`}
+        type="article"
+      />
       <Navbar />
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
