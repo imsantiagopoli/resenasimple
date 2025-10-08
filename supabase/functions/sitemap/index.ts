@@ -29,7 +29,6 @@ Deno.serve(async (req: Request) => {
 
     const staticPages = [
       { url: '/', priority: '1.0', changefreq: 'daily' },
-      { url: '/demo', priority: '0.9', changefreq: 'weekly' },
       { url: '/blog', priority: '0.9', changefreq: 'daily' },
       { url: '/politicas-de-privacidad', priority: '0.5', changefreq: 'monthly' },
       { url: '/terminos-y-condiciones', priority: '0.5', changefreq: 'monthly' },

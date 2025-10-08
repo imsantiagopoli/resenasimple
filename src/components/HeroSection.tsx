@@ -103,33 +103,13 @@ const HeroSection: React.FC = () => {
             </motion.div>
 
             {/* CTA Buttons */}
-            <motion.div
+            <motion.div 
               className="flex flex-col sm:flex-row gap-4 pt-4"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <Link
-                to="/demo"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium text-base border transition-all duration-200 focus:outline-none"
-                style={{
-                  backgroundColor: 'white',
-                  color: '#161616',
-                  borderColor: 'rgb(209, 213, 219)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
-                  e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                  e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
-                }}
-              >
-                Agendar Demo
-              </Link>
-
-              <Link
+              <Link 
                 to="/auth"
                 className="group inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                 style={{
@@ -148,9 +128,28 @@ const HeroSection: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <span className="mr-2">Comenzar</span>
+                <span className="mr-2">Prueba Gratis 14 Días</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
+              
+              <button
+                className="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium text-base border transition-all duration-200 focus:outline-none"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#161616',
+                  borderColor: 'rgb(209, 213, 219)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgb(249, 250, 251)';
+                  e.currentTarget.style.borderColor = 'rgb(156, 163, 175)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.borderColor = 'rgb(209, 213, 219)';
+                }}
+              >
+                Ver Demo
+              </button>
             </motion.div>
 
             {/* Supporting Text */}
