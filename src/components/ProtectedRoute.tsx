@@ -36,6 +36,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <>{children}</>
   }
 
+  // For any other protected route (dashboard pages)
   // If no business profile exists, redirect to onboarding
   if (!businessProfile) {
     return <Navigate to="/onboarding" replace />

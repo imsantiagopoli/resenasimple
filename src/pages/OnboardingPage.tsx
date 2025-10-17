@@ -22,15 +22,8 @@ const OnboardingPage: React.FC = () => {
     logo: null as File | null
   });
 
-  // If businessProfile already exists after refetch, ProtectedRoute will redirect
-  // This should not normally execute since ProtectedRoute prevents rendering
-  useEffect(() => {
-    if (!businessLoading && businessProfile && !isSubmitting) {
-      // This means the page was accessed with an existing business
-      // ProtectedRoute should handle this, but we add this as a safety net
-      navigate('/app/inicio', { replace: true });
-    }
-  }, [businessProfile, businessLoading, isSubmitting, navigate]);
+  // ProtectedRoute handles redirection if businessProfile already exists
+  // No need for manual navigation here
 
   const businessTypes = [
     'Restaurante',

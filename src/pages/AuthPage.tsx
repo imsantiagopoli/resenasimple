@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useData } from '../contexts/DataContext';
 import { 
   ArrowRight, 
   Mail, 
@@ -21,6 +22,7 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, signUp, signIn, signInWithGoogle, resetPassword, loading } = useAuth();
+  const { businessProfile, businessLoading } = useData();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -103,10 +105,19 @@ const AuthPage: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/app/inicio');
+    if (user && !loading && !businessLoading) {
+      // Check if this is a Google OAuth callback
+      const isGoogleCallback = searchParams.get('google_callback') === 'true';
+
+      if (isGoogleCallback || businessProfile) {
+        // User has business or is coming from Google -> go to dashboard
+        navigate('/app/inicio', { replace: true });
+      } else if (!businessProfile) {
+        // User doesn't have business -> go to onboarding
+        navigate('/onboarding', { replace: true });
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, businessLoading, businessProfile, navigate, searchParams]);
 
   // Auto-advance carousel
   useEffect(() => {

@@ -103,7 +103,7 @@ export const useAuth = () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/onboarding`,
+        redirectTo: `${window.location.origin}/auth?google_callback=true`,
         scopes: 'https://www.googleapis.com/auth/business.manage https://www.googleapis.com/auth/userinfo.email',
         queryParams: {
           access_type: 'offline',
