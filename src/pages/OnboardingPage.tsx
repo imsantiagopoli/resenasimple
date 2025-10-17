@@ -22,11 +22,15 @@ const OnboardingPage: React.FC = () => {
     logo: null as File | null
   });
 
+  // If businessProfile already exists after refetch, ProtectedRoute will redirect
+  // This should not normally execute since ProtectedRoute prevents rendering
   useEffect(() => {
-    if (!businessLoading && businessProfile) {
+    if (!businessLoading && businessProfile && !isSubmitting) {
+      // This means the page was accessed with an existing business
+      // ProtectedRoute should handle this, but we add this as a safety net
       navigate('/app/inicio', { replace: true });
     }
-  }, [businessProfile, businessLoading, navigate]);
+  }, [businessProfile, businessLoading, isSubmitting, navigate]);
 
   const businessTypes = [
     'Restaurante',
@@ -125,8 +129,9 @@ const OnboardingPage: React.FC = () => {
         logoUrl
       );
 
+      // Refetch business data to update the context
+      // ProtectedRoute will automatically redirect to /app/inicio once businessProfile is loaded
       await refetchBusinessData();
-      navigate('/app/inicio');
     } catch (err: any) {
       console.error('Error creating business:', err);
       setError(err.message || 'Error al configurar tu negocio. Por favor intenta de nuevo.');
