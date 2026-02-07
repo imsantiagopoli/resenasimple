@@ -1158,7 +1158,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
 
       if (profile) {
-        setBusinessProfile(profile);
+        // Transform business_name to name for interface compatibility
+        const transformedProfile = {
+          ...profile,
+          name: profile.business_name || profile.name,
+        };
+        setBusinessProfile(transformedProfile);
         
         // Fetch branches
         const { data: branches, error: branchesError } = await supabase

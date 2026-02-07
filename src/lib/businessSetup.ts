@@ -20,7 +20,7 @@ export const createBusinessAndBranch = async (
       .insert([
         {
           user_id: userId,
-          name: restaurantName,
+          business_name: restaurantName,
           description: `Auténtico ${businessType.toLowerCase()} con los mejores sabores.`,
           logo_url: logoUrl || null,
         }
